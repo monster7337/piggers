@@ -1,5 +1,6 @@
 import { Manrope, Playfair_Display } from "next/font/google";
 import { SiteShell } from "@/components/site-shell";
+import { absoluteUrl, withBasePath } from "@/lib/base-path";
 import { contactInfo } from "@/lib/site-data";
 import "./globals.css";
 
@@ -14,7 +15,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://piggyland.ru"),
+  metadataBase: new URL(absoluteUrl("/")),
   title: {
     default: "Piggy Land",
     template: "%s | Piggy Land"
@@ -44,7 +45,7 @@ export const metadata = {
       "Антикафе с минипигами в Санкт-Петербурге: предварительная запись, 11 свинок, фотолокации, чайная комната и теплые мероприятия.",
     images: [
       {
-        url: "/images/piggyland-hero.png",
+        url: absoluteUrl("/images/piggyland-hero.png"),
         width: 1366,
         height: 768,
         alt: "Piggy Land"
@@ -58,6 +59,14 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  const imageVariables = {
+    "--image-progress": `url("${withBasePath("/images/progress.png")}")`,
+    "--image-experience": `url("${withBasePath("/images/familyandpigs2.png")}")`,
+    "--image-piggies": `url("${withBasePath("/images/piggers.png")}")`,
+    "--image-reviews": `url("${withBasePath("/images/otziv.png")}")`,
+    "--image-faq": `url("${withBasePath("/images/faq.png")}")`
+  };
+
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -79,7 +88,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="ru">
-      <body className={`${manrope.variable} ${playfair.variable}`}>
+      <body className={`${manrope.variable} ${playfair.variable}`} style={imageVariables}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}

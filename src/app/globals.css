@@ -82,7 +82,7 @@ img {
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(23, 16, 12, 0.04), rgba(23, 16, 12, 0.14)),
-    url("/images/progress.png");
+    var(--image-progress);
   background-position: center;
   background-size: cover;
 }
@@ -127,7 +127,7 @@ img {
 .experience-section {
   position: relative;
   overflow: hidden;
-  background: url("/images/familyandpigs2.png");
+  background: var(--image-experience);
   background-position: center;
   background-size: cover;
 }
@@ -185,7 +185,7 @@ img {
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(23, 16, 12, 0.03), rgba(23, 16, 12, 0.12)),
-    url("/images/piggers.png");
+    var(--image-piggies);
   background-position: center 42%;
   background-size: cover;
 }
@@ -239,7 +239,7 @@ img {
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(23, 16, 12, 0.03), rgba(23, 16, 12, 0.12)),
-    url("/images/otziv.png");
+    var(--image-reviews);
   background-position: center;
   background-size: cover;
 }
@@ -286,7 +286,7 @@ img {
   overflow: hidden;
   background:
     linear-gradient(180deg, rgba(23, 16, 12, 0.03), rgba(23, 16, 12, 0.12)),
-    url("/images/faq.png");
+    var(--image-faq);
   background-position: center;
   background-size: cover;
 }
@@ -650,11 +650,72 @@ img {
 }
 
 .header-booking-button {
-  min-height: 46px;
-  padding: 0 18px;
-  font-size: 0.95rem;
+  position: relative;
+  isolation: isolate;
+  min-height: 56px;
+  padding: 0 26px;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
   white-space: nowrap;
   flex-shrink: 0;
+  border-color: rgba(255, 214, 207, 0.22);
+  box-shadow:
+    0 20px 40px rgba(182, 66, 48, 0.3),
+    0 0 0 1px rgba(255, 242, 236, 0.1);
+  animation: headerBookingPulse 1.9s ease-in-out infinite;
+}
+
+.header-booking-button::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(230, 72, 51, 0.42), rgba(230, 72, 51, 0));
+  opacity: 0.72;
+  animation: headerBookingHalo 1.9s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.header-booking-button::after {
+  content: none;
+}
+
+.header-booking-button:hover {
+  box-shadow:
+    0 24px 46px rgba(182, 66, 48, 0.38),
+    0 0 0 1px rgba(255, 244, 238, 0.16);
+}
+
+@keyframes headerBookingPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 20px 40px rgba(182, 66, 48, 0.28),
+      0 0 0 1px rgba(255, 242, 236, 0.1);
+    filter: saturate(1);
+  }
+
+  50% {
+    box-shadow:
+      0 24px 52px rgba(214, 68, 46, 0.44),
+      0 0 28px rgba(214, 68, 46, 0.28);
+    filter: saturate(1.08);
+  }
+}
+
+@keyframes headerBookingHalo {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.48;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
 }
 
 .mobile-menu-button {
@@ -2418,7 +2479,8 @@ img {
   }
 
   .header-booking-button {
-    padding: 0 16px;
+    min-height: 52px;
+    padding: 0 20px;
     font-size: 0.92rem;
   }
 }

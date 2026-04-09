@@ -1,3 +1,7 @@
+import { withBasePath } from "@/lib/base-path";
+
+const heroImage = withBasePath("/images/piggyland-hero.png");
+
 export const navigation = [
   { label: "Главная", href: "/#home", section: "home" },
   { label: "Тарифы", href: "/#rates", section: "rates" },
@@ -52,7 +56,7 @@ export const rates = [
     description:
       "Один час нахождения в антикафе с минипигами в будние дни с 13:00 до 20:00 и весь день с 11:00 до 20:00 в выходные и праздничные дни плюс чай, кофе и сладости.",
     includes: ["будни с 13:00 до 20:00", "выходные с 11:00 до 20:00", "чай, кофе и сладости"],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "62% 52%",
     details:
       "Классический входной билет на один час посещения антикафе с минипигами. Подходит как базовый формат визита без дополнительных скидок."
@@ -69,7 +73,7 @@ export const rates = [
     description:
       "Входной билет со скидкой 30% в будние дни в интервал на 11:00. Не действует в выходные, праздничные дни и каникулы.",
     includes: ["слоты 11:00 и 13:00", "только будни", "не действует в праздники и каникулы"],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "78% 45%",
     details:
       "Самый выгодный тариф для дневного визита. Хорошо подходит тем, кто готов прийти в фиксированное утреннее или раннее дневное окно."
@@ -86,7 +90,7 @@ export const rates = [
     description:
       "Акция: входной билет на семью от 3 человек и выше со скидкой 20%. Цена указана за одного человека.",
     includes: ["от 3 человек", "цена за одного гостя", "семейный формат со скидкой"],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "72% 58%",
     details:
       "Семейный тариф считается по количеству билетов этого типа. Он рассчитан на группы от трех человек и помогает собрать общий визит по более выгодной цене."
@@ -103,7 +107,7 @@ export const rates = [
     description:
       "Скидка на входной билет для пенсионеров, участников СВО, инвалидов и именинников. Льгота подтверждается при посещении.",
     includes: ["льготные категории гостей", "нужен подтверждающий документ", "цена за 1 билет"],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "86% 52%",
     details:
       "Тариф применяется для льготных категорий. На шаге подтверждения или при визите можно отдельно напомнить о необходимости подтверждающего документа."
@@ -169,7 +173,7 @@ export const piggies = [
       "Чаще всего оказывается в центре семейных фото.",
       "Любит устраиваться у бортика, когда гости пьют чай."
     ],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "74% 58%"
   },
   {
@@ -184,7 +188,7 @@ export const piggies = [
       "Часто первой ложится рядом, если в комнате становится совсем уютно.",
       "Отлично чувствует себя в кадре и любит мягкий свет."
     ],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "64% 52%"
   },
   {
@@ -199,7 +203,7 @@ export const piggies = [
       "Часто становится героем коротких видео для соцсетей.",
       "Любит прогуливаться вдоль белого забора во дворе."
     ],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "88% 50%"
   },
   {
@@ -214,7 +218,7 @@ export const piggies = [
       "У него самая выразительная походка во всем Piggy Land.",
       "Особенно хорош в кадрах на золотом вечернем свете."
     ],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "82% 60%"
   },
   {
@@ -229,7 +233,7 @@ export const piggies = [
       "Лучше всего раскрывается в небольших группах.",
       "Часто выбирает самые солнечные места в комнате."
     ],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "70% 48%"
   },
   {
@@ -244,7 +248,7 @@ export const piggies = [
       "Его чаще всего выбирают дети как своего любимчика.",
       "Умеет моментально собирать вокруг себя внимание."
     ],
-    image: "/images/piggyland-hero.png",
+    image: heroImage,
     imagePosition: "80% 46%"
   }
 ];
@@ -259,18 +263,18 @@ export const galleryCategories = [
 ];
 
 export const galleryItems = [
-  { id: "g-1", category: "piggies", title: "Солнечная прогулка у амбара", description: "Теплый свет, зеленая трава и спокойный ритм фермы.", image: "/images/piggyland-hero.png", position: "72% 54%" },
-  { id: "g-2", category: "guests", title: "Неспешный визит вдвоем", description: "Сценарий для пары, которая хочет необычно провести час.", image: "/images/piggyland-hero.png", position: "60% 52%" },
-  { id: "g-3", category: "interior", title: "Главная зона отдыха", description: "Светлая, чистая и мягкая среда без визуального шума.", image: "/images/piggyland-hero.png", position: "82% 40%" },
-  { id: "g-4", category: "details", title: "Фермерские акценты", description: "Белый забор, дерево и натуральные фактуры в деталях.", image: "/images/piggyland-hero.png", position: "40% 52%" },
-  { id: "g-5", category: "family", title: "Семейный формат", description: "Визиты, в которых комфортно и детям, и взрослым.", image: "/images/piggyland-hero.png", position: "80% 58%" },
-  { id: "g-6", category: "piggies", title: "Портрет в золотой час", description: "Крупный кадр минипига в мягком солнечном свете.", image: "/images/piggyland-hero.png", position: "86% 52%" },
-  { id: "g-7", category: "guests", title: "Тихий час с чаем", description: "Антикафе-настроение с теплым сервисом и живыми эмоциями.", image: "/images/piggyland-hero.png", position: "54% 56%" },
-  { id: "g-8", category: "interior", title: "Зона общения", description: "Пространство, где людям и минипигам комфортно рядом.", image: "/images/piggyland-hero.png", position: "76% 44%" },
-  { id: "g-9", category: "details", title: "Детали декора", description: "Текстиль, свет и цветовые акценты в теплой палитре.", image: "/images/piggyland-hero.png", position: "32% 44%" },
-  { id: "g-10", category: "family", title: "Визит с детьми", description: "Без спешки, с понятными правилами и спокойным ритмом.", image: "/images/piggyland-hero.png", position: "74% 62%" },
-  { id: "g-11", category: "piggies", title: "Любопытный взгляд", description: "Кадр, в котором особенно заметен живой характер жителей Piggy Land.", image: "/images/piggyland-hero.png", position: "90% 56%" },
-  { id: "g-12", category: "guests", title: "Фотозона у фермерского дворика", description: "Светлый фон, зелень и кадры, которые хочется сохранить.", image: "/images/piggyland-hero.png", position: "68% 46%" }
+  { id: "g-1", category: "piggies", title: "Солнечная прогулка у амбара", description: "Теплый свет, зеленая трава и спокойный ритм фермы.", image: heroImage, position: "72% 54%" },
+  { id: "g-2", category: "guests", title: "Неспешный визит вдвоем", description: "Сценарий для пары, которая хочет необычно провести час.", image: heroImage, position: "60% 52%" },
+  { id: "g-3", category: "interior", title: "Главная зона отдыха", description: "Светлая, чистая и мягкая среда без визуального шума.", image: heroImage, position: "82% 40%" },
+  { id: "g-4", category: "details", title: "Фермерские акценты", description: "Белый забор, дерево и натуральные фактуры в деталях.", image: heroImage, position: "40% 52%" },
+  { id: "g-5", category: "family", title: "Семейный формат", description: "Визиты, в которых комфортно и детям, и взрослым.", image: heroImage, position: "80% 58%" },
+  { id: "g-6", category: "piggies", title: "Портрет в золотой час", description: "Крупный кадр минипига в мягком солнечном свете.", image: heroImage, position: "86% 52%" },
+  { id: "g-7", category: "guests", title: "Тихий час с чаем", description: "Антикафе-настроение с теплым сервисом и живыми эмоциями.", image: heroImage, position: "54% 56%" },
+  { id: "g-8", category: "interior", title: "Зона общения", description: "Пространство, где людям и минипигам комфортно рядом.", image: heroImage, position: "76% 44%" },
+  { id: "g-9", category: "details", title: "Детали декора", description: "Текстиль, свет и цветовые акценты в теплой палитре.", image: heroImage, position: "32% 44%" },
+  { id: "g-10", category: "family", title: "Визит с детьми", description: "Без спешки, с понятными правилами и спокойным ритмом.", image: heroImage, position: "74% 62%" },
+  { id: "g-11", category: "piggies", title: "Любопытный взгляд", description: "Кадр, в котором особенно заметен живой характер жителей Piggy Land.", image: heroImage, position: "90% 56%" },
+  { id: "g-12", category: "guests", title: "Фотозона у фермерского дворика", description: "Светлый фон, зелень и кадры, которые хочется сохранить.", image: heroImage, position: "68% 46%" }
 ];
 
 export const reviews = [

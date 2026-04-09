@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 
 export function PageHero({
   eyebrow,
@@ -34,7 +35,7 @@ export function PageHero({
 
         <div className="page-hero-media">
           <Image
-            src="/images/piggyland-hero.png"
+            src={withBasePath("/images/piggyland-hero.png")}
             alt="Теплый фермерский дворик Piggy Land"
             fill
             sizes="(max-width: 960px) 100vw, 46vw"
@@ -45,4 +46,3 @@ export function PageHero({
     </section>
   );
 }
-

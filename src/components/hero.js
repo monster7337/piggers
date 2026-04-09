@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 import { heroHighlights } from "@/lib/site-data";
 
 export function Hero() {
@@ -11,7 +12,7 @@ export function Hero() {
     <section id="home" className="hero-section">
       <div className="hero-background">
         <Image
-          src="/images/piggyland-hero.png"
+          src={withBasePath("/images/piggyland-hero.png")}
           alt="Минипиги на солнечной ферме рядом с красным амбаром"
           fill
           priority
