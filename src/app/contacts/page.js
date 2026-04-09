@@ -1,4 +1,4 @@
-import { Clock3, MapPin, MessageCircle, Phone } from "lucide-react";
+import { AtSign, Clock3, MapPin, MessageCircle, Phone, SendHorizontal } from "lucide-react";
 import { AnimatedSection } from "@/components/animated-section";
 import { PageHero } from "@/components/page-hero";
 import { SectionHeading } from "@/components/section-heading";
@@ -6,13 +6,24 @@ import { contactInfo } from "@/lib/site-data";
 
 export const metadata = {
   title: "Контакты",
-  description: "Контакты антикафе Piggy Land в Санкт-Петербурге: адрес, телефон, VK, график и предварительная запись."
+  description: "Контакты антикафе Piggy Land в Санкт-Петербурге: адрес, телефон, VK, Telegram, Instagram, график и предварительная запись."
+};
+
+const socialIcons = {
+  vk: MessageCircle,
+  telegram: SendHorizontal,
+  instagram: AtSign
 };
 
 const contactCards = [
   { icon: MapPin, title: "Адрес", value: contactInfo.address },
   { icon: Phone, title: "Телефон", value: contactInfo.phone, href: contactInfo.phoneLink },
-  { icon: MessageCircle, title: contactInfo.socialLabel, value: contactInfo.socialValue, href: contactInfo.socialLink },
+  ...contactInfo.socials.map((social) => ({
+    icon: socialIcons[social.id] ?? MessageCircle,
+    title: social.label,
+    value: social.value,
+    href: social.href
+  })),
   { icon: Clock3, title: "График", value: contactInfo.hours }
 ];
 
@@ -31,9 +42,9 @@ export default function ContactsPage() {
           <SectionHeading
             eyebrow="Связь"
             title="Контакты, которые всегда под рукой"
-            description="Позвоните, напишите во VK и заранее согласуйте удобный слот для визита."
+            description="Позвоните, напишите во VK, Telegram или Instagram и заранее согласуйте удобный слот для визита."
           />
-          <div className="card-grid card-grid-3">
+          <div className="card-grid card-grid-3 contacts-grid">
             {contactCards.map((item) => {
               const Icon = item.icon;
               const content = (

@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Images, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { galleryCategories } from "@/lib/site-data";
 
-export function GalleryFilter({ items, limit, showLink = false }) {
+export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeIndex, setActiveIndex] = useState(null);
 
@@ -16,12 +16,14 @@ export function GalleryFilter({ items, limit, showLink = false }) {
   );
 
   const filteredItems = useMemo(() => {
-    if (limit) {
-      return fullItems.slice(0, limit);
+    const activeLimit = activeCategory === "all" && allCategoryLimit ? allCategoryLimit : limit;
+
+    if (activeLimit) {
+      return fullItems.slice(0, activeLimit);
     }
 
     return fullItems;
-  }, [fullItems, limit]);
+  }, [activeCategory, allCategoryLimit, fullItems, limit]);
 
   const activeItem = activeIndex !== null ? fullItems[activeIndex] : null;
 

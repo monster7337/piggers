@@ -22,7 +22,7 @@ export default function GalleryPage() {
         imagePosition="74% 50%"
       />
 
-      <AnimatedSection>
+      <AnimatedSection className="gallery-section">
         <div className="container">
           <SectionHeading
             eyebrow="Фото и сцены"

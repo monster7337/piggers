@@ -12,9 +12,11 @@ export const contactInfo = {
   phoneLink: "tel:+79213794040",
   email: null,
   emailLink: null,
-  socialLabel: "VK",
-  socialValue: "minipiggyspb",
-  socialLink: "https://vk.link/minipiggyspb",
+  socials: [
+    { id: "vk", label: "VK", value: "minipiggyspb", href: "https://vk.link/minipiggyspb" },
+    { id: "telegram", label: "Telegram", value: "@minipiggyspb", href: "https://t.me/minipiggyspb" },
+    { id: "instagram", label: "Instagram", value: "@minipiggyspb", href: "https://instagram.com/minipiggyspb" }
+  ],
   address: "г. Санкт-Петербург, ул. 6-я Советская, д. 28А, помещение 3-Н",
   hours: "По предварительной записи, ежедневно до 20:00",
   note: "Уважаемые гости, мы работаем по предварительной записи. Санкт-Петербург, 6-я Советская улица, дом 28А, помещение 3-Н."

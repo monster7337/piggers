@@ -41,9 +41,11 @@ export function Footer() {
           <div className="footer-links">
             <a href={contactInfo.phoneLink}>{contactInfo.phone}</a>
             {contactInfo.email && contactInfo.emailLink ? <a href={contactInfo.emailLink}>{contactInfo.email}</a> : null}
-            <a href={contactInfo.socialLink} target="_blank" rel="noreferrer">
-              {contactInfo.socialValue}
-            </a>
+            {contactInfo.socials.map((social) => (
+              <a key={social.id} href={social.href} target="_blank" rel="noreferrer">
+                {social.value}
+              </a>
+            ))}
             <span>{contactInfo.address}</span>
             <span>{contactInfo.hours}</span>
           </div>

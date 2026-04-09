@@ -88,7 +88,7 @@ export default function RatesPage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection>
+      <AnimatedSection className="faq-section">
         <div className="container narrow-section">
           <SectionHeading
             eyebrow="FAQ"

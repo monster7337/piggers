@@ -428,7 +428,7 @@ export function BookingPlanner({ initialRate }) {
                       <article key={item.id} className={clsx("card service-card", quantity > 0 && "selected")}>
                         <div className="service-card-header">
                           <strong>{formatCurrency(item.price)}</strong>
-                          <span className="views-pill">Посмотрели {item.views.toLocaleString("ru-RU")} человек</span>
+                          <span className="views-pill">Приобрели уже {item.views.toLocaleString("ru-RU")} человек</span>
                         </div>
                         <h3>{item.title}</h3>
                         <span className="ticket-description-label">Описание</span>

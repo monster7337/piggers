@@ -1,4 +1,5 @@
 import {
+  AtSign,
   CalendarDays,
   Camera,
   Clock3,
@@ -8,6 +9,7 @@ import {
   MapPin,
   MessageCircle,
   Phone,
+  SendHorizontal,
   Sparkles,
   TreePine,
   Users
@@ -54,10 +56,21 @@ const aboutValues = [
   }
 ];
 
+const socialIcons = {
+  vk: MessageCircle,
+  telegram: SendHorizontal,
+  instagram: AtSign
+};
+
 const contactCards = [
   { icon: MapPin, title: "Адрес", value: contactInfo.address },
   { icon: Phone, title: "Телефон", value: contactInfo.phone, href: contactInfo.phoneLink },
-  { icon: MessageCircle, title: contactInfo.socialLabel, value: contactInfo.socialValue, href: contactInfo.socialLink },
+  ...contactInfo.socials.map((social) => ({
+    icon: socialIcons[social.id] ?? MessageCircle,
+    title: social.label,
+    value: social.value,
+    href: social.href
+  })),
   { icon: Clock3, title: "График", value: contactInfo.hours }
 ];
 
@@ -133,14 +146,14 @@ export default function HomePage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection id="gallery">
+      <AnimatedSection id="gallery" className="gallery-section">
         <div className="container">
           <SectionHeading
             eyebrow="Галерея"
             title="Ключевые фото на странице, а полный просмотр уже в модальном просмотрщике"
             description="На лендинге остаются лучшие кадры, а вся галерея раскрывается поверх страницы с переключением вперед и назад."
           />
-          <GalleryFilter items={galleryItems} limit={6} showLink />
+          <GalleryFilter items={galleryItems} limit={6} allCategoryLimit={3} showLink />
         </div>
       </AnimatedSection>
 
@@ -187,7 +200,7 @@ export default function HomePage() {
             title="Санкт-Петербург, 6-я Советская, 28А"
             description="Свяжитесь с нами по телефону или через VK и заранее запишитесь на визит в удобное время."
           />
-          <div className="card-grid card-grid-3">
+          <div className="card-grid card-grid-3 contacts-grid">
             {contactCards.map((item) => {
               const Icon = item.icon;
               const content = (
@@ -212,7 +225,7 @@ export default function HomePage() {
         </div>
       </AnimatedSection>
 
-      <AnimatedSection>
+      <AnimatedSection className="faq-section">
         <div className="container narrow-section">
           <SectionHeading
             eyebrow="FAQ"

@@ -65,8 +65,8 @@ export default function RootLayout({ children }) {
     description:
       "Антикафе с минипигами в Санкт-Петербурге. 11 мини и микро пигов, чайная комната, фотолокации и визиты по предварительной записи.",
     telephone: contactInfo.phone,
-    url: contactInfo.socialLink,
-    sameAs: [contactInfo.socialLink],
+    url: contactInfo.socials[0]?.href,
+    sameAs: contactInfo.socials.map((social) => social.href),
     address: {
       "@type": "PostalAddress",
       streetAddress: "6-я Советская улица, дом 28А, помещение 3-Н",
