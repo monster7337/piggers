@@ -1,3 +1,4 @@
+import { absoluteUrl } from "@/lib/base-path";
 export const dynamic = "force-static";
 
 export default function robots() {
@@ -6,7 +7,6 @@ export default function robots() {
       userAgent: "*",
       allow: "/"
     },
-    sitemap: "https://piggyland.ru/sitemap.xml"
+    sitemap: absoluteUrl("/sitemap.xml")
   };
 }
-

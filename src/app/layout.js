@@ -1,16 +1,23 @@
+import { Manrope, Playfair_Display } from "next/font/google";
 import { SiteShell } from "@/components/site-shell";
-import { withBasePath } from "@/lib/base-path";
+import { absoluteUrl, withBasePath } from "@/lib/base-path";
 import { contactInfo } from "@/lib/site-data";
 import "./globals.css";
 
-const isStaticExport = process.env.STATIC_EXPORT === "true";
-const metadataBase = new URL(isStaticExport ? "https://monster7337.github.io" : "https://piggyland.ru");
-const heroImageUrl = isStaticExport
-  ? "https://monster7337.github.io/piggers/images/piggyland-hero.png"
-  : "https://piggyland.ru/images/piggyland-hero.png";
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-sans"
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-display"
+});
+
+const heroImageUrl = absoluteUrl("/images/piggyland-hero.png");
 
 export const metadata = {
-  metadataBase,
+  metadataBase: new URL(absoluteUrl("/")),
   title: {
     default: "Piggy Land",
     template: "%s | Piggy Land"
@@ -83,7 +90,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="ru" style={assetStyles}>
-      <body>
+      <body className={`${manrope.variable} ${playfair.variable}`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}

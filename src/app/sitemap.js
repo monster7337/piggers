@@ -1,5 +1,9 @@
+import { absoluteUrl } from "@/lib/base-path";
+
+export const dynamic = "force-static";
+
 const routes = [
-  "",
+  "/",
   "/rates",
   "/booking",
   "/piggies",
@@ -12,11 +16,9 @@ const routes = [
   "/visit-rules"
 ];
 
-export const dynamic = "force-static";
-
 export default function sitemap() {
   return routes.map((route) => ({
-    url: `https://piggyland.ru${route}`,
+    url: absoluteUrl(route),
     lastModified: new Date()
   }));
 }
