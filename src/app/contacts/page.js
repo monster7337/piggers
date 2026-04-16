@@ -42,7 +42,7 @@ export default function ContactsPage() {
           <SectionHeading
             eyebrow="Связь"
             title="Контакты, которые всегда под рукой"
-            description="Позвоните, напишите во VK, Telegram или Instagram и заранее согласуйте удобный слот для визита."
+            description="Позвоните или напишите нам и заранее выберите удобное время для визита."
           />
           <div className="card-grid card-grid-3 contacts-grid">
             {contactCards.map((item) => {
@@ -80,7 +80,7 @@ export default function ContactsPage() {
           </div>
           <div className="card detail-note">
             <span className="eyebrow">Что вас ждет</span>
-            <h2 className="section-title small">11 свинок, чайная комната и формат для особенных встреч</h2>
+            <h2 className="section-title small">11 свинок, чайная комната и теплые встречи</h2>
             <p className="section-copy">
               У нас отмечают дни рождения, проводят корпоративы, девичники, пижамные вечеринки и романтические вечера. Чай, кофе и вкусняшки входят в стоимость визита.
             </p>

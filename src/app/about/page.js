@@ -64,7 +64,7 @@ export default function AboutPage() {
           <SectionHeading
             eyebrow="Принципы"
             title="Что делает пространство особенным для гостей"
-            description="В центре внимания живое общение с минипигами, уют и формат, который легко адаптировать под разный повод."
+            description="В центре внимания живое общение с минипигами, уют и отдых, который легко подстроить под любой повод."
           />
           <div className="card-grid card-grid-3">
             {values.map((item) => {

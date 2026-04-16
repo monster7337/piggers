@@ -12,6 +12,8 @@ const routes = [
   "/visit-rules"
 ];
 
+export const dynamic = "force-static";
+
 export default function sitemap() {
   return routes.map((route) => ({
     url: `https://piggyland.ru${route}`,

@@ -18,8 +18,8 @@ export default function RatesPage() {
     <>
       <PageHero
         eyebrow="Тарифы / Услуги"
-        title="Выберите формат визита под настроение, количество гостей и повод"
-        description="У нас можно выбрать билет для обычного визита, семьи или льготного посещения, а также добавить кормление и другие приятные детали."
+        title="Выберите билет по настроению, компании и поводу"
+        description="У нас есть билеты для обычного визита, семьи и льготного посещения, а также приятные дополнения к встрече."
         primaryAction={{ href: "/booking", label: "Перейти к бронированию" }}
         secondaryAction={{ href: "/gift-certificates", label: "Подарочные сертификаты" }}
       />
@@ -27,9 +27,9 @@ export default function RatesPage() {
       <AnimatedSection>
         <div className="container">
           <SectionHeading
-            eyebrow="Основные форматы"
+            eyebrow="Основные билеты"
             title="Билеты для спокойного визита, семьи и особых условий"
-            description="Каждый тариф показывает стоимость, длительность и сценарий посещения без перегруженных таблиц."
+            description="Сразу видно цену, длительность визита и что входит в билет."
           />
           <div className="card-grid card-grid-4">
             {rates.map((rate) => (
@@ -45,7 +45,7 @@ export default function RatesPage() {
           <SectionHeading
             eyebrow="Что включено"
             title="Базовые преимущества каждого тарифа"
-            description="В каждом тарифе сохраняется понятный и дружелюбный состав визита без перегруженных сравнений."
+            description="Во всех билетах сохраняется теплый и понятный набор приятных деталей для гостей."
           />
             <div className="card feature-list">
               {[
@@ -93,7 +93,7 @@ export default function RatesPage() {
           <SectionHeading
             eyebrow="FAQ"
             title="Ответы на частые вопросы по бронированию"
-            description="Этот блок закрывает сомнения перед оформлением сеанса."
+            description="Коротко ответили на то, что чаще всего спрашивают перед визитом."
             align="center"
           />
           <FaqAccordion items={faqItems} />

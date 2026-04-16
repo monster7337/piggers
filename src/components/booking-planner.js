@@ -24,13 +24,21 @@ import { z } from "zod";
 import { alternativeProject, extras, rates } from "@/lib/site-data";
 
 const bookingSteps = ["Билеты", "Дата", "Время", "Услуги", "Контакты", "Подтверждение"];
+const bookingStepNotes = [
+  "Выберите билет",
+  "Найдите удобный день",
+  "Выберите удобное время",
+  "Добавьте приятные детали",
+  "Оставьте контакты",
+  "Проверьте все перед записью"
+];
 
 const contactSchema = z.object({
   name: z.string().min(2, "Введите имя"),
   phone: z
     .string()
     .min(10, "Введите телефон")
-    .regex(/^\+?[0-9()\-\s]{10,18}$/, "Укажите телефон в корректном формате"),
+    .regex(/^\+?[0-9()\-\s]{10,18}$/, "Укажите телефон правильно"),
   email: z.string().email("Укажите корректный email"),
   comment: z.string().max(240, "Комментарий не должен превышать 240 символов").optional()
 });
@@ -121,6 +129,12 @@ export function BookingPlanner({ initialRate }) {
   const totalTicketsCount = selectedTickets.reduce((sum, item) => sum + item.quantity, 0);
   const total = ticketsTotal + servicesTotal;
   const values = getValues();
+  const selectedDateLabel = selectedDate ? format(selectedDate, "d MMM", { locale: ru }) : "Выберите";
+  const selectedTimeLabel = selectedTime || "Выберите";
+  const mobileSelectionNote =
+    totalTicketsCount > 0
+      ? `${totalTicketsCount} билет${totalTicketsCount > 1 ? "а" : ""} · ${selectedDate ? selectedDateLabel : "без даты"}`
+      : "Соберите визит по шагам";
 
   const updateRateQuantity = (id, delta) => {
     setSelectedRateQuantities((current) => {
@@ -204,6 +218,39 @@ export function BookingPlanner({ initialRate }) {
   return (
     <div className="booking-layout">
       <div className="booking-main">
+        <div className="card booking-mobile-overview">
+          <div className="booking-mobile-overview-top">
+            <span className="eyebrow">Бронирование</span>
+            <span className="booking-mobile-step-pill">
+              Шаг {step + 1} / {bookingSteps.length}
+            </span>
+          </div>
+
+          <div className="booking-mobile-overview-copy">
+            <strong>{bookingSteps[step]}</strong>
+            <p>{bookingStepNotes[step]}</p>
+          </div>
+
+          <div className="booking-mobile-overview-grid">
+            <div className="booking-mobile-overview-item">
+              <span>Билеты</span>
+              <strong>{totalTicketsCount || "0"}</strong>
+            </div>
+            <div className="booking-mobile-overview-item">
+              <span>Дата</span>
+              <strong>{selectedDateLabel}</strong>
+            </div>
+            <div className="booking-mobile-overview-item">
+              <span>Время</span>
+              <strong>{selectedTimeLabel}</strong>
+            </div>
+            <div className="booking-mobile-overview-item booking-mobile-overview-item-accent">
+              <span>Итог</span>
+              <strong>{formatCurrency(total)}</strong>
+            </div>
+          </div>
+        </div>
+
         <div className="card booking-stepper">
           {bookingSteps.map((item, index) => (
             <button
@@ -334,7 +381,7 @@ export function BookingPlanner({ initialRate }) {
                       >
                         <span>{format(item.date, "EEE", { locale: ru })}</span>
                         <strong>{format(item.date, "d MMM", { locale: ru })}</strong>
-                        <small>{item.soldOut ? "Нет мест" : "Есть слоты"}</small>
+                        <small>{item.soldOut ? "Нет мест" : "Есть время"}</small>
                       </button>
                     );
                   })}
@@ -380,7 +427,7 @@ export function BookingPlanner({ initialRate }) {
                         >
                           <Clock3 size={16} />
                           <span>{slot.time}</span>
-                          <small>{slot.disabled ? "Недоступно" : "Свободный слот"}</small>
+                          <small>{slot.disabled ? "Недоступно" : "Свободно"}</small>
                         </button>
                       ))}
                     </div>
@@ -388,7 +435,7 @@ export function BookingPlanner({ initialRate }) {
                     {hasUnavailableTimeSlots ? (
                       <div className={clsx("booking-detour-card", !hasAvailableTimeSlots && "sold-out")}>
                         <div className="booking-detour-copy">
-                          <span className="booking-detour-badge">{hasAvailableTimeSlots ? "Если слот занят" : "Свободных слотов нет"}</span>
+                          <span className="booking-detour-badge">{hasAvailableTimeSlots ? "Если это время занято" : "Свободного времени нет"}</span>
                           <h3>{alternativeProject.timeTitle}</h3>
                           <p>{alternativeProject.timeDescription}</p>
                         </div>
@@ -407,7 +454,7 @@ export function BookingPlanner({ initialRate }) {
                 ) : (
                   <div className="status-inline">
                     <CircleAlert size={18} />
-                    <span>Сначала выберите дату, чтобы увидеть доступные слоты.</span>
+                    <span>Сначала выберите дату, чтобы увидеть свободное время.</span>
                   </div>
                 )}
               </>
@@ -494,7 +541,7 @@ export function BookingPlanner({ initialRate }) {
               <>
                 <div className="panel-heading">
                   <span className="eyebrow">Шаг 6</span>
-                  <h2>Подтверждение и переход к оплате</h2>
+                  <h2>Проверьте вашу запись</h2>
                 </div>
 
                 <div className="confirmation-card">
@@ -534,8 +581,7 @@ export function BookingPlanner({ initialRate }) {
                   <div className="status-inline success">
                     <CreditCard size={18} />
                     <span>
-                      После подтверждения записи мы показываем итог заказа. Онлайн-оплата и финальная интеграция
-                      платежного провайдера подключаются отдельным этапом.
+                      Проверьте все детали перед завершением. Онлайн-оплату мы добавим чуть позже.
                     </span>
                   </div>
                 </div>
@@ -550,6 +596,11 @@ export function BookingPlanner({ initialRate }) {
             ) : null}
 
             <div className="step-actions">
+              <div className="booking-mobile-action-meta">
+                <span>{mobileSelectionNote}</span>
+                <strong>{formatCurrency(total)}</strong>
+              </div>
+
               <button
                 type="button"
                 className="button button-secondary"
@@ -565,7 +616,7 @@ export function BookingPlanner({ initialRate }) {
                 </button>
               ) : (
                 <button type="button" className="button button-primary" onClick={submitBooking}>
-                  Перейти к оплате
+                  Подтвердить запись
                 </button>
               )}
             </div>
@@ -646,7 +697,7 @@ export function BookingPlanner({ initialRate }) {
           </div>
 
           <p className="muted-text">
-            На этом шаге можно собрать несколько билетов разных типов и добавить услуги поштучно в одном заказе.
+            Здесь можно выбрать несколько билетов и добавить приятные мелочи к визиту.
           </p>
         </div>
       </aside>

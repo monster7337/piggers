@@ -15,8 +15,8 @@ export default function PiggiesPage() {
     <>
       <PageHero
         eyebrow="Наши минипиги"
-        title="Здесь живут разные характеры, а не обезличенные карточки"
-        description="Страница показывает жителей Piggy Land и помогает эмоционально привязаться к месту еще до бронирования."
+        title="У каждого нашего минипига свой характер и свои привычки"
+        description="Познакомьтесь с жителями Piggy Land поближе еще до визита и выберите своих любимчиков."
         primaryAction={{ href: "/booking", label: "Забронировать визит" }}
         secondaryAction={{ href: "/gallery", label: "Посмотреть галерею" }}
         imagePosition="82% 54%"
@@ -27,7 +27,7 @@ export default function PiggiesPage() {
           <SectionHeading
             eyebrow="Жители пространства"
             title="Каждый минипиг со своим темпераментом, привычками и настроением"
-            description="На этой странице не должно быть цен и сценариев покупки. Только знакомство и атмосфера."
+            description="Здесь только знакомство, теплые детали и любимые привычки наших жителей."
           />
           <div className="card-grid card-grid-3">
             {piggies.map((piggy) => (

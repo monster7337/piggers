@@ -13,7 +13,10 @@ export function ReviewsStrip({ reviews }) {
             ))}
           </div>
           <p className="muted-text">
-            Гости чаще всего отмечают атмосферу, комфортную подачу и ощущение живого отдыха.
+            <span className="copy-desktop">
+              Гости чаще всего отмечают атмосферу, комфортную подачу и ощущение живого отдыха.
+            </span>
+            <span className="copy-mobile">Гости ценят атмосферу, комфорт и ощущение живого отдыха.</span>
           </p>
         </div>
       </div>
@@ -32,7 +35,10 @@ export function ReviewsStrip({ reviews }) {
               <Star key={index} size={14} fill="currentColor" />
             ))}
           </div>
-          <p>{review.text}</p>
+          <p>
+            <span className="copy-desktop">{review.text}</span>
+            <span className="copy-mobile">{review.mobileText || review.text}</span>
+          </p>
         </article>
       ))}
     </div>

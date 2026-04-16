@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 
 export function PiggyCard({ piggy, onOpen }) {
   return (
@@ -6,7 +7,7 @@ export function PiggyCard({ piggy, onOpen }) {
       <div
         className="photo-card-media piggy-media"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.04), rgba(17, 17, 17, 0.22)), url(${piggy.image})`,
+          backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.04), rgba(17, 17, 17, 0.22)), url(${withBasePath(piggy.image)})`,
           backgroundPosition: piggy.imagePosition
         }}
       />

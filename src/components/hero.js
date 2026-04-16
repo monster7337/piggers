@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 import { heroHighlights } from "@/lib/site-data";
 
 export function Hero() {
@@ -11,7 +12,7 @@ export function Hero() {
     <section id="home" className="hero-section">
       <div className="hero-background">
         <Image
-          src="/images/piggyland-hero.png"
+          src={withBasePath("/images/piggyland-hero.png")}
           alt="Минипиги на солнечной ферме рядом с красным амбаром"
           fill
           priority
@@ -42,17 +43,25 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.05 }}
           >
             Piggy Land
-            <span>Антикафе с минипигами в Санкт-Петербурге, куда хочется возвращаться за теплом и живым отдыхом.</span>
+            <span className="hero-title-desktop">Антикафе с минипигами в Санкт-Петербурге, куда хочется возвращаться за теплом и живым отдыхом.</span>
           </motion.h1>
           <motion.p
-            className="hero-copy-text"
+            className="hero-copy-text hero-copy-text-desktop"
             initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
             Приглашаем в гости к нашим мини и микро пигам: вас ждут 11 свинок, красочные
-            фотолокации, чайная комната со вкусняшками и форматы для дня рождения, девичника,
+            фотолокации, чайная комната со вкусняшками и уютные визиты для дня рождения, девичника,
             корпоратива или романтического вечера.
+          </motion.p>
+          <motion.p
+            className="hero-copy-text hero-copy-text-mobile"
+            initial={{ opacity: 0, y: 26 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.12 }}
+          >
+            Познакомьтесь с минипигами, посмотрите цены и выберите удобное время для теплого визита.
           </motion.p>
 
           <motion.div

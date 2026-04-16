@@ -6,6 +6,7 @@ import { Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { stripBasePath } from "@/lib/base-path";
 import { contactInfo, navigation } from "@/lib/site-data";
 
 function getBasePath(href) {
@@ -13,7 +14,7 @@ function getBasePath(href) {
 }
 
 export function Header() {
-  const pathname = usePathname();
+  const pathname = stripBasePath(usePathname());
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -86,6 +87,12 @@ export function Header() {
           </a>
           <Link className="button button-primary header-booking-button" href="/booking">
             Забронировать сеанс
+          </Link>
+          <a className="mobile-header-call" href={contactInfo.phoneLink} aria-label="Позвонить">
+            <Phone size={18} />
+          </a>
+          <Link className="mobile-header-booking" href="/booking">
+            Забронировать
           </Link>
           <button
             type="button"

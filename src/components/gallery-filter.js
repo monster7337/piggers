@@ -3,12 +3,14 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Images, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { withBasePath } from "@/lib/base-path";
 import { galleryCategories } from "@/lib/site-data";
 
 export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeIndex, setActiveIndex] = useState(null);
+  const lockedScrollRef = useRef(0);
 
   const fullItems = useMemo(
     () => (activeCategory === "all" ? items : items.filter((item) => item.category === activeCategory)),
@@ -26,6 +28,7 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
   }, [activeCategory, allCategoryLimit, fullItems, limit]);
 
   const activeItem = activeIndex !== null ? fullItems[activeIndex] : null;
+  const isModalOpen = activeIndex !== null;
 
   const openItem = (itemId) => {
     const index = fullItems.findIndex((item) => item.id === itemId);
@@ -40,6 +43,61 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
     setActiveIndex((current) => (current === null ? 0 : (current - 1 + fullItems.length) % fullItems.length));
   const showNext = () =>
     setActiveIndex((current) => (current === null ? 0 : (current + 1) % fullItems.length));
+
+  useEffect(() => {
+    if (!isModalOpen) {
+      return undefined;
+    }
+
+    lockedScrollRef.current = window.scrollY;
+    const html = document.documentElement;
+    const body = document.body;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setActiveIndex(null);
+      }
+
+      if (event.key === "ArrowLeft") {
+        setActiveIndex((current) => (current === null ? 0 : (current - 1 + fullItems.length) % fullItems.length));
+      }
+
+      if (event.key === "ArrowRight") {
+        setActiveIndex((current) => (current === null ? 0 : (current + 1) % fullItems.length));
+      }
+    };
+
+    html.classList.add("modal-open");
+    body.classList.add("modal-open");
+    body.style.position = "fixed";
+    body.style.top = `-${lockedScrollRef.current}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      const previousScrollBehavior = html.style.scrollBehavior;
+
+      html.style.scrollBehavior = "auto";
+      html.classList.remove("modal-open");
+      body.classList.remove("modal-open");
+
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+
+      window.scrollTo(0, lockedScrollRef.current);
+
+      window.requestAnimationFrame(() => {
+        html.style.scrollBehavior = previousScrollBehavior;
+      });
+    };
+  }, [isModalOpen, fullItems.length]);
 
   return (
     <div className="gallery-shell">
@@ -71,7 +129,7 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
             <span
               className="gallery-card-media"
               style={{
-                backgroundImage: `linear-gradient(180deg, rgba(12, 10, 8, 0.04), rgba(12, 10, 8, 0.34)), url(${item.image})`,
+                backgroundImage: `linear-gradient(180deg, rgba(12, 10, 8, 0.04), rgba(12, 10, 8, 0.34)), url(${withBasePath(item.image)})`,
                 backgroundPosition: item.position
               }}
             />
@@ -110,7 +168,7 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
               <div
                 className="lightbox-media"
                 style={{
-                  backgroundImage: `linear-gradient(180deg, rgba(12, 10, 8, 0.08), rgba(12, 10, 8, 0.18)), url(${activeItem.image})`,
+                  backgroundImage: `linear-gradient(180deg, rgba(12, 10, 8, 0.08), rgba(12, 10, 8, 0.18)), url(${withBasePath(activeItem.image)})`,
                   backgroundPosition: activeItem.position
                 }}
               />

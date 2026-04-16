@@ -40,7 +40,10 @@ export function VisitJourney({ steps }) {
                 aria-hidden={index !== activeIndex}
               >
                 <h3>{step.title}</h3>
-                <p>{step.description}</p>
+                <p>
+                  <span className="copy-desktop">{step.description}</span>
+                  <span className="copy-mobile">{step.mobileDescription || step.description}</span>
+                </p>
               </div>
             ))}
           </div>
@@ -89,7 +92,10 @@ export function VisitJourney({ steps }) {
 
               <span className="journey-step-status">{getStepStatus(index, activeIndex)}</span>
               <h3>{step.title}</h3>
-              <p>{step.description}</p>
+              <p>
+                <span className="copy-desktop">{step.description}</span>
+                <span className="copy-mobile">{step.mobileDescription || step.description}</span>
+              </p>
 
               <div className="journey-step-footer">
                 <span>{progressStep}% маршрута</span>

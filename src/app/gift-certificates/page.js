@@ -22,7 +22,7 @@ export default function GiftCertificatesPage() {
       <PageHero
         eyebrow="Подарочные сертификаты"
         title="Подарок, который запоминается как теплое впечатление, а не как еще одна вещь"
-        description="Страница сертификатов работает как отдельный продукт: выбор формата, получателя, текста и переход к оплате."
+        description="Выберите сертификат, добавьте имя получателя и подарите теплый визит к минипигам."
         primaryAction={{ href: "/booking", label: "Забронировать визит" }}
         secondaryAction={{ href: "/rates", label: "Посмотреть тарифы" }}
       />
@@ -32,7 +32,7 @@ export default function GiftCertificatesPage() {
           <SectionHeading
             eyebrow="Варианты сертификатов"
             title="От конкретного тарифа до свободного номинала"
-            description="Карточки ниже можно легко связать с реальной платежной логикой или формой заказа."
+            description="Можно выбрать готовый подарок или оставить человеку свободу выбрать удобный день самому."
           />
           <div className="card-grid card-grid-3">
             {giftCertificates.map((item) => (
@@ -53,8 +53,8 @@ export default function GiftCertificatesPage() {
         <div className="container">
           <SectionHeading
             eyebrow="Как это работает"
-            title="Сценарий оформления сертификата"
-            description="Страница может остаться очень простой, если важнее скорость запуска, чем сложный конструктор подарка."
+            title="Как подарить визит в Piggy Land"
+            description="Все просто: выберите сертификат, укажите получателя и отправьте подарок."
           />
           <div className="timeline-grid">
             {steps.map((step, index) => {

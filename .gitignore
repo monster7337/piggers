@@ -3,5 +3,6 @@ node_modules
 out
 dist
 npm-debug.log*
+.next-*.log
 .DS_Store
 

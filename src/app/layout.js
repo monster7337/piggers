@@ -1,20 +1,16 @@
-import { Manrope, Playfair_Display } from "next/font/google";
 import { SiteShell } from "@/components/site-shell";
+import { withBasePath } from "@/lib/base-path";
 import { contactInfo } from "@/lib/site-data";
 import "./globals.css";
 
-const manrope = Manrope({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-sans"
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-display"
-});
+const isStaticExport = process.env.STATIC_EXPORT === "true";
+const metadataBase = new URL(isStaticExport ? "https://monster7337.github.io" : "https://piggyland.ru");
+const heroImageUrl = isStaticExport
+  ? "https://monster7337.github.io/piggers/images/piggyland-hero.png"
+  : "https://piggyland.ru/images/piggyland-hero.png";
 
 export const metadata = {
-  metadataBase: new URL("https://piggyland.ru"),
+  metadataBase,
   title: {
     default: "Piggy Land",
     template: "%s | Piggy Land"
@@ -44,7 +40,7 @@ export const metadata = {
       "Антикафе с минипигами в Санкт-Петербурге: предварительная запись, 11 свинок, фотолокации, чайная комната и теплые мероприятия.",
     images: [
       {
-        url: "/images/piggyland-hero.png",
+        url: heroImageUrl,
         width: 1366,
         height: 768,
         alt: "Piggy Land"
@@ -58,6 +54,14 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  const assetStyles = {
+    "--journey-progress-image": `url("${withBasePath("/images/progress.png")}")`,
+    "--experience-family-image": `url("${withBasePath("/images/familyandpigs2.png")}")`,
+    "--gallery-section-image": `url("${withBasePath("/images/piggers.png")}")`,
+    "--reviews-section-image": `url("${withBasePath("/images/otziv.png")}")`,
+    "--faq-section-image": `url("${withBasePath("/images/faq.png")}")`
+  };
+
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -78,8 +82,8 @@ export default function RootLayout({ children }) {
   };
 
   return (
-    <html lang="ru">
-      <body className={`${manrope.variable} ${playfair.variable}`}>
+    <html lang="ru" style={assetStyles}>
+      <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}

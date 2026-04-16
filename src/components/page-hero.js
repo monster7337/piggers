@@ -1,6 +1,8 @@
+import clsx from "clsx";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 
 export function PageHero({
   eyebrow,
@@ -8,12 +10,13 @@ export function PageHero({
   description,
   primaryAction,
   secondaryAction,
-  imagePosition = "76% 52%"
+  imagePosition = "76% 52%",
+  hideImage = false
 }) {
   return (
     <section className="page-hero">
-      <div className="container page-hero-grid">
-        <div className="page-hero-copy">
+      <div className={clsx("container page-hero-grid", hideImage && "page-hero-grid-no-media")}>
+        <div className={clsx("page-hero-copy", hideImage && "page-hero-copy-no-media")}>
           {eyebrow ? <span className="eyebrow">{eyebrow}</span> : null}
           <h1 className="page-title">{title}</h1>
           <p className="page-copy">{description}</p>
@@ -32,15 +35,17 @@ export function PageHero({
           </div>
         </div>
 
-        <div className="page-hero-media">
-          <Image
-            src="/images/piggyland-hero.png"
-            alt="Теплый фермерский дворик Piggy Land"
-            fill
-            sizes="(max-width: 960px) 100vw, 46vw"
-            style={{ objectFit: "cover", objectPosition: imagePosition }}
-          />
-        </div>
+        {!hideImage ? (
+          <div className="page-hero-media">
+            <Image
+              src={withBasePath("/images/piggyland-hero.png")}
+              alt="Теплый фермерский дворик Piggy Land"
+              fill
+              sizes="(max-width: 960px) 100vw, 46vw"
+              style={{ objectFit: "cover", objectPosition: imagePosition }}
+            />
+          </div>
+        ) : null}
       </div>
     </section>
   );

@@ -42,17 +42,20 @@ const aboutValues = [
   {
     icon: HeartHandshake,
     title: "11 мини и микро пигов",
-    description: "Главные жители пространства встречают гостей в живой, дружелюбной и бережной атмосфере."
+    description: "Главные жители пространства встречают гостей в живой, дружелюбной и бережной атмосфере.",
+    mobileDescription: "11 дружелюбных жителей встречают гостей вживую."
   },
   {
     icon: TreePine,
     title: "Чайная комната и фотолокации",
-    description: "После общения со свинками можно посидеть за чаем или кофе со вкусняшками и сделать красивые кадры."
+    description: "После общения со свинками можно посидеть за чаем или кофе со вкусняшками и сделать красивые кадры.",
+    mobileDescription: "После визита можно спокойно выпить чай и сделать красивые фото."
   },
   {
     icon: Sparkles,
     title: "Праздники и камерные события",
-    description: "У нас отмечают дни рождения, проводят корпоративы, девичники, пижамные вечеринки и романтические вечера."
+    description: "У нас отмечают дни рождения, проводят корпоративы, девичники, пижамные вечеринки и романтические вечера.",
+    mobileDescription: "Подходит для дня рождения, вечеринки или камерного события."
   }
 ];
 
@@ -63,15 +66,16 @@ const socialIcons = {
 };
 
 const contactCards = [
-  { icon: MapPin, title: "Адрес", value: contactInfo.address },
-  { icon: Phone, title: "Телефон", value: contactInfo.phone, href: contactInfo.phoneLink },
+  { icon: MapPin, title: "Адрес", value: contactInfo.address, mobileValue: "6-я Советская, 28А" },
+  { icon: Phone, title: "Телефон", value: contactInfo.phone, mobileValue: "+7 (921) 379-40-40", href: contactInfo.phoneLink },
   ...contactInfo.socials.map((social) => ({
     icon: socialIcons[social.id] ?? MessageCircle,
     title: social.label,
     value: social.value,
+    mobileValue: social.value,
     href: social.href
   })),
-  { icon: Clock3, title: "График", value: contactInfo.hours }
+  { icon: Clock3, title: "График", value: contactInfo.hours, mobileValue: "Ежедневно по записи" }
 ];
 
 export default function HomePage() {
@@ -83,8 +87,8 @@ export default function HomePage() {
         <div className="container">
           <SectionHeading
             eyebrow="Тарифы и сеансы"
-            title="Форматы посещения, которые сразу ведут к бронированию"
-            description="Это первый прикладной блок после атмосферы: человек быстро понимает сценарии визита, стоимость и куда нажать дальше."
+            title="Выберите билет и приезжайте знакомиться с минипигами"
+            description="Сразу видно, сколько стоит визит, что входит и какой вариант подойдет именно вам."
             actions={
               <Link className="button button-secondary" href="/booking">
                 Перейти к бронированию
@@ -104,7 +108,7 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="Как проходит визит"
             title="Путь гостя от интереса до теплого часа с минипигами"
-            description="Воронка очень простая: формат, слот, подтверждение и приятный визит без лишних шагов."
+            description="Все просто: выберите билет, день и время, а дальше мы будем ждать вас в гости."
           />
           <VisitJourney steps={visitSteps} />
         </div>
@@ -115,7 +119,7 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="Что вас ждет"
             title="Что ждет гостей в антикафе с минипигами"
-            description="Здесь собраны ключевые причины приехать: живое общение со свинками, фотолокации, чайная комната и форматы для разных поводов."
+            description="Живое общение со свинками, красивые фото, чайная комната и идеи для теплого отдыха."
           />
           <div className="card-grid card-grid-3">
             {experienceHighlights.map((item, index) => {
@@ -127,7 +131,10 @@ export default function HomePage() {
                     <Icon size={22} />
                   </div>
                   <h3>{item.title}</h3>
-                  <p>{item.description}</p>
+                  <p>
+                    <span className="copy-desktop">{item.description}</span>
+                    <span className="copy-mobile">{item.mobileDescription || item.description}</span>
+                  </p>
                 </article>
               );
             })}
@@ -139,10 +146,10 @@ export default function HomePage() {
         <div className="container">
           <SectionHeading
             eyebrow="Наши минипиги"
-            title="Жители пространства, с которыми гости знакомятся вживую"
-            description="На странице остается чистая сетка, а подробности о характере, привычках и фактах открываются в модальном окне."
+            title="Познакомьтесь с нашими минипигами поближе"
+            description="У каждого свой характер, привычки и любимые занятия. Нажмите на карточку и узнайте больше."
           />
-          <PiggyBrowser piggies={piggies} />
+          <PiggyBrowser piggies={piggies} mobilePreviewCount={4} />
         </div>
       </AnimatedSection>
 
@@ -150,8 +157,8 @@ export default function HomePage() {
         <div className="container">
           <SectionHeading
             eyebrow="Галерея"
-            title="Ключевые фото на странице, а полный просмотр уже в модальном просмотрщике"
-            description="На лендинге остаются лучшие кадры, а вся галерея раскрывается поверх страницы с переключением вперед и назад."
+            title="Фотографии, после которых хочется приехать в Piggy Land"
+            description="Здесь собраны наши любимые кадры: минипиги, гости и теплая атмосфера пространства."
           />
           <GalleryFilter items={galleryItems} limit={6} allCategoryLimit={3} showLink />
         </div>
@@ -174,7 +181,10 @@ export default function HomePage() {
                     <Icon size={22} />
                   </div>
                   <h3>{item.title}</h3>
-                  <p>{item.description}</p>
+                  <p>
+                    <span className="copy-desktop">{item.description}</span>
+                    <span className="copy-mobile">{item.mobileDescription || item.description}</span>
+                  </p>
                 </article>
               );
             })}
@@ -186,8 +196,8 @@ export default function HomePage() {
         <div className="container">
           <SectionHeading
             eyebrow="Отзывы"
-            title="Социальное доказательство без сухой корпоративности"
-            description="Отзывы поддерживают доверие перед бронированием и подтверждают, что формат действительно нравится гостям."
+            title="Гости уходят с улыбкой и возвращаются снова"
+            description="Почитайте, что говорят те, кто уже успел побывать у нас."
           />
           <ReviewsStrip reviews={reviews} />
         </div>
@@ -209,7 +219,10 @@ export default function HomePage() {
                     <Icon size={22} />
                   </div>
                   <h3>{item.title}</h3>
-                  <p>{item.value}</p>
+                  <p>
+                    <span className="copy-desktop">{item.value}</span>
+                    <span className="copy-mobile">{item.mobileValue || item.value}</span>
+                  </p>
                 </article>
               );
 
@@ -230,7 +243,7 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="FAQ"
             title="Ответы на вопросы перед бронированием"
-            description="Accordion закрывает типовые возражения и помогает не терять пользователя на пути к оплате."
+            description="Собрали короткие ответы на то, что чаще всего спрашивают перед визитом."
             align="center"
           />
           <FaqAccordion items={faqItems} />

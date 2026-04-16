@@ -1,5 +1,6 @@
 import { ArrowUpRight, Clock3 } from "lucide-react";
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 
 export function RateCard({ rate }) {
   return (
@@ -7,7 +8,7 @@ export function RateCard({ rate }) {
       <div
         className="photo-card-media"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.02), rgba(17, 17, 17, 0.16)), url(${rate.image})`,
+          backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.02), rgba(17, 17, 17, 0.16)), url(${withBasePath(rate.image)})`,
           backgroundPosition: rate.imagePosition
         }}
       >
@@ -20,7 +21,10 @@ export function RateCard({ rate }) {
           <span className="price-badge">{rate.price.toLocaleString("ru-RU")} ₽</span>
         </div>
 
-        <p>{rate.description}</p>
+        <p>
+          <span className="copy-desktop">{rate.description}</span>
+          <span className="copy-mobile">{rate.mobileDescription || rate.description}</span>
+        </p>
 
         <div className="card-meta">
           <span>

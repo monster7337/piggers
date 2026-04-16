@@ -8,6 +8,7 @@ export function LegalPage({ eyebrow, title, description, sections }) {
         title={title}
         description={description}
         primaryAction={{ href: "/booking", label: "Перейти к бронированию" }}
+        hideImage
       />
       <section className="section">
         <div className="container legal-content">

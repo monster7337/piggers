@@ -15,8 +15,8 @@ export default function GalleryPage() {
     <>
       <PageHero
         eyebrow="Галерея"
-        title="Атмосферные кадры, которые показывают Piggy Land лучше любого баннера"
-        description="Страница объединяет фильтры, адаптивную сетку, lazy-стиль показа и lightbox для спокойного просмотра."
+        title="Атмосферные кадры, после которых хочется приехать к нам в гости"
+        description="Здесь собраны теплые фотографии с минипигами, гостями и уютной атмосферой Piggy Land."
         primaryAction={{ href: "/booking", label: "Забронировать визит" }}
         secondaryAction={{ href: "/rates", label: "Тарифы" }}
         imagePosition="74% 50%"
