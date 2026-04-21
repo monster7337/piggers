@@ -27,22 +27,27 @@ import { stripBasePath } from "@/lib/base-path";
 import styles from "@/components/admin/admin.module.css";
 import {
   ADMIN_AUTH_KEY,
+  BOOKING_PREPAYMENT_PER_GUEST,
   FIXED_SLOT_TIMES,
-  SLOT_CAPACITY,
+  calculateExpectedPrepayment,
   accentThemes,
   canSaveInSlot,
+  extraOptions,
   formatCurrency,
   formatLongDate,
   formatShortDate,
   formatWeekday,
   getAppointmentEnd,
+  getExtrasSummary,
   getPaymentMethodLabel,
   getSlotCapacityState,
   getStatusMeta,
   getTariffPrice,
   getTariffSummary,
+  hasOnSitePayment,
   hasPrepayment,
   normalizeAppointment,
+  onSitePaymentMethodOptions,
   paymentMethodOptions,
   removeAdminStorage,
   resizeGuestTickets,
@@ -65,17 +70,17 @@ const pageMetaMap = {
   "/admin/dashboard": {
     eyebrow: "Тетрадь дня",
     title: "Сегодня",
-    description: "Нечетные часы, число гостей и заполненность каждого слота."
+    description: "Нечетные часы, число гостей, оплаты и включаемый резерв по каждому слоту."
   },
   "/admin/calendar": {
     eyebrow: "Планирование",
     title: "Календарь",
-    description: "Слоты 11, 13, 15, 17 и 19 для каждого дня."
+    description: "Слоты 11, 13, 15, 17 и 19 с 12 базовыми местами и резервом."
   },
   "/admin/appointments": {
     eyebrow: "Записи",
     title: "Все записи",
-    description: "Поиск, фильтры и редактирование бронирований."
+    description: "Поиск, фильтры и редактирование бронирований и продаж сертификатов."
   },
   "/admin/clients": {
     eyebrow: "Клиенты",
@@ -122,7 +127,7 @@ function EditorChoiceGroup({ compact = false, onChange, options, value }) {
 }
 
 function AppointmentEditorModal() {
-  const { appointments, closeEditor, editorState, saveAppointment } = useAdmin();
+  const { appointments, closeEditor, editorState, saveAppointment, settings } = useAdmin();
   const [draft, setDraft] = useState(null);
   const [error, setError] = useState("");
 
@@ -168,6 +173,19 @@ function AppointmentEditorModal() {
     );
   }
 
+  function toggleExtraSelection(extraId) {
+    setDraft((current) => {
+      const hasExtra = current.selectedExtras.some((item) => item.id === extraId);
+
+      return normalizeAppointment({
+        ...current,
+        selectedExtras: hasExtra
+          ? current.selectedExtras.filter((item) => item.id !== extraId)
+          : [...current.selectedExtras, { id: extraId, quantity: 1 }]
+      });
+    });
+  }
+
   function addGuestTicket() {
     setDraft((current) =>
       normalizeAppointment({
@@ -199,12 +217,17 @@ function AppointmentEditorModal() {
     }
 
     if (draft.prepaymentAmount > 0 && !draft.paymentMethod) {
-      setError("Укажите способ оплаты для внесённой суммы.");
+      setError("Укажите способ предоплаты.");
       return;
     }
 
-    if (!canSaveInSlot(appointments, draft)) {
-      const slotState = getSlotCapacityState(appointments, draft.date, draft.time, draft.id);
+    if (draft.onSitePaymentAmount > 0 && !draft.onSitePaymentMethod) {
+      setError("Укажите способ оплаты на месте.");
+      return;
+    }
+
+    if (!canSaveInSlot(appointments, settings, draft)) {
+      const slotState = getSlotCapacityState(appointments, settings, draft.date, draft.time, draft.id);
       setError(
         `На ${draft.time} уже ${slotState.bookedGuests} гостей. Можно добавить максимум ${slotState.remainingGuests}.`
       );
@@ -215,14 +238,15 @@ function AppointmentEditorModal() {
   }
 
   const selectedStatusMeta = getStatusMeta(draft.status);
-  const slotState = getSlotCapacityState(appointments, draft.date, draft.time, draft.id);
+  const slotState = getSlotCapacityState(appointments, settings, draft.date, draft.time, draft.id);
   const maxGuestsForDraft = slotState.remainingGuests + draft.guestCount;
+  const expectedPrepayment = calculateExpectedPrepayment(draft.guestCount, draft.totalAmount);
   const slotOptions = FIXED_SLOT_TIMES.map((time) => {
-    const state = getSlotCapacityState(appointments, draft.date, time, draft.id);
+    const state = getSlotCapacityState(appointments, settings, draft.date, time, draft.id);
     return {
       value: time,
       label: time,
-      hint: `${state.bookedGuests}/${SLOT_CAPACITY} гостей`,
+      hint: `${state.bookedGuests}/${state.totalCapacity} гостей`,
       tone: state.isFull ? "danger" : state.bookedGuests ? "success" : "default"
     };
   });
@@ -261,9 +285,14 @@ function AppointmentEditorModal() {
                 </span>
                 <span className={styles.detailHeroChip}>
                   <Users size={14} />
-                  Уже {slotState.bookedGuests}/{SLOT_CAPACITY}
+                  Уже {slotState.bookedGuests}/{slotState.totalCapacity}
                 </span>
-                <span className={styles.detailHeroChip}>{hasPrepayment(draft) ? "Предоплата внесена" : "Без предоплаты"}</span>
+                <span className={styles.detailHeroChip}>
+                  {hasPrepayment(draft) ? `На сайте ${formatCurrency(draft.prepaymentAmount)}` : "Без предоплаты"}
+                </span>
+                <span className={styles.detailHeroChip}>
+                  {hasOnSitePayment(draft) ? `На месте ${formatCurrency(draft.onSitePaymentAmount)}` : "На месте пока 0 ₽"}
+                </span>
                 <span className={styles.editorStatusBadge} data-tone={selectedStatusMeta.tone}>
                   {selectedStatusMeta.label}
                 </span>
@@ -304,7 +333,7 @@ function AppointmentEditorModal() {
               <div className={styles.editorSectionHeader}>
                 <div>
                   <p className={styles.editorSectionTitle}>Дата и час</p>
-                  <p className={styles.editorSectionNote}>Запись возможна только на нечетные часы ровно по началу часа.</p>
+                  <p className={styles.editorSectionNote}>12 мест открыты всегда, ещё 2 резервных места можно включать по одному.</p>
                 </div>
                 <div className={styles.editorSectionMeta}>
                   <span>Свободно</span>
@@ -398,13 +427,45 @@ function AppointmentEditorModal() {
               >
                 Добавить гостя
               </button>
+
+              <div className={styles.editorSubSection}>
+                <div className={styles.editorSectionHeader}>
+                  <div>
+                    <p className={styles.editorSectionTitle}>Дополнительные услуги</p>
+                    <p className={styles.editorSectionNote}>Если гость выбрал корм или бутылочку, сумма заказа обновится автоматически.</p>
+                  </div>
+                </div>
+                <div className={styles.extraOptionList}>
+                  {extraOptions.map((extra) => {
+                    const selected = draft.selectedExtras.some((item) => item.id === extra.id);
+
+                    return (
+                      <label key={extra.id} className={clsx(styles.extraOptionCard, selected && styles.extraOptionCardActive)}>
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => toggleExtraSelection(extra.id)}
+                        />
+                        <div>
+                          <strong>
+                            {extra.title} · {formatCurrency(extra.price)}
+                          </strong>
+                          <small>{extra.description}</small>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
             </section>
 
             <section className={styles.editorSection}>
               <div className={styles.editorSectionHeader}>
                 <div>
                   <p className={styles.editorSectionTitle}>Оплата</p>
-                  <p className={styles.editorSectionNote}>Фиксируйте, сколько уже внесли, каким способом и сколько осталось доплатить.</p>
+                  <p className={styles.editorSectionNote}>
+                    На сайте можно брать только предоплату {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за место. Остальное фиксируйте как оплату на месте.
+                  </p>
                 </div>
                 <div className={styles.editorSectionMeta}>
                   <span>Остаток</span>
@@ -418,28 +479,32 @@ function AppointmentEditorModal() {
                   <strong>{formatCurrency(draft.totalAmount)}</strong>
                 </div>
                 <div className={styles.paymentSummaryCard}>
-                  <span>Внесено</span>
+                  <span>Лимит предоплаты</span>
+                  <strong>{formatCurrency(expectedPrepayment)}</strong>
+                </div>
+                <div className={styles.paymentSummaryCard}>
+                  <span>На сайте</span>
                   <strong>{formatCurrency(draft.prepaymentAmount)}</strong>
+                </div>
+                <div className={styles.paymentSummaryCard}>
+                  <span>На месте</span>
+                  <strong>{formatCurrency(draft.onSitePaymentAmount)}</strong>
                 </div>
                 <div className={styles.paymentSummaryCard}>
                   <span>Осталось</span>
                   <strong>{formatCurrency(draft.remainingAmount)}</strong>
-                </div>
-                <div className={styles.paymentSummaryCard}>
-                  <span>Предоплата</span>
-                  <strong>{hasPrepayment(draft) ? "Есть" : "Нет"}</strong>
                 </div>
               </div>
 
               <div className={styles.editorFieldGrid}>
                 <label className={clsx(styles.field, styles.settingField, styles.editorFieldCard)}>
                   <div className={styles.editorFieldHeader}>
-                    <span>Сколько внесли</span>
-                    <small>Можно указать предоплату или полную оплату</small>
+                    <span>Предоплата онлайн</span>
+                    <small>Не больше {formatCurrency(expectedPrepayment)} по правилу 500 ₽ за гостя</small>
                   </div>
                   <input
                     min="0"
-                    max={draft.totalAmount}
+                    max={expectedPrepayment}
                     type="number"
                     value={draft.prepaymentAmount}
                     onChange={(event) => updateField("prepaymentAmount", event.target.value)}
@@ -448,8 +513,8 @@ function AppointmentEditorModal() {
 
                 <div className={clsx(styles.settingField, styles.editorFieldCard, styles.paymentMethodBlock)}>
                   <div className={styles.editorFieldHeader}>
-                    <span>Способ оплаты</span>
-                    <small>{draft.prepaymentAmount > 0 ? "Как внесли деньги" : "Станет доступно после внесения суммы"}</small>
+                    <span>Как внесли предоплату</span>
+                    <small>{draft.prepaymentAmount > 0 ? "На сайте или вручную" : "Станет доступно после внесения суммы"}</small>
                   </div>
                   {draft.prepaymentAmount > 0 ? (
                     <EditorChoiceGroup
@@ -463,6 +528,40 @@ function AppointmentEditorModal() {
                     />
                   ) : (
                     <div className={styles.paymentMethodPlaceholder}>Сначала укажите внесённую сумму.</div>
+                  )}
+                </div>
+
+                <label className={clsx(styles.field, styles.settingField, styles.editorFieldCard)}>
+                  <div className={styles.editorFieldHeader}>
+                    <span>Оплачено на месте</span>
+                    <small>Сколько администратор уже приняла при визите</small>
+                  </div>
+                  <input
+                    min="0"
+                    max={Math.max(0, draft.totalAmount - draft.prepaymentAmount)}
+                    type="number"
+                    value={draft.onSitePaymentAmount}
+                    onChange={(event) => updateField("onSitePaymentAmount", event.target.value)}
+                  />
+                </label>
+
+                <div className={clsx(styles.settingField, styles.editorFieldCard, styles.paymentMethodBlock)}>
+                  <div className={styles.editorFieldHeader}>
+                    <span>Способ оплаты на месте</span>
+                    <small>{draft.onSitePaymentAmount > 0 ? "Наличные, безнал, QR и т.д." : "Станет доступно после внесения суммы"}</small>
+                  </div>
+                  {draft.onSitePaymentAmount > 0 ? (
+                    <EditorChoiceGroup
+                      compact
+                      options={onSitePaymentMethodOptions.map((method) => ({
+                        value: method.value,
+                        label: method.label
+                      }))}
+                      value={draft.onSitePaymentMethod}
+                      onChange={(value) => updateField("onSitePaymentMethod", value)}
+                    />
+                  ) : (
+                    <div className={styles.paymentMethodPlaceholder}>Сначала укажите сумму оплаты на месте.</div>
                   )}
                 </div>
               </div>
@@ -547,7 +646,7 @@ function AppointmentEditorModal() {
 }
 
 function AppointmentDetailsModal() {
-  const { appointments, closeDetails, deleteAppointment, openEditModal, selectedAppointment, updateAppointmentStatus } = useAdmin();
+  const { appointments, closeDetails, deleteAppointment, openEditModal, selectedAppointment, settings, updateAppointmentStatus } = useAdmin();
 
   const telLink = useMemo(
     () => (selectedAppointment?.phone ? `tel:${selectedAppointment.phone.replace(/[^\d+]/g, "")}` : "#"),
@@ -558,7 +657,7 @@ function AppointmentDetailsModal() {
     return null;
   }
 
-  const slotState = getSlotCapacityState(appointments, selectedAppointment.date, selectedAppointment.time);
+  const slotState = getSlotCapacityState(appointments, settings, selectedAppointment.date, selectedAppointment.time);
 
   return (
     <div className={styles.modalBackdrop} onClick={closeDetails}>
@@ -647,7 +746,14 @@ function AppointmentDetailsModal() {
                   <Users size={14} />
                   {selectedAppointment.guestCount} чел.
                 </span>
-                <span className={styles.detailMiniItem}>{hasPrepayment(selectedAppointment) ? "Предоплата внесена" : "Предоплаты нет"}</span>
+                <span className={styles.detailMiniItem}>
+                  {hasPrepayment(selectedAppointment) ? `Сайт ${formatCurrency(selectedAppointment.prepaymentAmount)}` : "Предоплаты нет"}
+                </span>
+                <span className={styles.detailMiniItem}>
+                  {hasOnSitePayment(selectedAppointment)
+                    ? `На месте ${formatCurrency(selectedAppointment.onSitePaymentAmount)}`
+                    : "На месте пока 0 ₽"}
+                </span>
               </div>
             </div>
 
@@ -664,7 +770,7 @@ function AppointmentDetailsModal() {
               </div>
               <div className={styles.detailCard}>
                 <span>В этом часу</span>
-                <strong>{slotState.bookedGuests}/{SLOT_CAPACITY} гостей</strong>
+                <strong>{slotState.bookedGuests}/{slotState.totalCapacity} гостей</strong>
               </div>
               <div className={styles.detailCard}>
                 <span>Источник</span>
@@ -675,12 +781,20 @@ function AppointmentDetailsModal() {
                 <strong>{formatCurrency(selectedAppointment.totalAmount)}</strong>
               </div>
               <div className={styles.detailCard}>
-                <span>Внесено</span>
+                <span>На сайте</span>
                 <strong>{formatCurrency(selectedAppointment.prepaymentAmount)}</strong>
               </div>
               <div className={styles.detailCard}>
-                <span>Способ оплаты</span>
+                <span>Как внесли предоплату</span>
                 <strong>{getPaymentMethodLabel(selectedAppointment.paymentMethod)}</strong>
+              </div>
+              <div className={styles.detailCard}>
+                <span>На месте</span>
+                <strong>{formatCurrency(selectedAppointment.onSitePaymentAmount)}</strong>
+              </div>
+              <div className={styles.detailCard}>
+                <span>Способ оплаты на месте</span>
+                <strong>{getPaymentMethodLabel(selectedAppointment.onSitePaymentMethod)}</strong>
               </div>
               <div className={styles.detailCard}>
                 <span>Осталось оплатить</span>
@@ -689,6 +803,10 @@ function AppointmentDetailsModal() {
               <div className={styles.detailCard}>
                 <span>Свободно мест</span>
                 <strong>{slotState.remainingGuests}</strong>
+              </div>
+              <div className={styles.detailCard}>
+                <span>Допы</span>
+                <strong>{getExtrasSummary(selectedAppointment)}</strong>
               </div>
               <div className={styles.detailCard}>
                 <span>Создана</span>
@@ -705,7 +823,7 @@ function AppointmentDetailsModal() {
             <div className={styles.noteCard}>
               <span className={styles.noteCardTitle}>
                 <Users size={16} />
-                Гости и тарифы
+                Гости, тарифы и допы
               </span>
               <div className={styles.detailBreakdownList}>
                 {selectedAppointment.guestTickets.map((ticket, index) => (
@@ -713,6 +831,15 @@ function AppointmentDetailsModal() {
                     <span>Гость {index + 1}</span>
                     <strong>
                       {ticket.tariff} · {formatCurrency(getTariffPrice(ticket.tariff))}
+                    </strong>
+                  </div>
+                ))}
+                {selectedAppointment.selectedExtras.map((extra) => (
+                  <div key={extra.id} className={styles.detailBreakdownRow}>
+                    <span>{extraOptions.find((item) => item.id === extra.id)?.title ?? extra.id}</span>
+                    <strong>
+                      {extra.quantity > 1 ? `${extra.quantity} × ` : ""}
+                      {formatCurrency((extraOptions.find((item) => item.id === extra.id)?.price ?? 0) * extra.quantity)}
                     </strong>
                   </div>
                 ))}
@@ -816,7 +943,7 @@ export function AdminShell({ children }) {
           <div className={styles.sidebarInfoCard}>
             <span>Часы записи</span>
             <strong>{FIXED_SLOT_TIMES.join(" · ")}</strong>
-            <small>Выбранный день: {formatWeekday(selectedDate)}, {formatShortDate(selectedDate)}</small>
+            <small>Выбранный день: {formatWeekday(selectedDate)}, {formatShortDate(selectedDate)} · 12 + 2 резерв</small>
           </div>
           <a className={styles.ghostButton} href={otherCrmUrl}>
             <ChevronRight size={16} />

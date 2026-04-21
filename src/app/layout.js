@@ -64,6 +64,7 @@ export default function RootLayout({ children }) {
   const assetStyles = {
     "--journey-progress-image": `url("${withBasePath("/images/progress.png")}")`,
     "--experience-family-image": `url("${withBasePath("/images/familyandpigs2.png")}")`,
+    "--piggies-section-image": `url("${withBasePath("/images/piggersfon.png")}")`,
     "--gallery-section-image": `url("${withBasePath("/images/piggers.png")}")`,
     "--reviews-section-image": `url("${withBasePath("/images/otziv.png")}")`,
     "--faq-section-image": `url("${withBasePath("/images/faq.png")}")`

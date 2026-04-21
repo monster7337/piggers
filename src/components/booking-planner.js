@@ -6,6 +6,7 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  ArrowUpRight,
   CalendarDays,
   Check,
   CircleAlert,
@@ -14,24 +15,41 @@ import {
   Info,
   Minus,
   Plus,
-  ArrowUpRight,
   ShoppingBag
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import {
+  BOOKING_PREPAYMENT_PER_GUEST,
+  FIXED_SLOT_TIMES,
+  calculateExpectedPrepayment,
+  defaultSettings,
+  formatCurrency,
+  getSlotCapacityState,
+  readStoredAppointments,
+  readStoredSettings,
+  savePublicBooking
+} from "@/components/admin/admin-data";
 import { alternativeProject, extras, rates } from "@/lib/site-data";
 
 const bookingSteps = ["Билеты", "Дата", "Время", "Услуги", "Контакты", "Подтверждение"];
 const bookingStepNotes = [
-  "Выберите билет",
+  "Выберите билеты",
   "Найдите удобный день",
   "Выберите удобное время",
   "Добавьте приятные детали",
   "Оставьте контакты",
-  "Проверьте все перед записью"
+  "Проверьте предоплату и остаток"
 ];
+
+const siteRateToTariffMap = {
+  standard: "Обычный билет",
+  family: "Семейный билет",
+  social: "Льготный билет",
+  "happy-hour": "Счастливый час"
+};
 
 const contactSchema = z.object({
   name: z.string().min(2, "Введите имя"),
@@ -43,8 +61,19 @@ const contactSchema = z.object({
   comment: z.string().max(240, "Комментарий не должен превышать 240 символов").optional()
 });
 
-function formatCurrency(value) {
-  return `${value.toLocaleString("ru-RU")} ₽`;
+function createGuestTickets(selectedTickets) {
+  return selectedTickets.flatMap((item) =>
+    Array.from({ length: item.quantity }, () => ({
+      tariff: siteRateToTariffMap[item.id] ?? "Обычный билет"
+    }))
+  );
+}
+
+function getStorageSnapshot() {
+  return {
+    appointments: readStoredAppointments(),
+    settings: readStoredSettings() ?? defaultSettings
+  };
 }
 
 export function BookingPlanner({ initialRate }) {
@@ -59,6 +88,10 @@ export function BookingPlanner({ initialRate }) {
   const [selectedServiceQuantities, setSelectedServiceQuantities] = useState({});
   const [activeInfoRateId, setActiveInfoRateId] = useState(initialRate || null);
   const [stepError, setStepError] = useState("");
+  const [storageSnapshot, setStorageSnapshot] = useState(() => ({
+    appointments: [],
+    settings: defaultSettings
+  }));
 
   const {
     register,
@@ -77,17 +110,70 @@ export function BookingPlanner({ initialRate }) {
     mode: "onBlur"
   });
 
+  useEffect(() => {
+    setStorageSnapshot(getStorageSnapshot());
+
+    function handleStorage() {
+      setStorageSnapshot(getStorageSnapshot());
+    }
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const selectedTickets = useMemo(
+    () =>
+      rates
+        .map((rate) => ({
+          ...rate,
+          quantity: selectedRateQuantities[rate.id] || 0
+        }))
+        .filter((rate) => rate.quantity > 0),
+    [selectedRateQuantities]
+  );
+
+  const selectedServices = useMemo(
+    () =>
+      extras
+        .filter((service) => selectedServiceQuantities[service.id])
+        .map((service) => ({
+          ...service,
+          quantity: 1
+        })),
+    [selectedServiceQuantities]
+  );
+
+  const guestTickets = useMemo(() => createGuestTickets(selectedTickets), [selectedTickets]);
+  const selectedExtraItems = useMemo(
+    () => selectedServices.map((item) => ({ id: item.id, quantity: item.quantity })),
+    [selectedServices]
+  );
+
+  const ticketsTotal = selectedTickets.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const servicesTotal = selectedServices.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalTicketsCount = selectedTickets.reduce((sum, item) => sum + item.quantity, 0);
+  const total = ticketsTotal + servicesTotal;
+  const prepaymentNow = totalTicketsCount ? calculateExpectedPrepayment(totalTicketsCount, total) : 0;
+  const remainingOnSite = Math.max(0, total - prepaymentNow);
+  const values = getValues();
+
   const calendarDays = useMemo(
     () =>
       Array.from({ length: 12 }, (_, index) => {
         const date = addDays(new Date(), index);
+        const dateKey = format(date, "yyyy-MM-dd");
+        const availableSlots = FIXED_SLOT_TIMES.filter((time) => {
+          const state = getSlotCapacityState(storageSnapshot.appointments, storageSnapshot.settings, dateKey, time);
+          return state.remainingGuests >= Math.max(1, totalTicketsCount);
+        }).length;
 
         return {
           date,
-          soldOut: index === 4 || index === 9
+          soldOut: availableSlots === 0,
+          availableSlots
         };
       }),
-    []
+    [storageSnapshot.appointments, storageSnapshot.settings, totalTicketsCount]
   );
 
   const timeSlots = useMemo(() => {
@@ -95,48 +181,43 @@ export function BookingPlanner({ initialRate }) {
       return [];
     }
 
-    const dayIndex = calendarDays.findIndex(
-      (item) => format(item.date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
-    );
-    const baseSlots = ["11:00", "13:00", "15:00", "17:00", "18:00", "19:00"];
+    const dateKey = format(selectedDate, "yyyy-MM-dd");
+    return FIXED_SLOT_TIMES.map((time) => {
+      const state = getSlotCapacityState(storageSnapshot.appointments, storageSnapshot.settings, dateKey, time);
 
-    return baseSlots.map((time, index) => ({
-      time,
-      disabled: calendarDays[dayIndex]?.soldOut || (dayIndex + index) % 5 === 0
-    }));
-  }, [calendarDays, selectedDate]);
+      return {
+        time,
+        remainingGuests: state.remainingGuests,
+        disabled: state.remainingGuests < Math.max(1, totalTicketsCount),
+        totalCapacity: state.totalCapacity
+      };
+    });
+  }, [selectedDate, storageSnapshot.appointments, storageSnapshot.settings, totalTicketsCount]);
+
+  useEffect(() => {
+    if (!selectedDate || !selectedTime) {
+      return;
+    }
+
+    const dateKey = format(selectedDate, "yyyy-MM-dd");
+    const state = getSlotCapacityState(storageSnapshot.appointments, storageSnapshot.settings, dateKey, selectedTime);
+
+    if (state.remainingGuests < Math.max(1, totalTicketsCount)) {
+      setSelectedTime("");
+    }
+  }, [selectedDate, selectedTime, storageSnapshot.appointments, storageSnapshot.settings, totalTicketsCount]);
 
   const hasSoldOutDates = calendarDays.some((item) => item.soldOut);
   const hasUnavailableTimeSlots = timeSlots.some((slot) => slot.disabled);
   const hasAvailableTimeSlots = timeSlots.some((slot) => !slot.disabled);
-
-  const selectedTickets = rates
-    .map((rate) => ({
-      ...rate,
-      quantity: selectedRateQuantities[rate.id] || 0
-    }))
-    .filter((rate) => rate.quantity > 0);
-
-  const selectedServices = extras
-    .filter((service) => selectedServiceQuantities[service.id])
-    .map((service) => ({
-      ...service,
-      quantity: 1
-    }));
-
-  const ticketsTotal = selectedTickets.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const servicesTotal = selectedServices.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalTicketsCount = selectedTickets.reduce((sum, item) => sum + item.quantity, 0);
-  const total = ticketsTotal + servicesTotal;
-  const values = getValues();
   const selectedDateLabel = selectedDate ? format(selectedDate, "d MMM", { locale: ru }) : "Выберите";
   const selectedTimeLabel = selectedTime || "Выберите";
   const mobileSelectionNote =
     totalTicketsCount > 0
-      ? `${totalTicketsCount} билет${totalTicketsCount > 1 ? "а" : ""} · ${selectedDate ? selectedDateLabel : "без даты"}`
+      ? `${totalTicketsCount} мест · предоплата ${formatCurrency(prepaymentNow)}`
       : "Соберите визит по шагам";
 
-  const updateRateQuantity = (id, delta) => {
+  function updateRateQuantity(id, delta) {
     setSelectedRateQuantities((current) => {
       const nextQuantity = Math.max(0, (current[id] || 0) + delta);
       const next = { ...current };
@@ -149,9 +230,9 @@ export function BookingPlanner({ initialRate }) {
 
       return next;
     });
-  };
+  }
 
-  const toggleServiceSelection = (id) => {
+  function toggleServiceSelection(id) {
     setSelectedServiceQuantities((current) => {
       const next = { ...current };
 
@@ -163,9 +244,9 @@ export function BookingPlanner({ initialRate }) {
 
       return next;
     });
-  };
+  }
 
-  const goToStep = async (nextStep) => {
+  async function goToStep(nextStep) {
     setStepError("");
 
     if (nextStep <= step) {
@@ -198,21 +279,46 @@ export function BookingPlanner({ initialRate }) {
     }
 
     setStep(nextStep);
-  };
+  }
 
-  const submitBooking = handleSubmit((formValues) => {
-    const params = new URLSearchParams({
-      items: selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", "),
-      services: selectedServices.map((item) => item.title).join(", "),
-      date: selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: ru }) : "",
-      time: selectedTime,
-      tickets: String(totalTicketsCount),
-      total: formatCurrency(total),
-      name: formValues.name,
-      phone: formValues.phone
-    });
+  const submitBooking = handleSubmit(async (formValues) => {
+    const dateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
 
-    router.push(`/booking/success?${params.toString()}`);
+    try {
+      const appointment = savePublicBooking({
+        clientName: formValues.name,
+        phone: formValues.phone,
+        email: formValues.email,
+        date: dateKey,
+        time: selectedTime,
+        guestTickets,
+        selectedExtras: selectedExtraItems,
+        comment: formValues.comment
+      });
+
+      setStorageSnapshot(getStorageSnapshot());
+
+      const params = new URLSearchParams({
+        type: "booking",
+        bookingId: appointment.id,
+        items: selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", "),
+        services: selectedServices.map((item) => item.title).join(", "),
+        date: selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: ru }) : "",
+        time: selectedTime,
+        tickets: String(totalTicketsCount),
+        total: formatCurrency(total),
+        prepayment: formatCurrency(appointment.prepaymentAmount),
+        remaining: formatCurrency(appointment.remainingAmount),
+        name: formValues.name,
+        phone: formValues.phone
+      });
+
+      router.push(`/booking/success?${params.toString()}`);
+    } catch (error) {
+      setStorageSnapshot(getStorageSnapshot());
+      setStep(2);
+      setStepError(error instanceof Error ? error.message : "Не удалось завершить бронирование.");
+    }
   });
 
   return (
@@ -245,8 +351,8 @@ export function BookingPlanner({ initialRate }) {
               <strong>{selectedTimeLabel}</strong>
             </div>
             <div className="booking-mobile-overview-item booking-mobile-overview-item-accent">
-              <span>Итог</span>
-              <strong>{formatCurrency(total)}</strong>
+              <span>Сейчас</span>
+              <strong>{formatCurrency(prepaymentNow)}</strong>
             </div>
           </div>
         </div>
@@ -290,7 +396,7 @@ export function BookingPlanner({ initialRate }) {
                       <article key={rate.id} className={clsx("card ticket-card", quantity > 0 && "selected")}>
                         <div className="ticket-card-header">
                           <div className="ticket-price-group">
-                            <strong>{formatCurrency(rate.price)} / час</strong>
+                            <strong>{formatCurrency(rate.price)} / билет</strong>
                             {rate.oldPrice ? (
                               <div className="ticket-old-row">
                                 <span className="old-price">{formatCurrency(rate.oldPrice)}</span>
@@ -322,30 +428,18 @@ export function BookingPlanner({ initialRate }) {
 
                         <div className="ticket-footer">
                           {quantity === 0 ? (
-                            <button
-                              type="button"
-                              className="button button-primary"
-                              onClick={() => updateRateQuantity(rate.id, 1)}
-                            >
+                            <button type="button" className="button button-primary" onClick={() => updateRateQuantity(rate.id, 1)}>
                               Выбрать
                             </button>
                           ) : (
                             <div className="selection-state">
                               <span className="selected-state-pill">Выбрано</span>
                               <div className="quantity-stepper">
-                                <button
-                                  type="button"
-                                  className="counter-button"
-                                  onClick={() => updateRateQuantity(rate.id, -1)}
-                                >
+                                <button type="button" className="counter-button" onClick={() => updateRateQuantity(rate.id, -1)}>
                                   <Minus size={18} />
                                 </button>
                                 <strong>Сейчас выбран {quantity}</strong>
-                                <button
-                                  type="button"
-                                  className="counter-button"
-                                  onClick={() => updateRateQuantity(rate.id, 1)}
-                                >
+                                <button type="button" className="counter-button" onClick={() => updateRateQuantity(rate.id, 1)}>
                                   <Plus size={18} />
                                 </button>
                               </div>
@@ -381,7 +475,7 @@ export function BookingPlanner({ initialRate }) {
                       >
                         <span>{format(item.date, "EEE", { locale: ru })}</span>
                         <strong>{format(item.date, "d MMM", { locale: ru })}</strong>
-                        <small>{item.soldOut ? "Нет мест" : "Есть время"}</small>
+                        <small>{item.soldOut ? "Нет мест" : `${item.availableSlots} интервала доступно`}</small>
                       </button>
                     );
                   })}
@@ -427,7 +521,7 @@ export function BookingPlanner({ initialRate }) {
                         >
                           <Clock3 size={16} />
                           <span>{slot.time}</span>
-                          <small>{slot.disabled ? "Недоступно" : "Свободно"}</small>
+                          <small>{slot.disabled ? "Недостаточно мест" : `Свободно ${slot.remainingGuests}`}</small>
                         </button>
                       ))}
                     </div>
@@ -435,7 +529,9 @@ export function BookingPlanner({ initialRate }) {
                     {hasUnavailableTimeSlots ? (
                       <div className={clsx("booking-detour-card", !hasAvailableTimeSlots && "sold-out")}>
                         <div className="booking-detour-copy">
-                          <span className="booking-detour-badge">{hasAvailableTimeSlots ? "Если это время занято" : "Свободного времени нет"}</span>
+                          <span className="booking-detour-badge">
+                            {hasAvailableTimeSlots ? "Если это время занято" : "Свободного времени нет"}
+                          </span>
                           <h3>{alternativeProject.timeTitle}</h3>
                           <p>{alternativeProject.timeDescription}</p>
                         </div>
@@ -482,11 +578,7 @@ export function BookingPlanner({ initialRate }) {
                         <p>{item.description}</p>
                         <div className="ticket-footer">
                           {quantity === 0 ? (
-                            <button
-                              type="button"
-                              className="button button-primary"
-                              onClick={() => toggleServiceSelection(item.id)}
-                            >
+                            <button type="button" className="button button-primary" onClick={() => toggleServiceSelection(item.id)}>
                               Выбрать
                             </button>
                           ) : (
@@ -562,11 +654,7 @@ export function BookingPlanner({ initialRate }) {
                     </div>
                     <div>
                       <span>Услуги</span>
-                      <strong>
-                        {selectedServices.length
-                          ? selectedServices.map((item) => item.title).join(", ")
-                          : "Без дополнительных услуг"}
-                      </strong>
+                      <strong>{selectedServices.length ? selectedServices.map((item) => item.title).join(", ") : "Без допов"}</strong>
                     </div>
                     <div>
                       <span>Имя</span>
@@ -576,12 +664,21 @@ export function BookingPlanner({ initialRate }) {
                       <span>Телефон</span>
                       <strong>{values.phone || "Не указан"}</strong>
                     </div>
+                    <div>
+                      <span>Предоплата сейчас</span>
+                      <strong>{formatCurrency(prepaymentNow)}</strong>
+                    </div>
+                    <div>
+                      <span>Остаток на месте</span>
+                      <strong>{formatCurrency(remainingOnSite)}</strong>
+                    </div>
                   </div>
 
                   <div className="status-inline success">
                     <CreditCard size={18} />
                     <span>
-                      Проверьте все детали перед завершением. Онлайн-оплату мы добавим чуть позже.
+                      На сайте оплачивается только предоплата: {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждое место.
+                      Остаток {formatCurrency(remainingOnSite)} администратор отметит в CRM при оплате на месте.
                     </span>
                   </div>
                 </div>
@@ -598,7 +695,7 @@ export function BookingPlanner({ initialRate }) {
             <div className="step-actions">
               <div className="booking-mobile-action-meta">
                 <span>{mobileSelectionNote}</span>
-                <strong>{formatCurrency(total)}</strong>
+                <strong>{formatCurrency(prepaymentNow)}</strong>
               </div>
 
               <button
@@ -689,16 +786,31 @@ export function BookingPlanner({ initialRate }) {
                 </div>
               )}
             </div>
+
+            <div className="summary-group">
+              <span className="summary-group-title">
+                <CreditCard size={16} />
+                Оплата
+              </span>
+              <div className="summary-row">
+                <span>Полная стоимость</span>
+                <strong>{formatCurrency(total)}</strong>
+              </div>
+              <div className="summary-row">
+                <span>Предоплата сейчас</span>
+                <strong>{formatCurrency(prepaymentNow)}</strong>
+              </div>
+              <div className="summary-row">
+                <span>Оплата на месте</span>
+                <strong>{formatCurrency(remainingOnSite)}</strong>
+              </div>
+            </div>
           </div>
 
-          <div className="summary-total">
-            <span>Итоговая сумма</span>
-            <strong>{formatCurrency(total)}</strong>
+          <div className="status-inline success">
+            <CreditCard size={18} />
+            <span>Бронь фиксируется после предоплаты {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждого гостя.</span>
           </div>
-
-          <p className="muted-text">
-            Здесь можно выбрать несколько билетов и добавить приятные мелочи к визиту.
-          </p>
         </div>
       </aside>
     </div>

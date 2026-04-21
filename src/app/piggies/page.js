@@ -27,7 +27,7 @@ export default function PiggiesPage() {
           <SectionHeading
             eyebrow="Жители пространства"
             title="Каждый минипиг со своим темпераментом, привычками и настроением"
-            description="Здесь только знакомство, теплые детали и любимые привычки наших жителей."
+            description="Здесь собраны все наши минипиги: характер, любимые привычки и теплые детали о каждом."
           />
           <div className="card-grid card-grid-3">
             {piggies.map((piggy) => (

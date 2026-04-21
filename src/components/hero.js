@@ -1,11 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
-import { heroHighlights } from "@/lib/site-data";
+
+const heroBenefits = [
+  "11 мини и микро пигов разных пород и возрастов",
+  "чай, кофе и сладости входят в стоимость",
+  "животные имеют все необходимые прививки",
+  "инструктаж по технике безопасности",
+  "санитарный час перед каждым интервалом",
+  "яркие фотолокации",
+  "аренда залов под мероприятия"
+];
 
 export function Hero() {
   return (
@@ -29,12 +37,12 @@ export function Hero() {
           transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
         >
           <motion.span
-            className="eyebrow"
+            className="eyebrow hero-badge"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Работаем по предварительной записи
+            РАБОТАЕМ ПО ПРЕДВАРИТЕЛЬНОЙ ЗАПИСИ
           </motion.span>
           <motion.h1
             className="hero-title"
@@ -43,26 +51,28 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.05 }}
           >
             Piggy Land
-            <span className="hero-title-desktop">Антикафе с минипигами в Санкт-Петербурге, куда хочется возвращаться за теплом и живым отдыхом.</span>
           </motion.h1>
           <motion.p
-            className="hero-copy-text hero-copy-text-desktop"
+            className="hero-subtitle"
             initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            Приглашаем в гости к нашим мини и микро пигам: вас ждут 11 свинок, красочные
-            фотолокации, чайная комната со вкусняшками и уютные визиты для дня рождения, девичника,
-            корпоратива или романтического вечера.
+            Антикафе с минипигами в Санкт-Петербурге, где можно провести время с милыми и дружелюбными минипигами.
           </motion.p>
-          <motion.p
-            className="hero-copy-text hero-copy-text-mobile"
+          <motion.div
+            className="hero-description"
             initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.12 }}
+            transition={{ duration: 0.6, delay: 0.18 }}
           >
-            Познакомьтесь с минипигами, посмотрите цены и выберите удобное время для теплого визита.
-          </motion.p>
+            <p className="hero-copy-text">
+              Здесь вы можете гладить, кормить и играть с минипигами, а также делать с ними фотографии.
+            </p>
+            <p className="hero-copy-text">
+              Кроме того, гостей ждут чай, кофе и сладости, которые входят в стоимость посещения.
+            </p>
+          </motion.div>
 
           <motion.div
             className="hero-highlights"
@@ -78,7 +88,7 @@ export function Hero() {
               }
             }}
           >
-            {heroHighlights.map((item) => (
+            {heroBenefits.map((item) => (
               <motion.span
                 key={item}
                 className="highlight-pill"
@@ -98,12 +108,11 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.28 }}
           >
-            <Link className="button button-primary" href="/booking">
-              Забронировать сеанс
+            <Link className="button button-primary hero-primary-cta" href="/booking">
+              Забронировать посещение
             </Link>
-            <Link className="button button-secondary" href="/#rates">
+            <Link className="button button-secondary hero-secondary-cta" href="/#rates">
               Посмотреть тарифы
-              <ArrowRight size={18} />
             </Link>
           </motion.div>
         </motion.div>

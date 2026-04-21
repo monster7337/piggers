@@ -4,8 +4,8 @@ import { BookingSuccessSummary } from "@/components/booking-success-summary";
 import { PageHero } from "@/components/page-hero";
 
 export const metadata = {
-  title: "Подтверждение брони",
-  description: "Страница успешного подтверждения бронирования Piggy Land с составом заказа и деталями визита."
+  title: "Оформление завершено",
+  description: "Страница подтверждения брони или успешно оплаченного подарочного сертификата Piggy Land."
 };
 
 function BookingSuccessFallback() {
@@ -14,7 +14,7 @@ function BookingSuccessFallback() {
       <div className="success-icon">
         <CheckCircle2 size={28} />
       </div>
-      <h2>Подтверждение брони</h2>
+      <h2>Оформление завершено</h2>
       <p className="section-copy">
         Спасибо за запись. Если планы изменятся, свяжитесь с нами заранее по телефону или через VK, чтобы перенести визит.
       </p>
@@ -45,9 +45,9 @@ export default function BookingSuccessPage() {
   return (
     <>
       <PageHero
-        eyebrow="Бронь подтверждена"
-        title="Спасибо, ваш теплый визит в Piggy Land забронирован"
-        description="После успешного оформления гость видит номер брони, состав заказа, дату, время визита и контактные данные."
+        eyebrow="Оформление завершено"
+        title="Заказ принят и сразу попал в CRM"
+        description="После оформления гость видит номер брони или заказа, оплату, дату, время и контактные данные."
         primaryAction={{ href: "/", label: "Вернуться на главную" }}
         secondaryAction={{ href: "/booking", label: "Оформить еще одну бронь" }}
         hideImage

@@ -1893,6 +1893,42 @@
   background: rgba(255, 255, 255, 0.025);
 }
 
+.extraOptionList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.extraOptionCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.extraOptionCard input {
+  margin-top: 4px;
+}
+
+.extraOptionCard div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.extraOptionCard small {
+  color: var(--admin-muted);
+  line-height: 1.5;
+}
+
+.extraOptionCardActive {
+  border-color: rgba(80, 210, 255, 0.28);
+  background: rgba(80, 210, 255, 0.08);
+}
+
 .editorTextarea {
   min-height: 124px;
 }
@@ -2077,6 +2113,112 @@
 .detailBreakdownRow:first-child {
   padding-top: 0;
   border-top: 0;
+}
+
+.reserveControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.reserveMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reserveMeta span {
+  color: var(--admin-muted);
+  font-size: 0.82rem;
+}
+
+.reserveButtons {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.reserveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--admin-text);
+}
+
+.reserveButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.reportGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.reportCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.reportTitle {
+  color: var(--admin-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.reportList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reportListItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.reportListItem:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.reportListItem span,
+.reportListItem small,
+.reportEmpty {
+  color: var(--admin-muted);
+}
+
+.reportListItem strong {
+  color: var(--admin-text);
+}
+
+@media (max-width: 900px) {
+  .extraOptionList {
+    grid-template-columns: 1fr;
+  }
+
+  .reserveControls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .detailBreakdownRow span {

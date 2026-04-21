@@ -1,4 +1,4 @@
-import { ArrowUpRight, Clock3 } from "lucide-react";
+import { Clock3 } from "lucide-react";
 import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
 
@@ -35,7 +35,6 @@ export function RateCard({ rate }) {
 
         <Link className="button button-secondary button-block" href={`/booking?rate=${rate.id}`}>
           Выбрать
-          <ArrowUpRight size={18} />
         </Link>
       </div>
     </article>

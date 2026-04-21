@@ -103,11 +103,22 @@ export default function HomePage() {
         </div>
       </AnimatedSection>
 
+      <AnimatedSection id="piggies" className="section-muted">
+        <div className="container">
+          <SectionHeading
+            eyebrow="Наши минипиги"
+            title="Познакомьтесь с нашими минипигами поближе"
+            description="В разделе показываем самых заметных жителей, а по кнопке можно открыть галерею всех минипигов и перейти в подробную карточку каждого."
+          />
+          <PiggyBrowser piggies={piggies} previewCount={6} />
+        </div>
+      </AnimatedSection>
+
       <AnimatedSection className="journey-section">
         <div className="container">
           <SectionHeading
             eyebrow="Как проходит визит"
-            title="Путь гостя от интереса до теплого часа с минипигами"
+            title="Путь гостя от интереса до незабываемого часа с минипигами"
             description="Все просто: выберите билет, день и время, а дальше мы будем ждать вас в гости."
           />
           <VisitJourney steps={visitSteps} />
@@ -139,17 +150,6 @@ export default function HomePage() {
               );
             })}
           </div>
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection id="piggies" className="section-muted">
-        <div className="container">
-          <SectionHeading
-            eyebrow="Наши минипиги"
-            title="Познакомьтесь с нашими минипигами поближе"
-            description="У каждого свой характер, привычки и любимые занятия. Нажмите на карточку и узнайте больше."
-          />
-          <PiggyBrowser piggies={piggies} mobilePreviewCount={4} />
         </div>
       </AnimatedSection>
 

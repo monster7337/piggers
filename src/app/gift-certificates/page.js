@@ -1,6 +1,7 @@
 import { Gift, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { AnimatedSection } from "@/components/animated-section";
+import { GiftCertificateOrderForm } from "@/components/gift-certificate-order-form";
 import { PageHero } from "@/components/page-hero";
 import { SectionHeading } from "@/components/section-heading";
 import { giftCertificates } from "@/lib/site-data";
@@ -22,8 +23,8 @@ export default function GiftCertificatesPage() {
       <PageHero
         eyebrow="Подарочные сертификаты"
         title="Подарок, который запоминается как теплое впечатление, а не как еще одна вещь"
-        description="Выберите сертификат, добавьте имя получателя и подарите теплый визит к минипигам."
-        primaryAction={{ href: "/booking", label: "Забронировать визит" }}
+        description="Выберите сертификат, заполните анкету для получателя и оплатите его полностью прямо на сайте."
+        primaryAction={{ href: "#gift-order", label: "Оформить сертификат" }}
         secondaryAction={{ href: "/rates", label: "Посмотреть тарифы" }}
       />
 
@@ -72,12 +73,14 @@ export default function GiftCertificatesPage() {
             })}
           </div>
           <div className="section-actions">
-            <Link className="button button-primary" href="/booking">
-              Перейти к бронированию
+            <Link className="button button-primary" href="#gift-order">
+              Перейти к оформлению
             </Link>
           </div>
         </div>
       </AnimatedSection>
+
+      <GiftCertificateOrderForm />
     </>
   );
 }

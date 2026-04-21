@@ -38,7 +38,7 @@ export default async function PiggyDetailPage({ params }) {
       <PageHero
         eyebrow="Минипиг"
         title={`${piggy.name} — ${piggy.character}`}
-        description={piggy.trait}
+        description={piggy.trait || piggy.character}
         primaryAction={{ href: "/booking", label: "Забронировать визит" }}
         secondaryAction={{ href: "/piggies", label: "Вернуться ко всем" }}
         imagePosition={piggy.imagePosition}
@@ -84,11 +84,10 @@ export default async function PiggyDetailPage({ params }) {
           </article>
 
           <article className="card detail-note">
-            <span className="eyebrow">Возраст</span>
-            <h2 className="section-title small">{piggy.age}</h2>
+            <span className="eyebrow">О минипиге</span>
+            <h2 className="section-title small">{piggy.badge || piggy.age}</h2>
             <p className="section-copy">
-              Детальная страница минипига помогает показать атмосферу проекта и делает сайт более живым.
-              Это хороший контентный слой между главной и бронированием.
+              У каждого жителя Piggy Land свой характер, привычки и любимые занятия. Познакомьтесь поближе и приезжайте в гости за живыми эмоциями.
             </p>
             <div className="button-row">
               <Link className="button button-primary" href="/booking">

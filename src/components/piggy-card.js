@@ -15,10 +15,10 @@ export function PiggyCard({ piggy, onOpen }) {
       <div className="card-body">
         <div className="card-topline">
           <h3>{piggy.name}</h3>
-          <span className="soft-badge">{piggy.age}</span>
+          <span className="soft-badge">{piggy.badge || piggy.age}</span>
         </div>
         <p>{piggy.character}</p>
-        <p className="muted-text">{piggy.trait}</p>
+        {piggy.trait ? <p className="muted-text">{piggy.trait}</p> : null}
         {onOpen ? (
           <button type="button" className="button button-secondary button-block" onClick={() => onOpen(piggy.slug)}>
             Узнать подробнее
