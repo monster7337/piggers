@@ -6,6 +6,7 @@ import {
   CalendarRange,
   ChevronRight,
   Clock3,
+  CreditCard,
   Home,
   LogOut,
   Menu,
@@ -62,8 +63,16 @@ const navigationItems = [
   { href: "/admin/dashboard", label: "Сегодня", icon: Home },
   { href: "/admin/calendar", label: "Календарь", icon: CalendarRange },
   { href: "/admin/appointments", label: "Записи", icon: Rows3 },
+  { href: "/admin/finance", label: "Финансы", icon: CreditCard },
   { href: "/admin/clients", label: "Клиенты", icon: Users },
   { href: "/admin/settings", label: "Настройки", icon: Settings }
+];
+
+const mobileNavigationItems = [
+  navigationItems[0],
+  navigationItems[1],
+  navigationItems[3],
+  navigationItems[2]
 ];
 
 const pageMetaMap = {
@@ -81,6 +90,11 @@ const pageMetaMap = {
     eyebrow: "Записи",
     title: "Все записи",
     description: "Поиск, фильтры и редактирование бронирований и продаж сертификатов."
+  },
+  "/admin/finance": {
+    eyebrow: "Деньги",
+    title: "Финансы",
+    description: "Доходы, расходы, ручные операции и подробный итог дня."
   },
   "/admin/clients": {
     eyebrow: "Клиенты",
@@ -171,19 +185,6 @@ function AppointmentEditorModal() {
         guestTickets: current.guestTickets.map((ticket) => (ticket.id === ticketId ? { ...ticket, tariff } : ticket))
       })
     );
-  }
-
-  function toggleExtraSelection(extraId) {
-    setDraft((current) => {
-      const hasExtra = current.selectedExtras.some((item) => item.id === extraId);
-
-      return normalizeAppointment({
-        ...current,
-        selectedExtras: hasExtra
-          ? current.selectedExtras.filter((item) => item.id !== extraId)
-          : [...current.selectedExtras, { id: extraId, quantity: 1 }]
-      });
-    });
   }
 
   function addGuestTicket() {
@@ -428,35 +429,11 @@ function AppointmentEditorModal() {
                 Добавить гостя
               </button>
 
-              <div className={styles.editorSubSection}>
-                <div className={styles.editorSectionHeader}>
-                  <div>
-                    <p className={styles.editorSectionTitle}>Дополнительные услуги</p>
-                    <p className={styles.editorSectionNote}>Если гость выбрал корм или бутылочку, сумма заказа обновится автоматически.</p>
-                  </div>
+              {draft.selectedExtras.length ? (
+                <div className={styles.inlineAlert} data-tone="info">
+                  В этой записи есть старые допы: {getExtrasSummary(draft)}. Новые корм и бутылочка теперь оформляются только на месте.
                 </div>
-                <div className={styles.extraOptionList}>
-                  {extraOptions.map((extra) => {
-                    const selected = draft.selectedExtras.some((item) => item.id === extra.id);
-
-                    return (
-                      <label key={extra.id} className={clsx(styles.extraOptionCard, selected && styles.extraOptionCardActive)}>
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={() => toggleExtraSelection(extra.id)}
-                        />
-                        <div>
-                          <strong>
-                            {extra.title} · {formatCurrency(extra.price)}
-                          </strong>
-                          <small>{extra.description}</small>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
+              ) : null}
             </section>
 
             <section className={styles.editorSection}>
@@ -804,10 +781,12 @@ function AppointmentDetailsModal() {
                 <span>Свободно мест</span>
                 <strong>{slotState.remainingGuests}</strong>
               </div>
-              <div className={styles.detailCard}>
-                <span>Допы</span>
-                <strong>{getExtrasSummary(selectedAppointment)}</strong>
-              </div>
+              {selectedAppointment.selectedExtras.length ? (
+                <div className={styles.detailCard}>
+                  <span>Допы</span>
+                  <strong>{getExtrasSummary(selectedAppointment)}</strong>
+                </div>
+              ) : null}
               <div className={styles.detailCard}>
                 <span>Создана</span>
                 <strong>
@@ -823,7 +802,7 @@ function AppointmentDetailsModal() {
             <div className={styles.noteCard}>
               <span className={styles.noteCardTitle}>
                 <Users size={16} />
-                Гости, тарифы и допы
+                Гости и тарифы
               </span>
               <div className={styles.detailBreakdownList}>
                 {selectedAppointment.guestTickets.map((ticket, index) => (
@@ -834,15 +813,22 @@ function AppointmentDetailsModal() {
                     </strong>
                   </div>
                 ))}
-                {selectedAppointment.selectedExtras.map((extra) => (
-                  <div key={extra.id} className={styles.detailBreakdownRow}>
-                    <span>{extraOptions.find((item) => item.id === extra.id)?.title ?? extra.id}</span>
-                    <strong>
-                      {extra.quantity > 1 ? `${extra.quantity} × ` : ""}
-                      {formatCurrency((extraOptions.find((item) => item.id === extra.id)?.price ?? 0) * extra.quantity)}
-                    </strong>
+                {selectedAppointment.selectedExtras.length ? (
+                  selectedAppointment.selectedExtras.map((extra) => (
+                    <div key={extra.id} className={styles.detailBreakdownRow}>
+                      <span>{extraOptions.find((item) => item.id === extra.id)?.title ?? extra.id}</span>
+                      <strong>
+                        {extra.quantity > 1 ? `${extra.quantity} × ` : ""}
+                        {formatCurrency((extraOptions.find((item) => item.id === extra.id)?.price ?? 0) * extra.quantity)}
+                      </strong>
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.detailBreakdownRow}>
+                    <span>Дополнительно</span>
+                    <strong>Оформляется на месте</strong>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -1002,7 +988,7 @@ export function AdminShell({ children }) {
               <input
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Поиск по клиенту, телефону, тарифу"
+                placeholder="Поиск по клиенту, телефону или операции"
               />
             </label>
 
@@ -1021,7 +1007,7 @@ export function AdminShell({ children }) {
                 autoFocus
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Поиск по клиенту, телефону, тарифу"
+                placeholder="Поиск по клиенту, телефону или операции"
               />
             </label>
           </div>
@@ -1031,7 +1017,7 @@ export function AdminShell({ children }) {
       </div>
 
       <nav className={styles.bottomNav}>
-        {[navigationItems[0], navigationItems[1], navigationItems[2]].map((item) => {
+        {mobileNavigationItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
 
@@ -1042,11 +1028,6 @@ export function AdminShell({ children }) {
             </Link>
           );
         })}
-
-        <Link href="/admin/settings" className={clsx(styles.bottomNavLink, pathname === "/admin/settings" && styles.bottomNavActive)}>
-          <Settings size={18} />
-          <span>Ещё</span>
-        </Link>
 
         <button className={clsx(styles.bottomNavLink, styles.bottomNavCreate)} type="button" onClick={() => openCreateModal()}>
           <Plus size={18} />

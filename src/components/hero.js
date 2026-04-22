@@ -6,13 +6,34 @@ import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
 
 const heroBenefits = [
-  "11 мини и микро пигов разных пород и возрастов",
-  "чай, кофе и сладости входят в стоимость",
-  "животные имеют все необходимые прививки",
-  "инструктаж по технике безопасности",
-  "санитарный час перед каждым интервалом",
-  "яркие фотолокации",
-  "аренда залов под мероприятия"
+  {
+    desktop: "11 мини и микро пигов разных пород и возрастов",
+    mobile: "11 минипигов"
+  },
+  {
+    desktop: "чай, кофе и сладости входят в стоимость",
+    mobile: "чай и вкусняшки включены"
+  },
+  {
+    desktop: "животные имеют все необходимые прививки",
+    mobile: "прививки и уход под контролем"
+  },
+  {
+    desktop: "инструктаж по технике безопасности",
+    mobile: "инструктаж перед визитом"
+  },
+  {
+    desktop: "санитарный час перед каждым интервалом",
+    mobile: "санитарный режим"
+  },
+  {
+    desktop: "яркие фотолокации",
+    mobile: "яркие фото"
+  },
+  {
+    desktop: "аренда залов под мероприятия",
+    mobile: "праздники и мероприятия"
+  }
 ];
 
 export function Hero() {
@@ -58,7 +79,10 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.12 }}
           >
-            Антикафе с минипигами в Санкт-Петербурге, где можно провести время с милыми и дружелюбными минипигами.
+            <span className="copy-desktop">
+              Антикафе с минипигами в Санкт-Петербурге, где можно провести время с милыми и дружелюбными минипигами.
+            </span>
+            <span className="copy-mobile">Антикафе с минипигами в центре Петербурга для теплого часа без суеты.</span>
           </motion.p>
           <motion.div
             className="hero-description"
@@ -71,6 +95,9 @@ export function Hero() {
             </p>
             <p className="hero-copy-text">
               Кроме того, гостей ждут чай, кофе и сладости, которые входят в стоимость посещения.
+            </p>
+            <p className="hero-copy-text-mobile">
+              Фото, общение со свинками, чайная пауза и уютный визит в одном месте.
             </p>
           </motion.div>
 
@@ -90,14 +117,15 @@ export function Hero() {
           >
             {heroBenefits.map((item) => (
               <motion.span
-                key={item}
+                key={item.desktop}
                 className="highlight-pill"
                 variants={{
                   hidden: { opacity: 0, y: 18 },
                   visible: { opacity: 1, y: 0 }
                 }}
               >
-                {item}
+                <span className="copy-desktop">{item.desktop}</span>
+                <span className="copy-mobile">{item.mobile}</span>
               </motion.span>
             ))}
           </motion.div>
@@ -111,9 +139,9 @@ export function Hero() {
             <Link className="button button-primary hero-primary-cta" href="/booking">
               Забронировать посещение
             </Link>
-            <Link className="button button-secondary hero-secondary-cta" href="/#rates">
+            <a className="button button-secondary hero-secondary-cta" href="/#rates">
               Посмотреть тарифы
-            </Link>
+            </a>
           </motion.div>
         </motion.div>
         <div className="hero-empty-column" aria-hidden="true" />

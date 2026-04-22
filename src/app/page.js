@@ -11,7 +11,6 @@ import {
   Phone,
   SendHorizontal,
   Sparkles,
-  TreePine,
   Users
 } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +30,7 @@ import {
   faqItems,
   galleryItems,
   piggies,
+  reviewPlatforms,
   rates,
   reviews,
   visitSteps
@@ -41,21 +41,27 @@ const highlightIcons = [HeartHandshake, Leaf, Coffee, Camera, Users, Sparkles];
 const aboutValues = [
   {
     icon: HeartHandshake,
-    title: "11 мини и микро пигов",
-    description: "Главные жители пространства встречают гостей в живой, дружелюбной и бережной атмосфере.",
-    mobileDescription: "11 дружелюбных жителей встречают гостей вживую."
+    title: "В штате работает зооветтехник",
+    description:
+      "За состоянием животных следит специалист в области животноводства: он отвечает за уход, рационы кормления, распорядок дня, своевременные прививки и оптимальные условия содержания, отдыха и общения с гостями.",
+    mobileDescription:
+      "Зооветтехник ведет уход, питание, режим дня, прививки и условия содержания животных."
   },
   {
-    icon: TreePine,
-    title: "Чайная комната и фотолокации",
-    description: "После общения со свинками можно посидеть за чаем или кофе со вкусняшками и сделать красивые кадры.",
-    mobileDescription: "После визита можно спокойно выпить чай и сделать красивые фото."
+    icon: Clock3,
+    title: "Тихий час после каждого интервала",
+    description:
+      "Для отдыха животных мы выстроили специальный режим посещения с перерывами каждый час: после каждой группы поросята спят и восстанавливаются, а инструкторы спокойно готовят пространство к следующему визиту.",
+    mobileDescription:
+      "После каждой группы у животных есть обязательный перерыв на сон и восстановление."
   },
   {
     icon: Sparkles,
-    title: "Праздники и камерные события",
-    description: "У нас отмечают дни рождения, проводят корпоративы, девичники, пижамные вечеринки и романтические вечера.",
-    mobileDescription: "Подходит для дня рождения, вечеринки или камерного события."
+    title: "Санитарный час и контроль среды",
+    description:
+      "Перед каждым интервалом в антикафе проводится сухая и влажная уборка с дезинфицирующими средствами и кварцеванием отдельных зон. Во всех залах постоянно идет рециркуляция воздуха, а температура и влажность помещения находятся под контролем.",
+    mobileDescription:
+      "Перед каждой группой проводится уборка и дезинфекция, а воздух, температура и влажность постоянно контролируются."
   }
 ];
 
@@ -89,10 +95,16 @@ export default function HomePage() {
             eyebrow="Тарифы и сеансы"
             title="Выберите билет и приезжайте знакомиться с минипигами"
             description="Сразу видно, сколько стоит визит, что входит и какой вариант подойдет именно вам."
+            mobileDescription="Быстро посмотрите цены, формат визита и выберите свой билет."
             actions={
-              <Link className="button button-secondary" href="/booking">
-                Перейти к бронированию
-              </Link>
+              <div className="home-rates-actions">
+                <Link className="button button-secondary" href="/booking">
+                  Перейти к бронированию
+                </Link>
+                <Link className="button button-primary button-shimmer" href="/gift-certificates">
+                  Купить сертификат
+                </Link>
+              </div>
             }
           />
           <div className="card-grid card-grid-4">
@@ -108,7 +120,8 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="Наши минипиги"
             title="Познакомьтесь с нашими минипигами поближе"
-            description="В разделе показываем самых заметных жителей, а по кнопке можно открыть галерею всех минипигов и перейти в подробную карточку каждого."
+            description="Показываем самых заметных жителей. Ниже можно открыть галерею всех минипигов и подробно посмотреть каждого прямо на главной."
+            mobileDescription="Откройте самых заметных жителей и посмотрите их карточки прямо здесь."
           />
           <PiggyBrowser piggies={piggies} previewCount={6} />
         </div>
@@ -120,6 +133,7 @@ export default function HomePage() {
             eyebrow="Как проходит визит"
             title="Путь гостя от интереса до незабываемого часа с минипигами"
             description="Все просто: выберите билет, день и время, а дальше мы будем ждать вас в гости."
+            mobileDescription="Четыре коротких шага от выбора билета до встречи со свинками."
           />
           <VisitJourney steps={visitSteps} />
         </div>
@@ -131,6 +145,7 @@ export default function HomePage() {
             eyebrow="Что вас ждет"
             title="Что ждет гостей в антикафе с минипигами"
             description="Живое общение со свинками, красивые фото, чайная комната и идеи для теплого отдыха."
+            mobileDescription="Фото, чайная комната, праздники и живое общение со свинками."
           />
           <div className="card-grid card-grid-3">
             {experienceHighlights.map((item, index) => {
@@ -159,6 +174,7 @@ export default function HomePage() {
             eyebrow="Галерея"
             title="Фотографии, после которых хочется приехать в Piggy Land"
             description="Здесь собраны наши любимые кадры: минипиги, гости и теплая атмосфера пространства."
+            mobileDescription="Лучшие кадры с минипигами, гостями и атмосферой пространства."
           />
           <GalleryFilter items={galleryItems} limit={6} allCategoryLimit={3} showLink />
         </div>
@@ -168,8 +184,9 @@ export default function HomePage() {
         <div className="container">
           <SectionHeading
             eyebrow="О нас"
-            title="Антикафе в Петербурге для теплого отдыха и ярких событий"
-            description="Мы работаем по предварительной записи и приглашаем гостей в пространство, где можно не только познакомиться со свинками, но и провести особенный вечер."
+            title="Наши принципиальные отличия от других подобных пространств"
+            description="Для нас важны не только впечатления гостей, но и профессиональный уход, режим отдыха животных и санитарный контроль пространства."
+            mobileDescription="Показываем, как у нас устроены уход, отдых животных и санитарный режим."
           />
           <div className="card-grid card-grid-3">
             {aboutValues.map((item) => {
@@ -198,8 +215,9 @@ export default function HomePage() {
             eyebrow="Отзывы"
             title="Гости уходят с улыбкой и возвращаются снова"
             description="Почитайте, что говорят те, кто уже успел побывать у нас."
+            mobileDescription="Реальные отзывы, награды и фото гостей."
           />
-          <ReviewsStrip reviews={reviews} />
+          <ReviewsStrip reviews={reviews} platforms={reviewPlatforms} />
         </div>
       </AnimatedSection>
 
@@ -209,6 +227,7 @@ export default function HomePage() {
             eyebrow="Контакты"
             title="Санкт-Петербург, 6-я Советская, 28А"
             description="Свяжитесь с нами по телефону или через VK и заранее запишитесь на визит в удобное время."
+            mobileDescription="Телефон, адрес и соцсети для быстрой записи."
           />
           <div className="card-grid card-grid-3 contacts-grid">
             {contactCards.map((item) => {
@@ -244,6 +263,7 @@ export default function HomePage() {
             eyebrow="FAQ"
             title="Ответы на вопросы перед бронированием"
             description="Собрали короткие ответы на то, что чаще всего спрашивают перед визитом."
+            mobileDescription="Коротко собрали главное перед визитом."
             align="center"
           />
           <FaqAccordion items={faqItems} />

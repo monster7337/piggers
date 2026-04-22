@@ -11,7 +11,6 @@ export function BookingSuccessSummary() {
   const items = searchParams.get("items");
   const date = searchParams.get("date");
   const time = searchParams.get("time");
-  const services = searchParams.get("services");
   const tickets = searchParams.get("tickets");
   const total = searchParams.get("total");
   const prepayment = searchParams.get("prepayment");
@@ -56,8 +55,8 @@ export function BookingSuccessSummary() {
           </div>
         ) : (
           <div>
-            <span>Услуги</span>
-            <strong>{services || "Без дополнительных услуг"}</strong>
+            <span>Дополнительно</span>
+            <strong>Корм и бутылочка оформляются на месте</strong>
           </div>
         )}
         {type === "gift" ? (

@@ -6,7 +6,7 @@ import { Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { stripBasePath } from "@/lib/base-path";
+import { stripBasePath, withBasePath } from "@/lib/base-path";
 import { contactInfo, navigation } from "@/lib/site-data";
 
 function getBasePath(href) {
@@ -59,13 +59,23 @@ export function Header() {
   return (
     <header className={clsx("site-header", isHomeHero && "home-hero", isScrolled && "scrolled")}>
       <div className="container header-inner">
-        <Link className="brand-lockup brand-lockup-compact" href="/#home" aria-label="Piggy Land">
-          <span className="brand-badge">PL</span>
-        </Link>
+        <a className="brand-lockup brand-lockup-compact" href="/#home" aria-label="Piggy Land">
+          <span className="brand-badge brand-badge-logo">
+            <img
+              src={withBasePath("/images/piggilandlogo-icon.png")}
+              alt=""
+              className="brand-logo-image"
+              width="48"
+              height="48"
+              decoding="async"
+              fetchPriority={isHomeHero ? "high" : "auto"}
+            />
+          </span>
+        </a>
 
         <nav className="desktop-nav" aria-label="Основная навигация">
           {navigation.map((item) => (
-            <Link
+            <a
               key={item.href}
               href={item.href}
               className={clsx(
@@ -76,7 +86,7 @@ export function Header() {
               )}
             >
               {item.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
@@ -118,7 +128,7 @@ export function Header() {
             <div className="container mobile-menu-inner">
               <nav className="mobile-nav" aria-label="Мобильная навигация">
                 {navigation.map((item) => (
-                  <Link
+                  <a
                     key={item.href}
                     href={item.href}
                     className={clsx(
@@ -129,7 +139,7 @@ export function Header() {
                     )}
                   >
                     {item.label}
-                  </Link>
+                  </a>
                 ))}
               </nav>
               <div className="mobile-menu-cta">

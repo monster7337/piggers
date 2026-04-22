@@ -4,24 +4,30 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import {
   ADMIN_ACTIVITY_KEY,
   ADMIN_APPOINTMENTS_KEY,
+  ADMIN_FINANCE_RECORDS_KEY,
   ADMIN_GIFT_CERTIFICATES_KEY,
   ADMIN_SETTINGS_KEY,
   createActivityEntry,
   createAppointmentTemplate,
+  createMockFinanceRecords,
   createMockActivityLog,
   createMockAppointments,
   createMockGiftCertificateOrders,
   defaultSettings,
   formatDateKey,
+  formatCurrency,
   getSlotReserveKey,
   groupClients,
   normalizeActivityEntry,
   normalizeAppointment,
+  normalizeFinanceRecord,
   normalizeSettings,
   readStoredActivityLog,
   readStoredAppointments,
+  readStoredFinanceRecords,
   readStoredGiftOrders,
   readStoredSettings,
+  sortFinanceRecords,
   sortAppointments,
   writeAdminJson
 } from "@/components/admin/admin-data";
@@ -31,6 +37,7 @@ const AdminContext = createContext(null);
 export function AdminProvider({ children }) {
   const [appointments, setAppointments] = useState([]);
   const [giftOrders, setGiftOrders] = useState([]);
+  const [financeRecords, setFinanceRecords] = useState([]);
   const [activityLog, setActivityLog] = useState([]);
   const [settings, setSettings] = useState(defaultSettings);
   const settingsRef = useRef(defaultSettings);
@@ -44,6 +51,7 @@ export function AdminProvider({ children }) {
   useEffect(() => {
     setAppointments(readStoredAppointments());
     setGiftOrders(readStoredGiftOrders());
+    setFinanceRecords(readStoredFinanceRecords());
     setActivityLog(readStoredActivityLog());
     setSettings(readStoredSettings());
     setHydrated(true);
@@ -64,6 +72,14 @@ export function AdminProvider({ children }) {
 
     writeAdminJson(ADMIN_GIFT_CERTIFICATES_KEY, giftOrders);
   }, [giftOrders, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    writeAdminJson(ADMIN_FINANCE_RECORDS_KEY, financeRecords);
+  }, [financeRecords, hydrated]);
 
   useEffect(() => {
     if (!hydrated) {
@@ -101,6 +117,10 @@ export function AdminProvider({ children }) {
 
       if (event.key === ADMIN_GIFT_CERTIFICATES_KEY) {
         setGiftOrders(readStoredGiftOrders());
+      }
+
+      if (event.key === ADMIN_FINANCE_RECORDS_KEY) {
+        setFinanceRecords(readStoredFinanceRecords());
       }
 
       if (event.key === ADMIN_ACTIVITY_KEY) {
@@ -285,6 +305,65 @@ export function AdminProvider({ children }) {
     pushToast("Настройки сохранены");
   }
 
+  function saveFinanceRecord(values) {
+    const normalizedRecord = {
+      ...normalizeFinanceRecord(values),
+      updatedAt: new Date().toISOString()
+    };
+    const existingRecord = normalizedRecord.id ? financeRecords.find((record) => record.id === normalizedRecord.id) ?? null : null;
+
+    setFinanceRecords((current) => {
+      if (existingRecord) {
+        return sortFinanceRecords(
+          current.map((record) => (record.id === normalizedRecord.id ? { ...record, ...normalizedRecord } : record))
+        );
+      }
+
+      return sortFinanceRecords([...current, normalizedRecord]);
+    });
+
+    appendActivity(
+      createActivityEntry({
+        entityId: normalizedRecord.id,
+        entityType: "finance",
+        kind: normalizedRecord.type,
+        relatedDate: normalizedRecord.date,
+        relatedTime: normalizedRecord.time,
+        tone: normalizedRecord.type === "expense" ? "danger" : "success",
+        message: `${normalizedRecord.type === "expense" ? "Расход" : "Доход"}: ${normalizedRecord.title} · ${formatCurrency(
+          normalizedRecord.amount
+        )}`
+      })
+    );
+    setSelectedDate(normalizedRecord.date);
+    pushToast(
+      existingRecord ? "Операция обновлена" : normalizedRecord.type === "expense" ? "Расход добавлен" : "Доход добавлен",
+      normalizedRecord.type === "expense" ? "neutral" : "success"
+    );
+  }
+
+  function deleteFinanceRecord(id) {
+    const record = financeRecords.find((item) => item.id === id);
+
+    if (!record) {
+      return;
+    }
+
+    setFinanceRecords((current) => current.filter((item) => item.id !== id));
+    appendActivity(
+      createActivityEntry({
+        entityId: record.id,
+        entityType: "finance",
+        kind: "deleted",
+        relatedDate: record.date,
+        relatedTime: record.time,
+        tone: "danger",
+        message: `Операция удалена: ${record.title} · ${formatCurrency(record.amount)}`
+      })
+    );
+    pushToast("Операция удалена", "neutral");
+  }
+
   function updateSlotReserve(dateKey, time, delta) {
     const reserveKey = getSlotReserveKey(dateKey, time);
     const currentSettings = settingsRef.current;
@@ -328,6 +407,7 @@ export function AdminProvider({ children }) {
   function resetDemoData() {
     setAppointments(createMockAppointments());
     setGiftOrders(createMockGiftCertificateOrders());
+    setFinanceRecords(createMockFinanceRecords());
     setActivityLog(createMockActivityLog());
     setSettings(normalizeSettings(defaultSettings));
     setSelectedDate(formatDateKey(new Date()));
@@ -347,9 +427,11 @@ export function AdminProvider({ children }) {
     clients,
     closeDetails,
     closeEditor,
+    deleteFinanceRecord,
     deleteAppointment,
     detailId,
     editorState,
+    financeRecords,
     giftOrders,
     hydrated,
     openCreateModal,
@@ -358,6 +440,7 @@ export function AdminProvider({ children }) {
     pushToast,
     resetDemoData,
     saveAppointment,
+    saveFinanceRecord,
     saveSettings,
     searchQuery,
     selectedAppointment,

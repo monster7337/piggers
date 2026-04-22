@@ -17,6 +17,7 @@ import {
   Plus,
   ShoppingBag
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,16 +33,16 @@ import {
   readStoredSettings,
   savePublicBooking
 } from "@/components/admin/admin-data";
-import { alternativeProject, extras, rates } from "@/lib/site-data";
+import { offerSections } from "@/lib/offer-data";
+import { alternativeProject, rates } from "@/lib/site-data";
 
-const bookingSteps = ["Билеты", "Дата", "Время", "Услуги", "Контакты", "Подтверждение"];
+const bookingSteps = ["Билеты", "Дата", "Время", "Контакты", "Подтверждение"];
 const bookingStepNotes = [
   "Выберите билеты",
   "Найдите удобный день",
   "Выберите удобное время",
-  "Добавьте приятные детали",
   "Оставьте контакты",
-  "Проверьте предоплату и остаток"
+  "Проверьте предоплату, оферту и остаток"
 ];
 
 const siteRateToTariffMap = {
@@ -85,9 +86,9 @@ export function BookingPlanner({ initialRate }) {
   const [selectedRateQuantities, setSelectedRateQuantities] = useState(() =>
     initialRate && rates.some((rate) => rate.id === initialRate) ? { [initialRate]: 1 } : {}
   );
-  const [selectedServiceQuantities, setSelectedServiceQuantities] = useState({});
   const [activeInfoRateId, setActiveInfoRateId] = useState(initialRate || null);
   const [stepError, setStepError] = useState("");
+  const [offerAccepted, setOfferAccepted] = useState(false);
   const [storageSnapshot, setStorageSnapshot] = useState(() => ({
     appointments: [],
     settings: defaultSettings
@@ -132,27 +133,11 @@ export function BookingPlanner({ initialRate }) {
     [selectedRateQuantities]
   );
 
-  const selectedServices = useMemo(
-    () =>
-      extras
-        .filter((service) => selectedServiceQuantities[service.id])
-        .map((service) => ({
-          ...service,
-          quantity: 1
-        })),
-    [selectedServiceQuantities]
-  );
-
   const guestTickets = useMemo(() => createGuestTickets(selectedTickets), [selectedTickets]);
-  const selectedExtraItems = useMemo(
-    () => selectedServices.map((item) => ({ id: item.id, quantity: item.quantity })),
-    [selectedServices]
-  );
 
   const ticketsTotal = selectedTickets.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const servicesTotal = selectedServices.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalTicketsCount = selectedTickets.reduce((sum, item) => sum + item.quantity, 0);
-  const total = ticketsTotal + servicesTotal;
+  const total = ticketsTotal;
   const prepaymentNow = totalTicketsCount ? calculateExpectedPrepayment(totalTicketsCount, total) : 0;
   const remainingOnSite = Math.max(0, total - prepaymentNow);
   const values = getValues();
@@ -232,20 +217,6 @@ export function BookingPlanner({ initialRate }) {
     });
   }
 
-  function toggleServiceSelection(id) {
-    setSelectedServiceQuantities((current) => {
-      const next = { ...current };
-
-      if (next[id]) {
-        delete next[id];
-      } else {
-        next[id] = 1;
-      }
-
-      return next;
-    });
-  }
-
   async function goToStep(nextStep) {
     setStepError("");
 
@@ -269,7 +240,7 @@ export function BookingPlanner({ initialRate }) {
       return;
     }
 
-    if (step === 4) {
+    if (step === 3) {
       const isValid = await trigger();
 
       if (!isValid) {
@@ -285,6 +256,11 @@ export function BookingPlanner({ initialRate }) {
     const dateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
 
     try {
+      if (!offerAccepted) {
+        setStepError("Перед оплатой нужно ознакомиться с офертой и принять ее условия.");
+        return;
+      }
+
       const appointment = savePublicBooking({
         clientName: formValues.name,
         phone: formValues.phone,
@@ -292,7 +268,7 @@ export function BookingPlanner({ initialRate }) {
         date: dateKey,
         time: selectedTime,
         guestTickets,
-        selectedExtras: selectedExtraItems,
+        selectedExtras: [],
         comment: formValues.comment
       });
 
@@ -302,7 +278,6 @@ export function BookingPlanner({ initialRate }) {
         type: "booking",
         bookingId: appointment.id,
         items: selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", "),
-        services: selectedServices.map((item) => item.title).join(", "),
         date: selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: ru }) : "",
         time: selectedTime,
         tickets: String(totalTicketsCount),
@@ -560,48 +535,6 @@ export function BookingPlanner({ initialRate }) {
               <>
                 <div className="panel-heading">
                   <span className="eyebrow">Шаг 4</span>
-                  <h2>Добавьте услуги</h2>
-                </div>
-
-                <div className="service-grid">
-                  {extras.map((item) => {
-                    const quantity = selectedServiceQuantities[item.id] || 0;
-
-                    return (
-                      <article key={item.id} className={clsx("card service-card", quantity > 0 && "selected")}>
-                        <div className="service-card-header">
-                          <strong>{formatCurrency(item.price)}</strong>
-                          <span className="views-pill">Приобрели уже {item.views.toLocaleString("ru-RU")} человек</span>
-                        </div>
-                        <h3>{item.title}</h3>
-                        <span className="ticket-description-label">Описание</span>
-                        <p>{item.description}</p>
-                        <div className="ticket-footer">
-                          {quantity === 0 ? (
-                            <button type="button" className="button button-primary" onClick={() => toggleServiceSelection(item.id)}>
-                              Выбрать
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="button button-secondary button-block service-selected-button"
-                              onClick={() => toggleServiceSelection(item.id)}
-                            >
-                              Выбрано
-                            </button>
-                          )}
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </>
-            ) : null}
-
-            {step === 4 ? (
-              <>
-                <div className="panel-heading">
-                  <span className="eyebrow">Шаг 5</span>
                   <h2>Контактные данные</h2>
                 </div>
                 <div className="form-grid">
@@ -629,10 +562,10 @@ export function BookingPlanner({ initialRate }) {
               </>
             ) : null}
 
-            {step === 5 ? (
+            {step === 4 ? (
               <>
                 <div className="panel-heading">
-                  <span className="eyebrow">Шаг 6</span>
+                  <span className="eyebrow">Шаг 5</span>
                   <h2>Проверьте вашу запись</h2>
                 </div>
 
@@ -653,8 +586,8 @@ export function BookingPlanner({ initialRate }) {
                       <strong>{selectedTime || "Не выбрано"}</strong>
                     </div>
                     <div>
-                      <span>Услуги</span>
-                      <strong>{selectedServices.length ? selectedServices.map((item) => item.title).join(", ") : "Без допов"}</strong>
+                      <span>Дополнительно</span>
+                      <strong>Корм и бутылочка оформляются на месте</strong>
                     </div>
                     <div>
                       <span>Имя</span>
@@ -681,6 +614,66 @@ export function BookingPlanner({ initialRate }) {
                       Остаток {formatCurrency(remainingOnSite)} администратор отметит в CRM при оплате на месте.
                     </span>
                   </div>
+
+                  <div className="offer-acceptance-shell">
+                    <label className={clsx("offer-acceptance-toggle", offerAccepted && "is-checked")}>
+                      <input
+                        type="checkbox"
+                        className="offer-acceptance-toggle-input"
+                        checked={offerAccepted}
+                        onChange={(event) => {
+                          setOfferAccepted(event.target.checked);
+                          if (event.target.checked) {
+                            setStepError("");
+                          }
+                        }}
+                      />
+                      <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                        <Check size={14} strokeWidth={2.8} />
+                      </span>
+                      <span className="offer-acceptance-toggle-copy">
+                        <strong>Принимаю условия договора оферты</strong>
+                        <small>Галочку можно поставить сразу. Сам текст оферты открывается в блоке ниже.</small>
+                      </span>
+                    </label>
+
+                    <details className="offer-acceptance-card">
+                      <summary className="offer-acceptance-summary">
+                        <span className="offer-acceptance-summary-copy">
+                          <Info size={18} />
+                          <span>
+                            <strong>Договор оферты перед оплатой</strong>
+                            <small>Откройте блок, если хотите ознакомиться с условиями прямо здесь.</small>
+                          </span>
+                        </span>
+                        <span className="offer-acceptance-summary-action">Читать оферту</span>
+                      </summary>
+
+                      <div className="offer-acceptance-body">
+                        <div className="offer-acceptance-sections">
+                          {offerSections.map((section) => (
+                            <section key={section.title} className="offer-acceptance-section">
+                              <h3>{section.title}</h3>
+                              {section.paragraphs.map((paragraph) => (
+                                <p key={paragraph}>{paragraph}</p>
+                              ))}
+                            </section>
+                          ))}
+                        </div>
+
+                        <Link href="/offer" className="offer-acceptance-link" target="_blank" rel="noreferrer">
+                          Открыть полную страницу оферты
+                          <ArrowUpRight size={16} />
+                        </Link>
+                      </div>
+                    </details>
+                  </div>
+
+                  {!offerAccepted ? (
+                    <p className="offer-acceptance-note">
+                      Кнопка оплаты станет активной после принятия условий оферты.
+                    </p>
+                  ) : null}
                 </div>
               </>
             ) : null}
@@ -712,8 +705,13 @@ export function BookingPlanner({ initialRate }) {
                   Продолжить
                 </button>
               ) : (
-                <button type="button" className="button button-primary" onClick={submitBooking}>
-                  Подтвердить запись
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={submitBooking}
+                  disabled={!offerAccepted}
+                >
+                  Оплатить
                 </button>
               )}
             </div>
@@ -771,23 +769,6 @@ export function BookingPlanner({ initialRate }) {
             </div>
 
             <div className="summary-group">
-              <span className="summary-group-title">Услуги</span>
-              {selectedServices.length ? (
-                selectedServices.map((item) => (
-                  <div key={item.id} className="summary-row">
-                    <span>{item.title}</span>
-                    <strong>{formatCurrency(item.price)}</strong>
-                  </div>
-                ))
-              ) : (
-                <div className="summary-row">
-                  <span>Без дополнительных услуг</span>
-                  <strong>0 ₽</strong>
-                </div>
-              )}
-            </div>
-
-            <div className="summary-group">
               <span className="summary-group-title">
                 <CreditCard size={16} />
                 Оплата
@@ -809,7 +790,10 @@ export function BookingPlanner({ initialRate }) {
 
           <div className="status-inline success">
             <CreditCard size={18} />
-            <span>Бронь фиксируется после предоплаты {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждого гостя.</span>
+            <span>
+              Бронь фиксируется после предоплаты {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждого гостя.
+              Корм и бутылочка оформляются уже на месте.
+            </span>
           </div>
         </div>
       </aside>

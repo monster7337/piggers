@@ -22,6 +22,8 @@ import {
   BOOKING_PREPAYMENT_PER_GUEST,
   FIXED_SLOT_TIMES,
   PUBLIC_SLOT_CAPACITY,
+  expenseCategoryOptions,
+  financeTypeOptions,
   formatDateKey,
   formatCurrency,
   formatLongDate,
@@ -30,14 +32,20 @@ import {
   formatWeekday,
   getAppointmentEnd,
   getDayActivity,
+  getDayExpenseBreakdown,
+  getDayExpenseEntries,
+  getDayExpenseTotal,
   getDayGiftOrders,
   getDayGiftRevenue,
   getDayIncome,
+  getDayIncomeBreakdown,
+  getDayIncomeEntries,
   getDayOnSiteIncome,
   getDayPaymentBreakdown,
   getDayPrepaymentAmount,
   getDaySlotGroups,
   getDaySourceBreakdown,
+  getDayTotalIncome,
   getFreeSlots,
   getGiftCertificateSummary,
   getMonthGrid,
@@ -49,7 +57,9 @@ import {
   getTariffSummary,
   getUpcomingAppointments,
   getWeekDays,
+  incomeCategoryOptions,
   matchesGiftSearch,
+  matchesFinanceSearch,
   matchesSearch,
   serviceOptions,
   shiftDate,
@@ -81,9 +91,9 @@ function EmptyState({ title, description, actionLabel, onAction }) {
   );
 }
 
-function Panel({ title, description, action, children }) {
+function Panel({ title, description, action, children, className, tone }) {
   return (
-    <section className={styles.panel}>
+    <section className={clsx(styles.panel, className)} data-tone={tone}>
       <div className={styles.panelHeader}>
         <div className={styles.panelTitleBlock}>
           <h2>{title}</h2>
@@ -377,8 +387,149 @@ function formatEventTime(timestamp) {
   return new Intl.DateTimeFormat("ru-RU", { timeStyle: "short" }).format(new Date(timestamp));
 }
 
+function toBreakdownItems(summary, noun) {
+  return Object.entries(summary)
+    .sort(([, left], [, right]) => right.amount - left.amount)
+    .map(([label, meta]) => ({
+      label,
+      value: formatCurrency(meta.amount),
+      note: `${meta.count} ${noun}`
+    }));
+}
+
+function getFlowLeadLabel(summary, fallback) {
+  const [topEntry] = Object.entries(summary).sort(([, left], [, right]) => right.amount - left.amount);
+  return topEntry?.[0] ?? fallback;
+}
+
+function formatSignedAmount(amount, type) {
+  return `${type === "expense" ? "-" : "+"}${formatCurrency(amount)}`;
+}
+
+function FinanceEntryRow({ entry, tone, onDelete }) {
+  return (
+    <article className={styles.financeEntry}>
+      <div className={styles.financeEntryMain}>
+        <div className={styles.financeEntryTop}>
+          <div className={styles.financeEntryHeading}>
+            <span className={styles.financeEntryTime}>{entry.time}</span>
+            <strong>{entry.person || entry.title}</strong>
+          </div>
+          <span className={styles.financeEntryAmount} data-tone={tone}>
+            {formatSignedAmount(entry.amount, tone)}
+          </span>
+        </div>
+
+        <div className={styles.financeEntryBottom}>
+          <strong className={styles.financeEntryTitle}>{entry.title}</strong>
+          {entry.note ? <small className={styles.financeEntryNote}>{entry.note}</small> : null}
+          <div className={styles.financeEntryBadges}>
+            <span className={styles.financeBadge} data-tone={entry.isManual ? "manual" : "system"}>
+              {entry.origin}
+            </span>
+            <span className={styles.financeBadge}>{entry.stream}</span>
+          </div>
+        </div>
+      </div>
+
+      {entry.isManual && onDelete ? (
+        <button className={styles.financeDeleteButton} type="button" onClick={() => onDelete(entry.id)}>
+          Удалить
+        </button>
+      ) : null}
+    </article>
+  );
+}
+
+function FinanceColumn({ action, entries, emptyLabel, onDelete, title, tone, total }) {
+  return (
+    <section className={styles.financeColumn} data-tone={tone}>
+      <div className={styles.financeColumnHeader}>
+        <div className={styles.financeColumnCopy}>
+          <span className={styles.financeColumnEyebrow}>{title}</span>
+          <strong>{formatSignedAmount(total, tone)}</strong>
+          <small>
+            {entries.length} {entries.length === 1 ? "операция" : entries.length < 5 ? "операции" : "операций"} за день
+          </small>
+        </div>
+        {action ? (
+          action.href ? (
+            <Link
+              className={styles.financeHeaderAction}
+              href={action.href}
+              aria-label={action.ariaLabel ?? action.label}
+            >
+              <span className={styles.financeHeaderActionIcon}>
+                <Plus size={16} />
+              </span>
+              <span className={styles.financeHeaderActionText}>{action.label}</span>
+            </Link>
+          ) : (
+            <button
+              className={styles.financeHeaderAction}
+              type="button"
+              onClick={action.onClick}
+              aria-label={action.ariaLabel ?? action.label}
+            >
+              <span className={styles.financeHeaderActionIcon}>
+                <Plus size={16} />
+              </span>
+              <span className={styles.financeHeaderActionText}>{action.label}</span>
+            </button>
+          )
+        ) : null}
+      </div>
+
+      {entries.length ? (
+        <div className={styles.financeEntryList}>
+          {entries.map((entry) => (
+            <FinanceEntryRow key={entry.id} entry={entry} tone={tone} onDelete={onDelete} />
+          ))}
+        </div>
+      ) : (
+        <div className={styles.financeEmpty}>{emptyLabel}</div>
+      )}
+    </section>
+  );
+}
+
+function FinanceBoard({
+  expenseAction,
+  expenseEntries,
+  expenseTotal,
+  incomeAction,
+  incomeEntries,
+  incomeTotal,
+  onDeleteExpense,
+  onDeleteIncome
+}) {
+  return (
+    <div className={styles.financeBoard}>
+      <FinanceColumn
+        action={incomeAction}
+        entries={incomeEntries}
+        emptyLabel="Доходов по выбранному дню пока нет."
+        onDelete={onDeleteIncome}
+        title="Доходы"
+        tone="income"
+        total={incomeTotal}
+      />
+      <FinanceColumn
+        action={expenseAction}
+        entries={expenseEntries}
+        emptyLabel="Расходов по выбранному дню пока нет."
+        onDelete={onDeleteExpense}
+        title="Расходы"
+        tone="expense"
+        total={expenseTotal}
+      />
+    </div>
+  );
+}
+
 export function AdminDashboardPage() {
-  const { activityLog, appointments, giftOrders, openCreateModal, selectedDate, settings, updateSlotReserve } = useAdmin();
+  const { activityLog, appointments, financeRecords, giftOrders, openCreateModal, selectedDate, settings, updateSlotReserve } =
+    useAdmin();
   const slotGroups = useMemo(() => getDaySlotGroups(appointments, settings, selectedDate), [appointments, selectedDate, settings]);
   const freeSlots = useMemo(() => getFreeSlots(appointments, settings, selectedDate), [appointments, selectedDate, settings]);
   const upcomingAppointments = useMemo(() => getUpcomingAppointments(appointments, 4), [appointments]);
@@ -391,35 +542,29 @@ export function AdminDashboardPage() {
   );
   const dayPrepayment = useMemo(() => getDayPrepaymentAmount(appointments, selectedDate), [appointments, selectedDate]);
   const dayOnSiteIncome = useMemo(() => getDayOnSiteIncome(appointments, selectedDate), [appointments, selectedDate]);
-  const dailyIncome = useMemo(() => getDayIncome(appointments, selectedDate), [appointments, selectedDate]);
   const dayGiftSales = useMemo(() => getDayGiftOrders(giftOrders, selectedDate), [giftOrders, selectedDate]);
   const dayGiftRevenue = useMemo(() => getDayGiftRevenue(giftOrders, selectedDate), [giftOrders, selectedDate]);
-  const paymentBreakdown = useMemo(() => getDayPaymentBreakdown(appointments, selectedDate), [appointments, selectedDate]);
-  const sourceBreakdown = useMemo(() => getDaySourceBreakdown(appointments, selectedDate), [appointments, selectedDate]);
+  const incomeEntries = useMemo(
+    () => getDayIncomeEntries(appointments, giftOrders, financeRecords, selectedDate),
+    [appointments, financeRecords, giftOrders, selectedDate]
+  );
+  const expenseEntries = useMemo(() => getDayExpenseEntries(financeRecords, selectedDate), [financeRecords, selectedDate]);
+  const totalIncome = useMemo(
+    () => getDayTotalIncome(appointments, giftOrders, financeRecords, selectedDate),
+    [appointments, financeRecords, giftOrders, selectedDate]
+  );
+  const totalExpenses = useMemo(() => getDayExpenseTotal(financeRecords, selectedDate), [financeRecords, selectedDate]);
+  const netIncome = totalIncome - totalExpenses;
+  const manualIncome = Math.max(0, totalIncome - dayPrepayment - dayOnSiteIncome - dayGiftRevenue);
+  const incomeBreakdown = useMemo(
+    () => getDayIncomeBreakdown(appointments, giftOrders, financeRecords, selectedDate),
+    [appointments, financeRecords, giftOrders, selectedDate]
+  );
+  const expenseBreakdown = useMemo(() => getDayExpenseBreakdown(financeRecords, selectedDate), [financeRecords, selectedDate]);
   const dayActivity = useMemo(() => getDayActivity(activityLog, selectedDate), [activityLog, selectedDate]);
 
-  const paymentRows = useMemo(() => {
-    const rows = [{ label: "Онлайн на сайте", value: formatCurrency(paymentBreakdown.online) }];
-
-    Object.entries(paymentBreakdown.methods).forEach(([method, amount]) => {
-      rows.push({
-        label: getPaymentMethodLabel(method),
-        value: formatCurrency(amount)
-      });
-    });
-
-    return rows.filter((item) => item.value !== formatCurrency(0));
-  }, [paymentBreakdown]);
-
-  const sourceRows = useMemo(
-    () =>
-      Object.entries(sourceBreakdown).map(([source, summary]) => ({
-        label: source,
-        value: `${summary.count} запис.`,
-        note: `Оплачено ${formatCurrency(summary.revenue)}`
-      })),
-    [sourceBreakdown]
-  );
+  const incomeRows = useMemo(() => toBreakdownItems(incomeBreakdown, "поступл."), [incomeBreakdown]);
+  const expenseRows = useMemo(() => toBreakdownItems(expenseBreakdown, "спис."), [expenseBreakdown]);
 
   const activityRows = useMemo(
     () =>
@@ -429,32 +574,70 @@ export function AdminDashboardPage() {
       })),
     [dayActivity]
   );
+  const bookedSlotsCount = slotGroups.filter((slot) => slot.appointments.length).length;
 
   return (
     <div className={styles.pageStack}>
       <DaySwitcher />
 
-      <div className={styles.statsGrid}>
-        <StatCard label="Гостей в дне" value={activeGuests} note="Сумма гостей по всем часам" tone="info" />
+      <div className={clsx(styles.statsGrid, styles.dashboardStatsGrid)}>
         <StatCard
-          label="Онлайн предоплата"
-          value={formatCurrency(dayPrepayment)}
-          note={`Фиксированно по ${formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за место`}
+          label="Гости и записи"
+          value={`${activeGuests} чел.`}
+          note={`${newAppointments} новых · ${bookedSlotsCount} часов занято`}
+          tone="info"
+        />
+        <StatCard
+          label="Доходы дня"
+          value={formatCurrency(totalIncome)}
+          note={`Сайт ${formatCurrency(dayPrepayment + dayGiftRevenue)} · на месте ${formatCurrency(dayOnSiteIncome)} · ручной ${formatCurrency(manualIncome)}`}
           tone="accent"
         />
-        <StatCard label="Оплата на месте" value={formatCurrency(dayOnSiteIncome)} note="Что администратор уже отметила в CRM" tone="success" />
         <StatCard
-          label="Сертификаты"
-          value={formatCurrency(dayGiftRevenue)}
-          note={`${dayGiftSales.length} продаж за выбранный день`}
+          label="Расходы дня"
+          value={formatCurrency(totalExpenses)}
+          note={expenseEntries.length ? `Главное списание: ${getFlowLeadLabel(expenseBreakdown, "без категорий")}` : "Расходов пока нет"}
           tone="danger"
+        />
+        <StatCard
+          label="Чистый итог"
+          value={formatCurrency(netIncome)}
+          note={`Доходов ${incomeEntries.length} · расходов ${expenseEntries.length}`}
+          tone={netIncome >= 0 ? "success" : "danger"}
           action={
-            <span className={styles.statCardLink}>
-              Всего по дню {formatCurrency(dailyIncome + dayGiftRevenue)}
-            </span>
+            <Link className={styles.statCardLink} href="/admin/finance">
+              Открыть финансы
+            </Link>
           }
         />
       </div>
+
+      <Panel
+        title="Денежный поток дня"
+        description="Слева все поступления по дню, справа все расходы. Отсюда видно, откуда деньги пришли и куда ушли."
+        action={
+          <Link className={styles.secondaryButton} href="/admin/finance">
+            Открыть финансы
+          </Link>
+        }
+      >
+        <FinanceBoard
+          expenseAction={{
+            href: "/admin/finance?type=expense#finance-form",
+            label: "Добавить запись",
+            ariaLabel: "Добавить расход"
+          }}
+          expenseEntries={expenseEntries}
+          expenseTotal={totalExpenses}
+          incomeAction={{
+            href: "/admin/finance?type=income#finance-form",
+            label: "Добавить запись",
+            ariaLabel: "Добавить доход"
+          }}
+          incomeEntries={incomeEntries}
+          incomeTotal={totalIncome}
+        />
+      </Panel>
 
       <div className={styles.dashboardGrid}>
         <Panel
@@ -474,29 +657,61 @@ export function AdminDashboardPage() {
           />
         </Panel>
 
-        <div className={styles.sideColumn}>
-          <Panel title="Отчёт дня" description="Откуда пришли деньги, какими способами и какие изменения были по записям.">
-            <div className={styles.reportGrid}>
-              <div className={styles.reportCard}>
-                <span className={styles.reportTitle}>Способы оплаты</span>
-                <ReportList items={paymentRows} emptyLabel="Платежей по выбранному дню пока нет." />
+        <div className={styles.dashboardSideGrid}>
+          <Panel
+            className={styles.dashboardSideSpanWide}
+            title="Итоги дня"
+            description="Быстрый разбор доходов, расходов и изменений по выбранной дате."
+            tone="summary"
+          >
+            <div className={clsx(styles.reportGrid, styles.dashboardSummaryGrid)}>
+              <div className={styles.reportCard} data-tone="income">
+                <div className={styles.reportCardHeader}>
+                  <span className={styles.reportTitle}>Источники дохода</span>
+                  <strong className={styles.reportCardValue}>{formatCurrency(totalIncome)}</strong>
+                </div>
+                <p className={styles.reportLead}>Лидер дня: {getFlowLeadLabel(incomeBreakdown, "пока пусто")}</p>
+                <ReportList items={incomeRows} emptyLabel="Поступлений по выбранному дню пока нет." />
               </div>
-              <div className={styles.reportCard}>
-                <span className={styles.reportTitle}>Источники записей</span>
-                <ReportList items={sourceRows} emptyLabel="По этому дню источники ещё не накопились." />
+              <div className={styles.reportCard} data-tone="expense">
+                <div className={styles.reportCardHeader}>
+                  <span className={styles.reportTitle}>Категории расходов</span>
+                  <strong className={styles.reportCardValue}>{formatCurrency(totalExpenses)}</strong>
+                </div>
+                <p className={styles.reportLead}>
+                  Главное списание: {getFlowLeadLabel(expenseBreakdown, "пока без категорий")}
+                </p>
+                <ReportList items={expenseRows} emptyLabel="Списаний по выбранному дню пока нет." />
               </div>
-              <div className={styles.reportCard}>
-                <span className={styles.reportTitle}>Изменения по дню</span>
+              <div className={styles.reportCard} data-tone="activity">
+                <div className={styles.reportCardHeader}>
+                  <span className={styles.reportTitle}>Изменения по дню</span>
+                  <strong className={styles.reportCardValue}>{dayActivity.length}</strong>
+                </div>
+                <p className={styles.reportLead}>
+                  {dayActivity.length
+                    ? "Последние действия менеджера и автоматические обновления по этой дате."
+                    : "По выбранной дате пока не было изменений."}
+                </p>
                 <ReportList items={activityRows} emptyLabel="Изменений по этому дню пока не было." />
               </div>
             </div>
           </Panel>
 
-          <Panel title="Продажи сертификатов" description="Полностью оплаченные сертификаты за выбранный день.">
+          <Panel
+            className={styles.dashboardMiniPanel}
+            title="Продажи сертификатов"
+            description="Полностью оплаченные сертификаты за выбранный день."
+            tone="gift"
+          >
+            <div className={styles.dashboardPanelMeta}>
+              <span>{dayGiftSales.length} продаж за день</span>
+              <strong>{formatCurrency(dayGiftRevenue)}</strong>
+            </div>
             {dayGiftSales.length ? (
               <div className={styles.sideList}>
                 {dayGiftSales.map((order) => (
-                  <div key={order.id} className={styles.sideListItem}>
+                  <div key={order.id} className={styles.sideListItem} data-card="gift">
                     <div>
                       <strong>{order.purchaserName}</strong>
                       <span>
@@ -504,7 +719,10 @@ export function AdminDashboardPage() {
                       </span>
                       <small>{getGiftCertificateSummary(order)}</small>
                     </div>
-                    <small>{order.deliveryMethod}</small>
+                    <div className={styles.sideListItemAside}>
+                      <strong>{formatCurrency(order.amount)}</strong>
+                      <small>{order.deliveryMethod}</small>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -513,13 +731,23 @@ export function AdminDashboardPage() {
             )}
           </Panel>
 
-          <Panel title="Где ещё есть места" description="Слоты, в которые ещё можно добавить гостей.">
+          <Panel
+            className={styles.dashboardMiniPanel}
+            title="Где ещё есть места"
+            description="Слоты, в которые ещё можно добавить гостей."
+            tone="availability"
+          >
+            <div className={styles.dashboardPanelMeta}>
+              <span>Свободных слотов: {freeSlots.length}</span>
+              <strong>{remainingGuests} мест</strong>
+            </div>
             {freeSlots.length ? (
               <div className={styles.slotGrid}>
                 {freeSlots.map((slot) => (
                   <button
                     key={slot.start}
                     className={styles.slotCard}
+                    data-state={slot.remainingGuests >= 8 ? "open" : slot.remainingGuests >= 4 ? "busy" : "limited"}
                     type="button"
                     onClick={() => openCreateModal({ date: selectedDate, time: slot.start })}
                   >
@@ -534,11 +762,20 @@ export function AdminDashboardPage() {
             )}
           </Panel>
 
-          <Panel title="Ближайшие записи" description="Следующие гости по времени.">
+          <Panel
+            className={styles.dashboardMiniPanel}
+            title="Ближайшие записи"
+            description="Следующие гости по времени."
+            tone="upcoming"
+          >
+            <div className={styles.dashboardPanelMeta}>
+              <span>Следующие визиты</span>
+              <strong>{upcomingAppointments.length}</strong>
+            </div>
             {upcomingAppointments.length ? (
               <div className={styles.sideList}>
                 {upcomingAppointments.map((appointment) => (
-                  <div key={appointment.id} className={styles.sideListItem}>
+                  <div key={appointment.id} className={styles.sideListItem} data-card="upcoming">
                     <div>
                       <strong>{appointment.clientName}</strong>
                       <span>
@@ -546,7 +783,9 @@ export function AdminDashboardPage() {
                       </span>
                       <small>{getPaymentSummary(appointment)}</small>
                     </div>
-                    <StatusChip status={appointment.status} />
+                    <div className={styles.sideListItemAside}>
+                      <StatusChip status={appointment.status} />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -555,21 +794,36 @@ export function AdminDashboardPage() {
             )}
           </Panel>
 
-          <Panel title="Последние действия по броням" description="Недавние изменения в основных записях.">
-            <div className={styles.sideList}>
-              {recentActions.map((appointment) => (
-                <div key={appointment.id} className={styles.sideListItem}>
-                  <div>
-                    <strong>{appointment.clientName}</strong>
-                    <span>
-                      {appointment.time} · {appointment.guestCount} чел.
-                    </span>
-                    <small>{getTariffSummary(appointment, true)}</small>
-                  </div>
-                  <small>{formatShortDate(appointment.date)}</small>
-                </div>
-              ))}
+          <Panel
+            className={styles.dashboardMiniPanel}
+            title="Последние действия по броням"
+            description="Недавние изменения в основных записях."
+            tone="activity"
+          >
+            <div className={styles.dashboardPanelMeta}>
+              <span>Последние обновления</span>
+              <strong>{recentActions.length}</strong>
             </div>
+            {recentActions.length ? (
+              <div className={styles.sideList}>
+                {recentActions.map((appointment) => (
+                  <div key={appointment.id} className={styles.sideListItem} data-card="activity">
+                    <div>
+                      <strong>{appointment.clientName}</strong>
+                      <span>
+                        {appointment.time} · {appointment.guestCount} чел.
+                      </span>
+                      <small>{getTariffSummary(appointment, true)}</small>
+                    </div>
+                    <div className={styles.sideListItemAside}>
+                      <small>{formatShortDate(appointment.date)}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="Действий пока нет" description="Последние изменения по броням появятся здесь автоматически." />
+            )}
           </Panel>
         </div>
       </div>
@@ -717,6 +971,268 @@ function NotebookScheduleViewWrapper() {
       settings={settings}
       updateSlotReserve={updateSlotReserve}
     />
+  );
+}
+
+function getCurrentTimeValue() {
+  const now = new Date();
+  return `${`${now.getHours()}`.padStart(2, "0")}:${`${now.getMinutes()}`.padStart(2, "0")}`;
+}
+
+function createFinanceDraft(dateKey, type = "income") {
+  const nextType = financeTypeOptions.some((option) => option.value === type) ? type : financeTypeOptions[0].value;
+
+  return {
+    id: "",
+    type: nextType,
+    date: dateKey,
+    time: getCurrentTimeValue(),
+    title: "",
+    person: "",
+    category: nextType === "expense" ? expenseCategoryOptions[0] : incomeCategoryOptions[0],
+    amount: "",
+    note: ""
+  };
+}
+
+export function AdminFinancePage() {
+  const searchParams = useSearchParams();
+  const { appointments, deleteFinanceRecord, financeRecords, giftOrders, saveFinanceRecord, searchQuery, selectedDate } = useAdmin();
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const [draft, setDraft] = useState(() => createFinanceDraft(formatDateKey(new Date())));
+  const [formError, setFormError] = useState("");
+  const formAnchorRef = useRef(null);
+  const typeFromQuery = searchParams.get("type");
+
+  useEffect(() => {
+    setDraft((current) => ({
+      ...current,
+      date: selectedDate
+    }));
+  }, [selectedDate]);
+
+  useEffect(() => {
+    if (!financeTypeOptions.some((option) => option.value === typeFromQuery)) {
+      return;
+    }
+
+    setDraft((current) => ({
+      ...current,
+      type: typeFromQuery,
+      category: typeFromQuery === "expense" ? expenseCategoryOptions[0] : incomeCategoryOptions[0]
+    }));
+  }, [typeFromQuery]);
+
+  const incomeEntriesAll = useMemo(
+    () => getDayIncomeEntries(appointments, giftOrders, financeRecords, selectedDate),
+    [appointments, financeRecords, giftOrders, selectedDate]
+  );
+  const expenseEntriesAll = useMemo(() => getDayExpenseEntries(financeRecords, selectedDate), [financeRecords, selectedDate]);
+  const incomeEntries = useMemo(
+    () => incomeEntriesAll.filter((entry) => matchesFinanceSearch(entry, deferredSearchQuery)),
+    [deferredSearchQuery, incomeEntriesAll]
+  );
+  const expenseEntries = useMemo(
+    () => expenseEntriesAll.filter((entry) => matchesFinanceSearch(entry, deferredSearchQuery)),
+    [deferredSearchQuery, expenseEntriesAll]
+  );
+  const totalIncome = useMemo(
+    () => getDayTotalIncome(appointments, giftOrders, financeRecords, selectedDate),
+    [appointments, financeRecords, giftOrders, selectedDate]
+  );
+  const totalExpenses = useMemo(() => getDayExpenseTotal(financeRecords, selectedDate), [financeRecords, selectedDate]);
+  const netIncome = totalIncome - totalExpenses;
+  const incomeBreakdownItems = useMemo(
+    () => toBreakdownItems(getDayIncomeBreakdown(appointments, giftOrders, financeRecords, selectedDate), "поступл."),
+    [appointments, financeRecords, giftOrders, selectedDate]
+  );
+  const expenseBreakdownItems = useMemo(
+    () => toBreakdownItems(getDayExpenseBreakdown(financeRecords, selectedDate), "спис."),
+    [financeRecords, selectedDate]
+  );
+  const manualOperationCount = incomeEntriesAll.filter((entry) => entry.isManual).length + expenseEntriesAll.filter((entry) => entry.isManual).length;
+  const systemIncomeCount = incomeEntriesAll.filter((entry) => !entry.isManual).length;
+  const categoryOptions = draft.type === "expense" ? expenseCategoryOptions : incomeCategoryOptions;
+
+  function updateDraft(field, value) {
+    setDraft((current) => ({
+      ...current,
+      [field]: value
+    }));
+  }
+
+  function handleTypeChange(nextType) {
+    setDraft((current) => ({
+      ...current,
+      type: nextType,
+      category: nextType === "expense" ? expenseCategoryOptions[0] : incomeCategoryOptions[0]
+    }));
+    setFormError("");
+  }
+
+  function openFinanceForm(nextType) {
+    handleTypeChange(nextType);
+    formAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!draft.title.trim()) {
+      setFormError("Укажите, что это за операция.");
+      return;
+    }
+
+    if (!Number(draft.amount)) {
+      setFormError("Укажите сумму больше 0 ₽.");
+      return;
+    }
+
+    saveFinanceRecord({
+      ...draft,
+      date: selectedDate,
+      amount: Number(draft.amount)
+    });
+    setDraft(createFinanceDraft(selectedDate, draft.type));
+    setFormError("");
+  }
+
+  return (
+    <div className={styles.pageStack}>
+      <DaySwitcher />
+
+      <div className={styles.statsGrid}>
+        <StatCard label="Выручка дня" value={formatCurrency(totalIncome)} note={`Автоматически ${systemIncomeCount} поступл. · ручных ${manualOperationCount}`} tone="accent" />
+        <StatCard label="Расходы дня" value={formatCurrency(totalExpenses)} note={expenseEntriesAll.length ? getFlowLeadLabel(getDayExpenseBreakdown(financeRecords, selectedDate), "без категорий") : "Расходов нет"} tone="danger" />
+        <StatCard label="Чистый итог" value={formatCurrency(netIncome)} note="Доходы минус расходы за выбранную дату" tone={netIncome >= 0 ? "success" : "danger"} />
+        <StatCard
+          label="Операции в дне"
+          value={incomeEntriesAll.length + expenseEntriesAll.length}
+          note={`${incomeEntriesAll.length} поступлений · ${expenseEntriesAll.length} списаний`}
+          tone="info"
+        />
+      </div>
+
+      <div id="finance-form" ref={formAnchorRef}>
+        <Panel title="Новая операция" description="Добавьте ручной доход или расход. Запись сразу попадёт в итоги дня и в историю CRM.">
+          <form className={styles.financeForm} onSubmit={handleSubmit}>
+            <div className={styles.segmented}>
+              {financeTypeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={clsx(styles.segmentedButton, draft.type === option.value && styles.segmentedButtonActive)}
+                  type="button"
+                  onClick={() => handleTypeChange(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.financeFormGrid}>
+              <label className={styles.field}>
+                <span>Время</span>
+                <input type="time" value={draft.time} onChange={(event) => updateDraft("time", event.target.value)} />
+              </label>
+
+              <label className={styles.field}>
+                <span>Категория</span>
+                <select value={draft.category} onChange={(event) => updateDraft("category", event.target.value)}>
+                  {categoryOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className={clsx(styles.field, styles.financeFieldWide)}>
+                <span>Что это за операция</span>
+                <input
+                  placeholder={draft.type === "expense" ? "Например, зарплата администратора" : "Например, доплата за праздник"}
+                  value={draft.title}
+                  onChange={(event) => updateDraft("title", event.target.value)}
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>{draft.type === "expense" ? "Кому ушли деньги" : "От кого деньги"}</span>
+                <input
+                  placeholder={draft.type === "expense" ? "Сотрудник или поставщик" : "Клиент или контакт"}
+                  value={draft.person}
+                  onChange={(event) => updateDraft("person", event.target.value)}
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>Сумма</span>
+                <input
+                  min="0"
+                  step="100"
+                  type="number"
+                  value={draft.amount}
+                  onChange={(event) => updateDraft("amount", event.target.value)}
+                />
+              </label>
+
+              <label className={clsx(styles.field, styles.financeFieldWide)}>
+                <span>Комментарий</span>
+                <textarea
+                  rows={3}
+                  placeholder="Коротко поясните, что это за доход или расход."
+                  value={draft.note}
+                  onChange={(event) => updateDraft("note", event.target.value)}
+                />
+              </label>
+            </div>
+
+            {formError ? <div className={styles.inlineAlert} data-tone="danger">{formError}</div> : null}
+
+            <div className={styles.financeFormFooter}>
+              <span className={styles.financeFormHint}>Операция будет записана на {formatLongDate(selectedDate)}.</span>
+              <button className={styles.primaryButton} type="submit">
+                <Plus size={18} />
+                <span>{draft.type === "expense" ? "Добавить расход" : "Добавить доход"}</span>
+              </button>
+            </div>
+          </form>
+        </Panel>
+      </div>
+
+      <Panel title="Итоги дня" description="Слева все доходы, справа все расходы. Для ручных операций доступно быстрое удаление.">
+        <FinanceBoard
+          expenseAction={{
+            label: "Добавить запись",
+            ariaLabel: "Добавить расход",
+            onClick: () => openFinanceForm("expense")
+          }}
+          expenseEntries={expenseEntries}
+          expenseTotal={totalExpenses}
+          incomeAction={{
+            label: "Добавить запись",
+            ariaLabel: "Добавить доход",
+            onClick: () => openFinanceForm("income")
+          }}
+          incomeEntries={incomeEntries}
+          incomeTotal={totalIncome}
+          onDeleteExpense={deleteFinanceRecord}
+          onDeleteIncome={deleteFinanceRecord}
+        />
+      </Panel>
+
+      <Panel title="Откуда деньги пришли и куда ушли" description="Крупные источники поступлений и категории расходов за день.">
+        <div className={styles.reportGrid}>
+          <div className={styles.reportCard}>
+            <span className={styles.reportTitle}>Источники дохода</span>
+            <ReportList items={incomeBreakdownItems} emptyLabel="Поступлений по выбранному дню пока нет." />
+          </div>
+          <div className={styles.reportCard}>
+            <span className={styles.reportTitle}>Категории расходов</span>
+            <ReportList items={expenseBreakdownItems} emptyLabel="Расходов по выбранному дню пока нет." />
+          </div>
+        </div>
+      </Panel>
+    </div>
   );
 }
 
@@ -1040,7 +1556,8 @@ export function AdminSettingsPage() {
   const startRouteOptions = [
     { value: "/admin/dashboard", label: "Сегодня", hint: "тетрадь дня" },
     { value: "/admin/calendar", label: "Календарь", hint: "планирование" },
-    { value: "/admin/appointments", label: "Записи", hint: "все брони" }
+    { value: "/admin/appointments", label: "Записи", hint: "все брони" },
+    { value: "/admin/finance", label: "Финансы", hint: "деньги и расходы" }
   ];
   const timeFormatOptions = [
     { value: "24h", label: "24 часа", hint: "11:00" },

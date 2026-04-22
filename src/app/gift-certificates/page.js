@@ -1,86 +1,10 @@
-import { Gift, Heart, Sparkles } from "lucide-react";
-import Link from "next/link";
-import { AnimatedSection } from "@/components/animated-section";
 import { GiftCertificateOrderForm } from "@/components/gift-certificate-order-form";
-import { PageHero } from "@/components/page-hero";
-import { SectionHeading } from "@/components/section-heading";
-import { giftCertificates } from "@/lib/site-data";
-
-const steps = [
-  { icon: Gift, title: "Выберите номинал или тариф" },
-  { icon: Heart, title: "Укажите получателя и текст поздравления" },
-  { icon: Sparkles, title: "Оплатите и отправьте сертификат" }
-];
 
 export const metadata = {
-  title: "Подарочные сертификаты",
-  description: "Подарочные сертификаты Piggy Land: цифровой подарок на визит с минипигами с выбором тарифа или номинала."
+  title: "Подарочный сертификат на посещение",
+  description: "Подарочный сертификат Piggy Land на посещение для одного гостя или группы до 12 человек."
 };
 
 export default function GiftCertificatesPage() {
-  return (
-    <>
-      <PageHero
-        eyebrow="Подарочные сертификаты"
-        title="Подарок, который запоминается как теплое впечатление, а не как еще одна вещь"
-        description="Выберите сертификат, заполните анкету для получателя и оплатите его полностью прямо на сайте."
-        primaryAction={{ href: "#gift-order", label: "Оформить сертификат" }}
-        secondaryAction={{ href: "/rates", label: "Посмотреть тарифы" }}
-      />
-
-      <AnimatedSection>
-        <div className="container">
-          <SectionHeading
-            eyebrow="Варианты сертификатов"
-            title="От конкретного тарифа до свободного номинала"
-            description="Можно выбрать готовый подарок или оставить человеку свободу выбрать удобный день самому."
-          />
-          <div className="card-grid card-grid-3">
-            {giftCertificates.map((item) => (
-              <article key={item.id} className="card feature-card">
-                <div className="feature-icon">
-                  <Gift size={22} />
-                </div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-                <strong>{item.price.toLocaleString("ru-RU")} ₽</strong>
-              </article>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="section-muted">
-        <div className="container">
-          <SectionHeading
-            eyebrow="Как это работает"
-            title="Как подарить визит в Piggy Land"
-            description="Все просто: выберите сертификат, укажите получателя и отправьте подарок."
-          />
-          <div className="timeline-grid">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-
-              return (
-                <article key={step.title} className="card timeline-card">
-                  <div className="timeline-icon">
-                    <Icon size={22} />
-                  </div>
-                  <span className="timeline-count">Шаг {index + 1}</span>
-                  <h3>{step.title}</h3>
-                </article>
-              );
-            })}
-          </div>
-          <div className="section-actions">
-            <Link className="button button-primary" href="#gift-order">
-              Перейти к оформлению
-            </Link>
-          </div>
-        </div>
-      </AnimatedSection>
-
-      <GiftCertificateOrderForm />
-    </>
-  );
+  return <GiftCertificateOrderForm />;
 }

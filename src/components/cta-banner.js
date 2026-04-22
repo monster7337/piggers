@@ -7,9 +7,15 @@ export function CtaBanner() {
         <div className="cta-banner">
           <div>
             <span className="eyebrow">Запишитесь заранее</span>
-            <h2 className="section-title">Выберите удобное время и запишитесь к нашим минипигам заранее.</h2>
+            <h2 className="section-title">
+              <span className="copy-desktop">Выберите удобное время и запишитесь к нашим минипигам заранее.</span>
+              <span className="copy-mobile">Выберите удобный сеанс и приезжайте к минипигам.</span>
+            </h2>
             <p className="section-copy">
-              Мы работаем по предварительной записи: выберите билет, день и время, а дальше мы с радостью будем ждать вас в гости.
+              <span className="copy-desktop">
+                Мы работаем по предварительной записи: выберите билет, день и время, а дальше мы с радостью будем ждать вас в гости.
+              </span>
+              <span className="copy-mobile">Билет, дата и время выбираются за пару шагов прямо на сайте.</span>
             </p>
           </div>
           <div className="button-row">

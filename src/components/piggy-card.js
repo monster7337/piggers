@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
 
 export function PiggyCard({ piggy, onOpen }) {
@@ -19,15 +18,9 @@ export function PiggyCard({ piggy, onOpen }) {
         </div>
         <p>{piggy.character}</p>
         {piggy.trait ? <p className="muted-text">{piggy.trait}</p> : null}
-        {onOpen ? (
-          <button type="button" className="button button-secondary button-block" onClick={() => onOpen(piggy.slug)}>
-            Узнать подробнее
-          </button>
-        ) : (
-          <Link className="button button-secondary button-block" href={`/piggies/${piggy.slug}`}>
-            Узнать подробнее
-          </Link>
-        )}
+        <button type="button" className="button button-secondary button-block" onClick={() => onOpen?.(piggy.slug)}>
+          Узнать подробнее
+        </button>
       </div>
     </article>
   );

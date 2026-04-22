@@ -4,7 +4,8 @@
   "private": true,
   "description": "Piggy Land booking website built with React and Next.js",
   "scripts": {
-    "dev": "next dev",
+    "predev": "node scripts/reset-dev-cache.mjs",
+    "dev": "next dev --webpack",
     "build": "next build",
     "postbuild": "node scripts/ensure-nojekyll.mjs",
     "start": "next start"

@@ -5,6 +5,7 @@ export const ADMIN_APPOINTMENTS_KEY = "piggyland-admin-appointments";
 export const ADMIN_SETTINGS_KEY = "piggyland-admin-settings";
 export const ADMIN_ACTIVITY_KEY = "piggyland-admin-activity";
 export const ADMIN_GIFT_CERTIFICATES_KEY = "piggyland-admin-gift-certificates";
+export const ADMIN_FINANCE_RECORDS_KEY = "piggyland-admin-finance-records";
 
 export const PUBLIC_SLOT_CAPACITY = 12;
 export const SLOT_RESERVE_CAPACITY = 2;
@@ -60,7 +61,13 @@ export const paymentMethodOptions = [
   { value: "transfer", label: "Перевод" }
 ];
 export const onSitePaymentMethodOptions = paymentMethodOptions.filter((item) => item.value !== "online");
-export const giftDeliveryOptions = ["Email", "WhatsApp", "Telegram"];
+export const giftDeliveryOptions = ["Email", "Telegram", "VK", "Instagram", "WhatsApp"];
+export const financeTypeOptions = [
+  { value: "income", label: "Доход" },
+  { value: "expense", label: "Расход" }
+];
+export const incomeCategoryOptions = ["Ручной доход", "Мероприятие", "Продажа на месте", "Доплата", "Прочее"];
+export const expenseCategoryOptions = ["Зарплата", "Расходники", "Корм и уход", "Коммунальные", "Реклама", "Прочее"];
 export const extraOptions = siteExtras.map((item) => ({
   id: item.id,
   title: item.title,
@@ -208,6 +215,15 @@ function normalizeOnSitePaymentMethod(method) {
   return onSitePaymentMethodOptions.some((item) => item.value === method) ? method : "";
 }
 
+function normalizeFinanceType(type) {
+  return type === "expense" ? "expense" : "income";
+}
+
+function normalizeFinanceCategory(type, value) {
+  const options = type === "expense" ? expenseCategoryOptions : incomeCategoryOptions;
+  return options.includes(value) ? value : options[0];
+}
+
 function normalizeReserveSeatCount(value) {
   const normalized = Number(value);
   if (!Number.isFinite(normalized)) {
@@ -223,6 +239,10 @@ function normalizeText(value) {
 
 function normalizeEmail(value) {
   return normalizeText(value).trim();
+}
+
+function compareDateTime(leftDate, leftTime, rightDate, rightTime) {
+  return `${leftDate} ${normalizeClockTime(leftTime)}`.localeCompare(`${rightDate} ${normalizeClockTime(rightTime)}`);
 }
 
 function createGuestTicket(tariff, index) {
@@ -468,6 +488,166 @@ export function getDaySourceBreakdown(appointments, dateKey) {
       };
       return summary;
     }, {});
+}
+
+function sortLedgerEntries(entries) {
+  return [...entries].sort((left, right) => compareDateTime(right.date, right.time, left.date, left.time));
+}
+
+export function getDayFinanceRecords(financeRecords, dateKey) {
+  return sortFinanceRecords(financeRecords.filter((record) => record.date === dateKey));
+}
+
+export function getDayIncomeEntries(appointments, giftOrders, financeRecords, dateKey) {
+  const appointmentEntries = getDayAppointments(appointments, dateKey)
+    .filter(isAppointmentActive)
+    .flatMap((appointment) => {
+      const entries = [];
+      const prepaymentAmount = normalizeAmount(appointment.prepaymentAmount);
+      const onSitePaidAmount = getOnSitePaidAmount(appointment);
+
+      if (prepaymentAmount) {
+        entries.push({
+          id: `income-prepayment-${appointment.id}`,
+          type: "income",
+          stream: "Онлайн предоплата",
+          origin: "Бронь",
+          date: appointment.date,
+          time: appointment.time,
+          title: "Предоплата на сайте",
+          person: appointment.clientName,
+          amount: prepaymentAmount,
+          note: `${appointment.guestCount} чел. · ${getTariffSummary(appointment, true)}`,
+          isManual: false
+        });
+      }
+
+      if (onSitePaidAmount) {
+        entries.push({
+          id: `income-onsite-${appointment.id}`,
+          type: "income",
+          stream: "Оплата на месте",
+          origin: "CRM",
+          date: appointment.date,
+          time: appointment.time,
+          title: "Оплата в пространстве",
+          person: appointment.clientName,
+          amount: onSitePaidAmount,
+          note: appointment.onSitePaymentMethod ? getPaymentMethodLabel(appointment.onSitePaymentMethod) : "Способ не указан",
+          isManual: false
+        });
+      }
+
+      return entries;
+    });
+
+  const giftEntries = getDayGiftOrders(giftOrders, dateKey).map((order) => ({
+    id: `income-gift-${order.id}`,
+    type: "income",
+    stream: "Сертификаты",
+    origin: "Сайт",
+    date: order.purchaseDate,
+    time: order.purchaseTime,
+    title: "Продажа сертификата",
+    person: order.purchaserName,
+    amount: normalizeAmount(order.amount),
+    note: order.certificateTitle,
+    isManual: false
+  }));
+
+  const manualIncomeEntries = getDayFinanceRecords(financeRecords, dateKey)
+    .filter((record) => record.type === "income")
+    .map((record) => ({
+      id: record.id,
+      type: "income",
+      stream: record.category,
+      origin: "Ручной",
+      date: record.date,
+      time: record.time,
+      title: record.title,
+      person: record.person,
+      amount: normalizeAmount(record.amount),
+      note: [record.category, record.note].filter(Boolean).join(" · "),
+      isManual: true
+    }));
+
+  return sortLedgerEntries([...appointmentEntries, ...giftEntries, ...manualIncomeEntries]);
+}
+
+export function getDayExpenseEntries(financeRecords, dateKey) {
+  return sortLedgerEntries(
+    getDayFinanceRecords(financeRecords, dateKey)
+      .filter((record) => record.type === "expense")
+      .map((record) => ({
+        id: record.id,
+        type: "expense",
+        stream: record.category,
+        origin: "Расход",
+        date: record.date,
+        time: record.time,
+        title: record.title,
+        person: record.person,
+        amount: normalizeAmount(record.amount),
+        note: [record.category, record.note].filter(Boolean).join(" · "),
+        isManual: true
+      }))
+  );
+}
+
+function summarizeLedgerBy(entries, keyBuilder) {
+  return entries.reduce((summary, entry) => {
+    const key = keyBuilder(entry);
+    const current = summary[key] ?? { amount: 0, count: 0 };
+
+    summary[key] = {
+      amount: current.amount + normalizeAmount(entry.amount),
+      count: current.count + 1
+    };
+
+    return summary;
+  }, {});
+}
+
+export function getDayIncomeBreakdown(appointments, giftOrders, financeRecords, dateKey) {
+  return summarizeLedgerBy(getDayIncomeEntries(appointments, giftOrders, financeRecords, dateKey), (entry) => entry.stream);
+}
+
+export function getDayExpenseBreakdown(financeRecords, dateKey) {
+  return summarizeLedgerBy(getDayExpenseEntries(financeRecords, dateKey), (entry) => entry.stream);
+}
+
+export function getDayExpenseTotal(financeRecords, dateKey) {
+  return getDayExpenseEntries(financeRecords, dateKey).reduce((sum, entry) => sum + normalizeAmount(entry.amount), 0);
+}
+
+export function getDayTotalIncome(appointments, giftOrders, financeRecords, dateKey) {
+  return getDayIncomeEntries(appointments, giftOrders, financeRecords, dateKey).reduce(
+    (sum, entry) => sum + normalizeAmount(entry.amount),
+    0
+  );
+}
+
+export function matchesFinanceSearch(entry, query) {
+  if (!query.trim()) {
+    return true;
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const haystack = [
+    entry.title,
+    entry.person,
+    entry.note,
+    entry.stream,
+    entry.origin,
+    entry.date,
+    entry.time,
+    `${entry.amount}`
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(normalizedQuery);
 }
 
 export function formatDateKey(date) {
@@ -762,6 +942,33 @@ export function groupClients(appointments) {
     .sort((left, right) => appointmentSort(right.lastAppointment, left.lastAppointment));
 }
 
+export function sortFinanceRecords(records) {
+  return [...records].sort((left, right) => compareDateTime(right.date, right.time, left.date, left.time));
+}
+
+export function normalizeFinanceRecord(values) {
+  const createdAt = values.createdAt ?? new Date().toISOString();
+  const type = normalizeFinanceType(values.type);
+  const date = values.date || formatDateKey(new Date(createdAt));
+  const title = normalizeText(values.title).trim();
+
+  return {
+    ...values,
+    id: values.id || createId("finance"),
+    type,
+    date,
+    time: normalizeClockTime(values.time || getCurrentClockTime()),
+    title: title || (type === "income" ? "Новый доход" : "Новый расход"),
+    person: normalizeText(values.person).trim(),
+    category: normalizeFinanceCategory(type, values.category),
+    amount: normalizeAmount(values.amount),
+    note: normalizeText(values.note).trim(),
+    source: values.source === "system" ? "system" : "manual",
+    createdAt,
+    updatedAt: values.updatedAt ?? createdAt
+  };
+}
+
 export function buildTimelineHours() {
   return [...FIXED_SLOT_TIMES];
 }
@@ -893,7 +1100,6 @@ export function createMockAppointments() {
       time: "11:00",
       guestTickets: makeTickets("Семейный билет", "Обычный билет", "Льготный билет"),
       service: "Семейный билет",
-      selectedExtras: [{ id: "feed-cup", quantity: 1 }],
       comment: "Мама, папа и ребёнок.",
       status: "confirmed",
       createdAtOffsetDays: -2,
@@ -909,7 +1115,6 @@ export function createMockAppointments() {
       time: "11:00",
       guestTickets: makeTickets("Обычный билет", "Обычный билет", "Льготный билет", "Льготный билет", "Семейный билет"),
       service: "Семейный билет",
-      selectedExtras: [{ id: "bottle-feeding", quantity: 1 }],
       comment: "Компания друзей, хотят сидеть вместе.",
       status: "pending",
       createdAtOffsetDays: -3,
@@ -1041,7 +1246,6 @@ export function createMockAppointments() {
       time: "19:00",
       guestTickets: makeTickets("Семейный билет", "Семейный билет", "Обычный билет", "Обычный билет"),
       service: "Семейный билет",
-      selectedExtras: [{ id: "feed-cup", quantity: 2 }],
       comment: "Нужны места рядом.",
       status: "confirmed",
       createdAtOffsetDays: -10,
@@ -1053,9 +1257,19 @@ export function createMockAppointments() {
 }
 
 export function normalizeGiftCertificateOrder(values) {
-  const certificateId = giftCertificateCatalog[values.certificateId] ? values.certificateId : siteGiftCertificates[0].id;
+  const fallbackCertificateId = siteGiftCertificates.find((item) => item.id === "gift-visit")?.id ?? siteGiftCertificates[0].id;
+  const certificateId = giftCertificateCatalog[values.certificateId] ? values.certificateId : fallbackCertificateId;
   const presetPrice = giftCertificateCatalog[certificateId]?.price ?? 0;
-  const amount = certificateId === "gift-nominal" ? Math.max(1000, normalizeAmount(values.amount || presetPrice)) : presetPrice;
+  const guestCount = Math.max(1, Math.min(12, Number(values.guestCount) || 1));
+  const defaultVisitPricePerGuest = guestCount >= 3 ? 1200 : 1500;
+  const pricePerGuest =
+    certificateId === "gift-visit" ? normalizeAmount(values.pricePerGuest || defaultVisitPricePerGuest) || defaultVisitPricePerGuest : 0;
+  const amount =
+    certificateId === "gift-visit"
+      ? normalizeAmount(values.amount || guestCount * pricePerGuest)
+      : certificateId === "gift-nominal"
+        ? Math.max(1000, normalizeAmount(values.amount || presetPrice))
+        : presetPrice;
   const createdAt = values.createdAt ?? new Date().toISOString();
   const purchaseDate = values.purchaseDate || formatDateKey(new Date(createdAt));
 
@@ -1063,14 +1277,17 @@ export function normalizeGiftCertificateOrder(values) {
     ...values,
     id: values.id || createId("gift"),
     certificateId,
-    certificateTitle: giftCertificateCatalog[certificateId]?.title ?? "Подарочный сертификат",
+    certificateTitle: normalizeText(values.certificateTitle).trim() || giftCertificateCatalog[certificateId]?.title || "Подарочный сертификат",
     amount,
+    guestCount,
+    pricePerGuest,
     purchaserName: normalizeText(values.purchaserName).trim(),
     purchaserPhone: normalizeText(values.purchaserPhone).trim(),
     purchaserEmail: normalizeEmail(values.purchaserEmail),
     recipientName: normalizeText(values.recipientName).trim(),
     recipientPhone: normalizeText(values.recipientPhone).trim(),
     recipientEmail: normalizeEmail(values.recipientEmail),
+    deliveryContact: normalizeText(values.deliveryContact).trim(),
     message: normalizeText(values.message).trim(),
     deliveryMethod: giftDeliveryOptions.includes(values.deliveryMethod) ? values.deliveryMethod : giftDeliveryOptions[0],
     comment: normalizeText(values.comment).trim(),
@@ -1101,10 +1318,12 @@ export function matchesGiftSearch(order, query) {
     order.recipientName,
     order.recipientPhone,
     order.recipientEmail,
+    order.deliveryContact,
     order.certificateTitle,
     order.message,
     order.comment,
     order.deliveryMethod,
+    `${order.guestCount || ""}`,
     `${order.amount}`
   ]
     .filter(Boolean)
@@ -1237,6 +1456,11 @@ export function readStoredGiftOrders() {
   return storedOrders ? storedOrders.map((order) => normalizeGiftCertificateOrder(order)) : createMockGiftCertificateOrders();
 }
 
+export function readStoredFinanceRecords() {
+  const storedRecords = readAdminJson(ADMIN_FINANCE_RECORDS_KEY, null);
+  return storedRecords ? sortFinanceRecords(storedRecords.map((record) => normalizeFinanceRecord(record))) : createMockFinanceRecords();
+}
+
 export function readStoredActivityLog() {
   const storedActivity = readAdminJson(ADMIN_ACTIVITY_KEY, null);
   return storedActivity ? storedActivity.map((entry) => normalizeActivityEntry(entry)) : createMockActivityLog();
@@ -1358,6 +1582,65 @@ export function createMockGiftCertificateOrders() {
   ];
 }
 
+export function createMockFinanceRecords() {
+  const today = formatDateKey(new Date());
+
+  return sortFinanceRecords([
+    normalizeFinanceRecord({
+      id: "finance-001",
+      type: "expense",
+      date: today,
+      time: "09:40",
+      title: "Расходники для зала",
+      person: "Хозмаркет",
+      category: "Расходники",
+      amount: 900,
+      note: "Салфетки, перчатки и уборка",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }),
+    normalizeFinanceRecord({
+      id: "finance-002",
+      type: "income",
+      date: today,
+      time: "12:20",
+      title: "Доплата за праздник",
+      person: "Анастасия Волкова",
+      category: "Мероприятие",
+      amount: 7000,
+      note: "День рождения вне сайта",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }),
+    normalizeFinanceRecord({
+      id: "finance-003",
+      type: "expense",
+      date: today,
+      time: "20:10",
+      title: "Зарплата администратора",
+      person: "Марина",
+      category: "Зарплата",
+      amount: 2500,
+      note: "Смена за день",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }),
+    normalizeFinanceRecord({
+      id: "finance-004",
+      type: "expense",
+      date: shiftDate(today, -1),
+      time: "18:30",
+      title: "Корм и уход",
+      person: "Фермерский склад",
+      category: "Корм и уход",
+      amount: 1800,
+      note: "Овощи и лакомства для свинок",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    })
+  ]);
+}
+
 export function createMockActivityLog() {
   const today = formatDateKey(new Date());
 
@@ -1391,6 +1674,26 @@ export function createMockActivityLog() {
       relatedTime: "10:15",
       tone: "success",
       message: "Сертификат оплачен: Мария Соколова · Сертификат на стандартный визит."
+    }),
+    createActivityEntry({
+      id: "activity-004",
+      entityId: "finance-002",
+      entityType: "finance",
+      kind: "income",
+      relatedDate: today,
+      relatedTime: "12:20",
+      tone: "success",
+      message: `Ручной доход: Доплата за праздник · ${formatCurrency(7000)}`
+    }),
+    createActivityEntry({
+      id: "activity-005",
+      entityId: "finance-003",
+      entityType: "finance",
+      kind: "expense",
+      relatedDate: today,
+      relatedTime: "20:10",
+      tone: "danger",
+      message: `Расход: Зарплата администратора · ${formatCurrency(2500)}`
     })
   ];
 }
