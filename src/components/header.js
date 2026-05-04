@@ -59,7 +59,7 @@ export function Header() {
   return (
     <header className={clsx("site-header", isHomeHero && "home-hero", isScrolled && "scrolled")}>
       <div className="container header-inner">
-        <a className="brand-lockup brand-lockup-compact" href="/#home" aria-label="Piggy Land">
+        <a className="brand-lockup brand-lockup-compact" href={withBasePath("/#home")} aria-label="Piggy Land">
           <span className="brand-badge brand-badge-logo">
             <img
               src={withBasePath("/images/piggilandlogo-icon.png")}
@@ -77,7 +77,7 @@ export function Header() {
           {navigation.map((item) => (
             <a
               key={item.href}
-              href={item.href}
+              href={withBasePath(item.href)}
               className={clsx(
                 "nav-link",
                 pathname === "/"
@@ -130,7 +130,8 @@ export function Header() {
                 {navigation.map((item) => (
                   <a
                     key={item.href}
-                    href={item.href}
+                    href={withBasePath(item.href)}
+                    onClick={() => setIsOpen(false)}
                     className={clsx(
                       "mobile-nav-link",
                       pathname === "/"
@@ -147,7 +148,7 @@ export function Header() {
                   <Phone size={16} />
                   <span>{contactInfo.phone}</span>
                 </a>
-                <Link className="button button-primary button-block" href="/booking">
+                <Link className="button button-primary button-block" href="/booking" onClick={() => setIsOpen(false)}>
                   Перейти к бронированию
                 </Link>
               </div>

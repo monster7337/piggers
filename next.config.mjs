@@ -4,7 +4,7 @@ const basePath = isStaticExport ? "/piggers" : "";
 const siteUrl = isStaticExport ? "https://monster7337.github.io" : "https://piggyland.ru";
 
 const nextConfig = {
-  allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.31.155", "172.18.0.1", "192.168.0.6"],
+  allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.31.155", "172.18.0.1", "192.168.0.6", "192.168.0.14"],
   ...(isStaticExport
     ? {
         output: "export",

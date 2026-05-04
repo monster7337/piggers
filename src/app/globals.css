@@ -1158,6 +1158,12 @@ img {
   text-wrap: balance;
 }
 
+.hero-highlights .highlight-pill:last-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: calc((100% - 12px) / 2);
+}
+
 .hero-copy-overlay .button-row {
   margin-top: 6px;
 }
@@ -4206,8 +4212,9 @@ img {
   }
 
   .hero-copy-overlay {
-    width: min(100%, 420px);
-    max-width: min(100%, 92vw);
+    width: min(340px, calc(100vw - 32px));
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 22px 18px 18px;
     border-radius: 26px;
     border: 1px solid rgba(255, 255, 255, 0.26);
@@ -6081,12 +6088,22 @@ img {
     max-width: 34ch;
   }
 
+  .hero-subtitle,
+  .hero-description,
+  .hero-description .hero-copy-text,
+  .hero-highlights,
+  .highlight-pill {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
   .hero-description .hero-copy-text {
-    display: none;
+    display: block;
   }
 
   .hero-copy-text-mobile {
-    display: block;
+    display: none;
     margin: 0;
     font-size: 0.94rem;
     line-height: 1.48;
@@ -6098,16 +6115,18 @@ img {
     gap: 8px;
   }
 
-  .hero-highlights .highlight-pill:nth-child(n + 5) {
-    display: none;
-  }
-
   .highlight-pill {
     min-height: 54px;
     padding: 10px 12px;
     border-radius: 18px;
     font-size: 0.76rem;
     line-height: 1.2;
+  }
+
+  .hero-highlights .highlight-pill:last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc((100% - 8px) / 2);
   }
 
   #rates .card-grid-4 {
