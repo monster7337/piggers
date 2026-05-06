@@ -71,7 +71,7 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.05 }}
           >
-            Пигги Лэнд
+            Пигги Ленд
           </motion.h1>
           <motion.p
             className="hero-subtitle"
@@ -140,7 +140,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.28 }}
           >
             <Link className="button button-primary hero-primary-cta" href="/booking">
-              Забронировать посещение
+              Записаться
             </Link>
             <a className="button button-secondary hero-secondary-cta" href={withBasePath("/#rates")}>
               Посмотреть тарифы

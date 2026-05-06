@@ -53,12 +53,7 @@ export function BookingSuccessSummary() {
             <span>Получатель</span>
             <strong>{recipient || "Будет указан администратором"}</strong>
           </div>
-        ) : (
-          <div>
-            <span>Дополнительно</span>
-            <strong>Корм и бутылочка оформляются на месте</strong>
-          </div>
-        )}
+        ) : null}
         {type === "gift" ? (
           <div>
             <span>Оплата</span>

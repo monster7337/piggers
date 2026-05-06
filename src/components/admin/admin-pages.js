@@ -57,7 +57,10 @@ import {
   getTariffSummary,
   getUpcomingAppointments,
   getWeekDays,
+  HAPPY_HOUR_SLOT_TIMES,
   incomeCategoryOptions,
+  isHappyHourDisabledForDate,
+  isHappyHourEnabled,
   matchesGiftSearch,
   matchesFinanceSearch,
   matchesSearch,
@@ -257,12 +260,32 @@ function NotebookAppointmentRow({ appointment }) {
   );
 }
 
-function NotebookScheduleView({ appointments, selectedDate, settings, updateSlotReserve }) {
+function NotebookScheduleView({ appointments, selectedDate, settings, updateHappyHourDate, updateSlotReserve }) {
   const { openCreateModal } = useAdmin();
   const slotGroups = useMemo(() => getDaySlotGroups(appointments, settings, selectedDate), [appointments, selectedDate, settings]);
+  const happyHourDisabled = isHappyHourDisabledForDate(settings, selectedDate);
+  const happyHourSlots = HAPPY_HOUR_SLOT_TIMES.join(" и ");
 
   return (
     <div className={styles.notebookBoard}>
+      <div className={styles.happyHourControl} data-disabled={happyHourDisabled ? "true" : "false"}>
+        <div>
+          <strong>Счастливый час на дату</strong>
+          <span>
+            {happyHourDisabled
+              ? `Отключён для слотов ${happyHourSlots}. На сайте будет обычная цена.`
+              : `Активен в будни для слотов ${happyHourSlots}. На сайте будет метка и скидка.`}
+          </span>
+        </div>
+        <button
+          className={happyHourDisabled ? styles.successButton : styles.warningButton}
+          type="button"
+          onClick={() => updateHappyHourDate(selectedDate, happyHourDisabled)}
+        >
+          {happyHourDisabled ? "Включить" : "Отключить"}
+        </button>
+      </div>
+
       {slotGroups.map((slot) => (
         <section
           key={slot.time}
@@ -273,7 +296,7 @@ function NotebookScheduleView({ appointments, selectedDate, settings, updateSlot
           <div className={styles.notebookSlotHeader}>
             <div>
               <strong>{slot.time}</strong>
-              <span>Слот на 1 час</span>
+              <span>{isHappyHourEnabled(settings, selectedDate, slot.time) ? "Счастливый час" : "Слот на 1 час"}</span>
             </div>
             <div className={styles.notebookSlotCounter}>
               <strong>{slot.bookedGuests}</strong>
@@ -528,7 +551,7 @@ function FinanceBoard({
 }
 
 export function AdminDashboardPage() {
-  const { activityLog, appointments, financeRecords, giftOrders, openCreateModal, selectedDate, settings, updateSlotReserve } =
+  const { activityLog, appointments, financeRecords, giftOrders, openCreateModal, selectedDate, settings, updateHappyHourDate, updateSlotReserve } =
     useAdmin();
   const slotGroups = useMemo(() => getDaySlotGroups(appointments, settings, selectedDate), [appointments, selectedDate, settings]);
   const freeSlots = useMemo(() => getFreeSlots(appointments, settings, selectedDate), [appointments, selectedDate, settings]);
@@ -653,6 +676,7 @@ export function AdminDashboardPage() {
             appointments={appointments}
             selectedDate={selectedDate}
             settings={settings}
+            updateHappyHourDate={updateHappyHourDate}
             updateSlotReserve={updateSlotReserve}
           />
         </Panel>
@@ -962,13 +986,14 @@ export function AdminCalendarPage() {
 }
 
 function NotebookScheduleViewWrapper() {
-  const { appointments, selectedDate, settings, updateSlotReserve } = useAdmin();
+  const { appointments, selectedDate, settings, updateHappyHourDate, updateSlotReserve } = useAdmin();
 
   return (
     <NotebookScheduleView
       appointments={appointments}
       selectedDate={selectedDate}
       settings={settings}
+      updateHappyHourDate={updateHappyHourDate}
       updateSlotReserve={updateSlotReserve}
     />
   );

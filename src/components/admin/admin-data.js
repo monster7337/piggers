@@ -12,6 +12,7 @@ export const SLOT_RESERVE_CAPACITY = 2;
 export const MAX_SLOT_CAPACITY = PUBLIC_SLOT_CAPACITY + SLOT_RESERVE_CAPACITY;
 export const BOOKING_PREPAYMENT_PER_GUEST = 500;
 export const FIXED_SLOT_TIMES = ["11:00", "13:00", "15:00", "17:00", "19:00"];
+export const HAPPY_HOUR_SLOT_TIMES = ["11:00", "13:00"];
 
 export const mockCredentials = {
   login: "user",
@@ -106,7 +107,8 @@ export const defaultSettings = {
   darkThemeByDefault: true,
   timeFormat: "24h",
   startRoute: "/admin/dashboard",
-  slotReserveMap: {}
+  slotReserveMap: {},
+  happyHourDisabledDates: {}
 };
 
 const extraCatalog = Object.fromEntries(siteExtras.map((item) => [item.id, item]));
@@ -231,6 +233,16 @@ function normalizeReserveSeatCount(value) {
   }
 
   return Math.min(SLOT_RESERVE_CAPACITY, Math.max(0, Math.round(normalized)));
+}
+
+function normalizeBooleanDateMap(value) {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  return Object.fromEntries(
+    Object.entries(value).filter(([dateKey, isDisabled]) => /^\d{4}-\d{2}-\d{2}$/.test(dateKey) && Boolean(isDisabled))
+  );
 }
 
 function normalizeText(value) {
@@ -798,8 +810,26 @@ export function normalizeSettings(settings) {
     slotDuration: Number(nextSettings.slotDuration) || 60,
     slotReserveMap: Object.fromEntries(
       Object.entries(slotReserveMap).map(([slotKey, value]) => [slotKey, normalizeReserveSeatCount(value)]).filter(([, value]) => value > 0)
-    )
+    ),
+    happyHourDisabledDates: normalizeBooleanDateMap(nextSettings.happyHourDisabledDates)
   };
+}
+
+export function isHappyHourSlotTime(time) {
+  return HAPPY_HOUR_SLOT_TIMES.includes(time);
+}
+
+export function isHappyHourDisabledForDate(settings, dateKey) {
+  return Boolean(normalizeSettings(settings).happyHourDisabledDates?.[dateKey]);
+}
+
+export function isHappyHourEnabled(settings, dateKey, time) {
+  if (!dateKey || !isHappyHourSlotTime(time) || isHappyHourDisabledForDate(settings, dateKey)) {
+    return false;
+  }
+
+  const weekday = parseDateKey(dateKey).getDay();
+  return weekday !== 0 && weekday !== 6;
 }
 
 export function getSlotReserveKey(dateKey, time) {

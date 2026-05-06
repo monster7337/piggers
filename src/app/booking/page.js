@@ -12,7 +12,8 @@ export default function BookingPage() {
     <section className="section">
       <div className="container">
         <div className="card info-band">
-          Мы работаем по предварительной записи. На сайте оплачивается только предоплата 500 ₽ за каждое место, остальное гость оплачивает на месте. Корм и бутылочка выбираются уже во время визита.
+          Мы работаем по предварительной записи. На сайте оплачивается только предоплата 500 ₽ за каждое место,
+          остальное гость оплачивает на месте.
         </div>
         <Suspense fallback={<BookingPlanner />}>
           <BookingPageClient />

@@ -404,6 +404,38 @@ export function AdminProvider({ children }) {
     pushToast(nextValue > currentValue ? "Добавлено резервное место" : "Резервное место скрыто", "neutral");
   }
 
+  function updateHappyHourDate(dateKey, enabled) {
+    const currentSettings = settingsRef.current;
+    const nextMap = { ...(currentSettings.happyHourDisabledDates ?? {}) };
+
+    if (enabled) {
+      delete nextMap[dateKey];
+    } else {
+      nextMap[dateKey] = true;
+    }
+
+    const nextSettings = normalizeSettings({
+      ...currentSettings,
+      happyHourDisabledDates: nextMap
+    });
+
+    settingsRef.current = nextSettings;
+    setSettings(nextSettings);
+
+    appendActivity(
+      createActivityEntry({
+        entityId: `happy-hour-${dateKey}`,
+        entityType: "settings",
+        kind: enabled ? "happy-hour-enabled" : "happy-hour-disabled",
+        relatedDate: dateKey,
+        relatedTime: "",
+        tone: enabled ? "success" : "warning",
+        message: enabled ? `Счастливый час включён на ${dateKey}.` : `Счастливый час отключён на ${dateKey}.`
+      })
+    );
+    pushToast(enabled ? "Счастливый час включён на дату" : "Счастливый час отключён на дату", enabled ? "success" : "neutral");
+  }
+
   function resetDemoData() {
     setAppointments(createMockAppointments());
     setGiftOrders(createMockGiftCertificateOrders());
@@ -448,6 +480,7 @@ export function AdminProvider({ children }) {
     setSearchQuery,
     setSelectedDate,
     settings,
+    updateHappyHourDate,
     updateSlotReserve,
     toasts,
     updateAppointmentStatus

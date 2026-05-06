@@ -1064,8 +1064,9 @@ img {
 }
 
 .hero-title {
-  max-width: 8ch;
+  max-width: none;
   font-size: clamp(3.6rem, 6.3vw, 6.5rem);
+  white-space: nowrap;
 }
 
 .hero-title span {
@@ -1165,7 +1166,22 @@ img {
 }
 
 .hero-copy-overlay .button-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  align-self: center;
+  width: min(100%, 462px);
   margin-top: 6px;
+  gap: 12px;
+}
+
+.hero-primary-cta,
+.hero-secondary-cta {
+  min-height: 56px;
+  padding: 0 26px;
+  font-size: 1rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .hero-media,
@@ -1926,6 +1942,7 @@ img {
   min-height: 480px;
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
 }
 
 .lightbox-copy {
@@ -1941,7 +1958,12 @@ img {
   font-size: 1.55rem;
 }
 
-.gallery-browser-panel,
+.gallery-browser-panel {
+  width: min(1440px, calc(100vw - 32px));
+  height: calc(100svh - 32px);
+  max-height: calc(100svh - 32px);
+}
+
 .piggy-modal {
   width: min(1040px, 100%);
 }
@@ -1949,11 +1971,12 @@ img {
 .gallery-browser-panel .lightbox-media {
   min-height: 0;
   flex: 1 1 auto;
-  flex-basis: min(64svh, 620px);
+  background-color: rgba(39, 28, 23, 0.08);
+  background-size: contain;
 }
 
 .gallery-browser-panel .lightbox-copy {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   max-height: min(220px, 28svh);
   padding: 18px 24px 22px;
 }
@@ -2011,9 +2034,11 @@ img {
 }
 
 .piggy-modal-media {
-  min-height: 0;
   min-height: 620px;
-  background-size: cover;
+  background-color: rgba(39, 28, 23, 0.08);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
 }
 
 .piggy-modal-copy {
@@ -2898,6 +2923,15 @@ img {
 .calendar-card small,
 .slot-card small {
   color: var(--muted);
+}
+
+.slot-card-note {
+  width: fit-content;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(61, 94, 67, 0.1);
+  color: var(--green) !important;
+  font-weight: 800;
 }
 
 .calendar-card.disabled,
@@ -5038,6 +5072,11 @@ img {
     border-radius: 24px;
   }
 
+  .gallery-browser-panel {
+    height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);
+    max-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);
+  }
+
   .lightbox-media {
     min-height: 220px;
   }
@@ -5055,8 +5094,10 @@ img {
   }
 
   .gallery-browser-panel .lightbox-media {
-    flex-basis: min(46svh, 380px);
-    max-height: 50svh;
+    min-height: 0;
+    flex: 1 1 auto;
+    max-height: none;
+    background-size: contain;
   }
 
   .gallery-browser-panel .lightbox-copy {

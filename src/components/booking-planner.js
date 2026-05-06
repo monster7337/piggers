@@ -28,6 +28,7 @@ import {
   calculateExpectedPrepayment,
   defaultSettings,
   formatCurrency,
+  isHappyHourEnabled,
   getSlotCapacityState,
   readStoredAppointments,
   readStoredSettings,
@@ -65,7 +66,7 @@ const contactSchema = z.object({
 function createGuestTickets(selectedTickets) {
   return selectedTickets.flatMap((item) =>
     Array.from({ length: item.quantity }, () => ({
-      tariff: siteRateToTariffMap[item.id] ?? "Обычный билет"
+      tariff: siteRateToTariffMap[item.effectiveTariffId || item.id] ?? "Обычный билет"
     }))
   );
 }
@@ -75,6 +76,26 @@ function getStorageSnapshot() {
     appointments: readStoredAppointments(),
     settings: readStoredSettings() ?? defaultSettings
   };
+}
+
+function getIntervalWord(count) {
+  const normalizedCount = Math.abs(count);
+  const lastTwoDigits = normalizedCount % 100;
+  const lastDigit = normalizedCount % 10;
+
+  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+    return "интервалов";
+  }
+
+  if (lastDigit === 1) {
+    return "интервал";
+  }
+
+  if (lastDigit >= 2 && lastDigit <= 4) {
+    return "интервала";
+  }
+
+  return "интервалов";
 }
 
 export function BookingPlanner({ initialRate }) {
@@ -122,21 +143,46 @@ export function BookingPlanner({ initialRate }) {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
+  const happyHourRate = rates.find((rate) => rate.id === "happy-hour");
+  const standardRate = rates.find((rate) => rate.id === "standard");
+  const selectedDateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
+  const happyHourDiscountActive = isHappyHourEnabled(storageSnapshot.settings, selectedDateKey, selectedTime);
+
   const selectedTickets = useMemo(
     () =>
       rates
-        .map((rate) => ({
-          ...rate,
-          quantity: selectedRateQuantities[rate.id] || 0
-        }))
+        .map((rate) => {
+          const quantity = selectedRateQuantities[rate.id] || 0;
+          const hasHappyHourDiscount = Boolean(
+            happyHourDiscountActive && happyHourRate && rate.id === "standard"
+          );
+          const effectivePrice = hasHappyHourDiscount ? happyHourRate.price : rate.price;
+
+          return {
+            ...rate,
+            quantity,
+            price: effectivePrice,
+            originalPrice: rate.price,
+            effectiveTariffId: hasHappyHourDiscount ? "happy-hour" : rate.id,
+            hasHappyHourDiscount
+          };
+        })
         .filter((rate) => rate.quantity > 0),
-    [selectedRateQuantities]
+    [happyHourDiscountActive, happyHourRate, selectedRateQuantities]
   );
 
   const guestTickets = useMemo(() => createGuestTickets(selectedTickets), [selectedTickets]);
 
   const ticketsTotal = selectedTickets.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalTicketsCount = selectedTickets.reduce((sum, item) => sum + item.quantity, 0);
+  const happyHourDiscountedTicketsCount = selectedTickets.reduce(
+    (sum, item) => sum + (item.hasHappyHourDiscount ? item.quantity : 0),
+    0
+  );
+  const happyHourDiscountAmount = selectedTickets.reduce(
+    (sum, item) => sum + (item.hasHappyHourDiscount ? (item.originalPrice - item.price) * item.quantity : 0),
+    0
+  );
   const total = ticketsTotal;
   const prepaymentNow = totalTicketsCount ? calculateExpectedPrepayment(totalTicketsCount, total) : 0;
   const remainingOnSite = Math.max(0, total - prepaymentNow);
@@ -172,6 +218,7 @@ export function BookingPlanner({ initialRate }) {
 
       return {
         time,
+        isHappyHour: isHappyHourEnabled(storageSnapshot.settings, dateKey, time),
         remainingGuests: state.remainingGuests,
         disabled: state.remainingGuests < Math.max(1, totalTicketsCount),
         totalCapacity: state.totalCapacity
@@ -448,9 +495,13 @@ export function BookingPlanner({ initialRate }) {
                         disabled={item.soldOut}
                         onClick={() => setSelectedDate(item.date)}
                       >
-                        <span>{format(item.date, "EEE", { locale: ru })}</span>
+                        <span>{format(item.date, "EEEEEE", { locale: ru })}</span>
                         <strong>{format(item.date, "d MMM", { locale: ru })}</strong>
-                        <small>{item.soldOut ? "Нет мест" : `${item.availableSlots} интервала доступно`}</small>
+                        <small>
+                          {item.soldOut
+                            ? "Нет мест"
+                            : `${item.availableSlots} ${getIntervalWord(item.availableSlots)} доступно`}
+                        </small>
                       </button>
                     );
                   })}
@@ -497,9 +548,21 @@ export function BookingPlanner({ initialRate }) {
                           <Clock3 size={16} />
                           <span>{slot.time}</span>
                           <small>{slot.disabled ? "Недостаточно мест" : `Свободно ${slot.remainingGuests}`}</small>
+                          {slot.isHappyHour ? <small className="slot-card-note">Счастливый час</small> : null}
                         </button>
                       ))}
                     </div>
+
+                    {happyHourDiscountedTicketsCount > 0 && happyHourRate && standardRate ? (
+                      <div className="status-inline success">
+                        <CreditCard size={18} />
+                        <span>
+                          Вы выбрали будний слот {selectedTime}. Для входного билета действует "Счастливый час":
+                          цена снижена с {formatCurrency(standardRate.price)} до {formatCurrency(happyHourRate.price)}
+                          {happyHourDiscountedTicketsCount > 1 ? ` за каждый из ${happyHourDiscountedTicketsCount} билетов` : ""}.
+                        </span>
+                      </div>
+                    ) : null}
 
                     {hasUnavailableTimeSlots ? (
                       <div className={clsx("booking-detour-card", !hasAvailableTimeSlots && "sold-out")}>
@@ -584,10 +647,6 @@ export function BookingPlanner({ initialRate }) {
                     <div>
                       <span>Время</span>
                       <strong>{selectedTime || "Не выбрано"}</strong>
-                    </div>
-                    <div>
-                      <span>Дополнительно</span>
-                      <strong>Корм и бутылочка оформляются на месте</strong>
                     </div>
                     <div>
                       <span>Имя</span>
@@ -737,6 +796,7 @@ export function BookingPlanner({ initialRate }) {
                   <div key={item.id} className="summary-row">
                     <span>
                       {item.name} x{item.quantity}
+                      {item.hasHappyHourDiscount ? " · цена счастливого часа" : ""}
                     </span>
                     <strong>{formatCurrency(item.price * item.quantity)}</strong>
                   </div>
@@ -777,6 +837,12 @@ export function BookingPlanner({ initialRate }) {
                 <span>Полная стоимость</span>
                 <strong>{formatCurrency(total)}</strong>
               </div>
+              {happyHourDiscountAmount > 0 ? (
+                <div className="summary-row">
+                  <span>Скидка счастливого часа</span>
+                  <strong>-{formatCurrency(happyHourDiscountAmount)}</strong>
+                </div>
+              ) : null}
               <div className="summary-row">
                 <span>Предоплата сейчас</span>
                 <strong>{formatCurrency(prepaymentNow)}</strong>
@@ -792,7 +858,6 @@ export function BookingPlanner({ initialRate }) {
             <CreditCard size={18} />
             <span>
               Бронь фиксируется после предоплаты {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждого гостя.
-              Корм и бутылочка оформляются уже на месте.
             </span>
           </div>
         </div>
