@@ -3402,7 +3402,7 @@ img {
     linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(249, 240, 231, 0.92)),
     radial-gradient(circle at top right, rgba(182, 66, 48, 0.05), transparent 36%);
   box-shadow: 0 16px 36px rgba(61, 39, 26, 0.08);
-  cursor: pointer;
+  cursor: default;
   transition:
     transform 0.22s ease,
     box-shadow 0.22s ease,
@@ -3424,14 +3424,24 @@ img {
 
 .offer-acceptance-toggle-input {
   position: absolute;
-  inset: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
   opacity: 0;
-  cursor: pointer;
 }
 
-.offer-acceptance-toggle-input:focus-visible + .offer-acceptance-toggle-box {
+.offer-acceptance-toggle-input:focus-visible + .offer-acceptance-toggle-control .offer-acceptance-toggle-box {
   outline: 3px solid rgba(182, 66, 48, 0.2);
   outline-offset: 4px;
+}
+
+.offer-acceptance-toggle-control {
+  display: inline-flex;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 .offer-acceptance-toggle-box {
@@ -3580,12 +3590,52 @@ img {
 }
 
 .offer-acceptance-link {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   align-self: flex-start;
   font-weight: 700;
   color: var(--accent);
+}
+
+.legal-top-return {
+  position: relative;
+  z-index: 5;
+  padding: 112px 0 0;
+}
+
+.legal-mobile-return {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .legal-top-return {
+    padding-top: 90px;
+  }
+
+  .legal-top-return .button {
+    width: 100%;
+  }
+
+  .legal-mobile-return {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 50;
+    display: block;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, transparent, rgba(255, 249, 242, 0.98) 30%);
+  }
+
+  .legal-mobile-return .button {
+    width: 100%;
+    box-shadow: 0 14px 32px rgba(61, 39, 26, 0.2);
+  }
+
+  .legal-content {
+    padding-bottom: 76px;
+  }
 }
 
 .offer-acceptance-note {

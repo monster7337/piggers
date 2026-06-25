@@ -754,8 +754,9 @@ export function BookingPlanner({ initialRate }) {
                   </div>
 
                   <div className="offer-acceptance-shell">
-                    <label className={clsx("offer-acceptance-toggle", offerAccepted && "is-checked")}>
+                    <div className={clsx("offer-acceptance-toggle", offerAccepted && "is-checked")}>
                       <input
+                        id="piggy-offer-accepted"
                         type="checkbox"
                         className="offer-acceptance-toggle-input"
                         checked={offerAccepted}
@@ -766,22 +767,25 @@ export function BookingPlanner({ initialRate }) {
                           }
                         }}
                       />
-                      <span className="offer-acceptance-toggle-box" aria-hidden="true">
-                        <Check size={14} strokeWidth={2.8} />
-                      </span>
+                      <label htmlFor="piggy-offer-accepted" className="offer-acceptance-toggle-control">
+                        <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                          <Check size={14} strokeWidth={2.8} />
+                        </span>
+                      </label>
                       <span className="offer-acceptance-toggle-copy">
                         <strong>
                           Принимаю{" "}
-                          <Link href="/offer?returnTo=/booking" className="offer-acceptance-link">
+                          <Link href="/offer?returnTo=/booking" prefetch className="offer-acceptance-link">
                             условия использования, политику конфиденциальности и публичную оферту
                           </Link>
                         </strong>
                         <small>Документ открывается на отдельной странице.</small>
                       </span>
-                    </label>
+                    </div>
 
-                    <label className={clsx("offer-acceptance-toggle", personalDataAccepted && "is-checked")}>
+                    <div className={clsx("offer-acceptance-toggle", personalDataAccepted && "is-checked")}>
                       <input
+                        id="piggy-personal-data-accepted"
                         type="checkbox"
                         className="offer-acceptance-toggle-input"
                         checked={personalDataAccepted}
@@ -792,19 +796,21 @@ export function BookingPlanner({ initialRate }) {
                           }
                         }}
                       />
-                      <span className="offer-acceptance-toggle-box" aria-hidden="true">
-                        <Check size={14} strokeWidth={2.8} />
-                      </span>
+                      <label htmlFor="piggy-personal-data-accepted" className="offer-acceptance-toggle-control">
+                        <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                          <Check size={14} strokeWidth={2.8} />
+                        </span>
+                      </label>
                       <span className="offer-acceptance-toggle-copy">
                         <strong>
                           Даю согласие на{" "}
-                          <Link href="/policy?returnTo=/booking" className="offer-acceptance-link">
+                          <Link href="/policy?returnTo=/booking" prefetch className="offer-acceptance-link">
                             обработку моих персональных данных
                           </Link>
                         </strong>
                         <small>Согласие открывается на отдельной странице.</small>
                       </span>
-                    </label>
+                    </div>
                   </div>
 
                   {!offerAccepted || !personalDataAccepted ? (

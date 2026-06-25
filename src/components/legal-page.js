@@ -4,6 +4,13 @@ import { PageHero } from "@/components/page-hero";
 export function LegalPage({ eyebrow, title, description, sections, returnHref = "/booking", returnLabel = "Вернуться к записи" }) {
   return (
     <>
+      <div className="legal-top-return">
+        <div className="container">
+          <Link href={returnHref} className="button button-secondary">
+            ← {returnLabel}
+          </Link>
+        </div>
+      </div>
       <PageHero
         eyebrow={eyebrow}
         title={title}
@@ -29,6 +36,11 @@ export function LegalPage({ eyebrow, title, description, sections, returnHref = 
           </div>
         </div>
       </section>
+      <div className="legal-mobile-return">
+        <Link href={returnHref} className="button button-primary">
+          ← {returnLabel}
+        </Link>
+      </div>
     </>
   );
 }
