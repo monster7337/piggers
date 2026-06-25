@@ -751,10 +751,11 @@ img {
   z-index: 30;
   padding: 18px 0;
   transition:
-    padding 0.22s ease,
     background-color 0.22s ease,
     box-shadow 0.22s ease,
     backdrop-filter 0.22s ease;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .site-header.home-hero {
@@ -2200,12 +2201,12 @@ img {
   padding: 20px;
   overflow: hidden;
   overscroll-behavior: contain;
+  isolation: isolate;
 }
 
 .lightbox-backdrop {
   position: absolute;
   inset: 0;
-  border: 0;
   background: rgba(18, 12, 10, 0.68);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);

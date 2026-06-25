@@ -4,12 +4,14 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Images, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { withBasePath } from "@/lib/base-path";
 import { galleryCategories } from "@/lib/site-data";
 
 export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeIndex, setActiveIndex] = useState(null);
+  const [portalTarget, setPortalTarget] = useState(null);
   const lockedScrollRef = useRef(0);
 
   const fullItems = useMemo(
@@ -43,6 +45,10 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
     setActiveIndex((current) => (current === null ? 0 : (current - 1 + fullItems.length) % fullItems.length));
   const showNext = () =>
     setActiveIndex((current) => (current === null ? 0 : (current + 1) % fullItems.length));
+
+  useEffect(() => {
+    setPortalTarget(document.body);
+  }, []);
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -150,17 +156,26 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
         </div>
       ) : null}
 
-      <AnimatePresence>
-        {activeItem ? (
-          <motion.div className="lightbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <button className="lightbox-backdrop" type="button" onClick={closeItem} />
-            <motion.div
-              className="lightbox-panel gallery-browser-panel"
-              initial={{ opacity: 0, scale: 0.96, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 16 }}
-              transition={{ duration: 0.24 }}
-            >
+      {portalTarget
+        ? createPortal(
+            <AnimatePresence>
+              {activeItem ? (
+                <motion.div
+                  className="lightbox"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={closeItem}
+                >
+                  <div className="lightbox-backdrop" aria-hidden="true" />
+                  <motion.div
+                    className="lightbox-panel gallery-browser-panel"
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
               <button type="button" className="lightbox-close" onClick={closeItem} aria-label="Закрыть">
                 <X size={20} />
               </button>
@@ -196,10 +211,13 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
                   </div>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+                  </motion.div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>,
+            portalTarget
+          )
+        : null}
     </div>
   );
 }

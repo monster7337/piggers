@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { stripBasePath, withBasePath } from "@/lib/base-path";
 import { contactInfo, navigation } from "@/lib/site-data";
 
@@ -18,38 +18,63 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
+  const isScrolledRef = useRef(false);
+  const activeSectionRef = useRef("home");
   const isHomeHero = pathname === "/";
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 14);
+    let frameId = 0;
 
-      if (pathname !== "/") {
+    const handleScroll = () => {
+      if (frameId) {
         return;
       }
 
-      const currentPoint = window.scrollY + 180;
-      let currentSection = "home";
+      frameId = window.requestAnimationFrame(() => {
+        frameId = 0;
+        const scrollY = window.scrollY;
+        const nextScrolled = isScrolledRef.current ? scrollY > 6 : scrollY > 36;
 
-      navigation.forEach((item) => {
-        if (!item.section) {
+        if (nextScrolled !== isScrolledRef.current) {
+          isScrolledRef.current = nextScrolled;
+          setIsScrolled(nextScrolled);
+        }
+
+        if (pathname !== "/") {
           return;
         }
 
-        const element = document.getElementById(item.section);
+        const currentPoint = scrollY + 180;
+        let currentSection = "home";
 
-        if (element && element.offsetTop <= currentPoint) {
-          currentSection = item.section;
+        navigation.forEach((item) => {
+          if (!item.section) {
+            return;
+          }
+
+          const element = document.getElementById(item.section);
+
+          if (element && element.offsetTop <= currentPoint) {
+            currentSection = item.section;
+          }
+        });
+
+        if (currentSection !== activeSectionRef.current) {
+          activeSectionRef.current = currentSection;
+          setActiveSection(currentSection);
         }
       });
-
-      setActiveSection(currentSection);
     };
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
   }, [pathname]);
 
   useEffect(() => {
