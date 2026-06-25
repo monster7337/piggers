@@ -6,12 +6,16 @@ export const metadata = {
   description: "Публичная оферта на бронирование посещения Piggy Land."
 };
 
-export default function OfferPage() {
+export default function OfferPage({ searchParams }) {
+  const returnHref = searchParams?.returnTo || "/booking";
+
   return (
     <LegalPage
       eyebrow="Оферта"
       title="Публичная оферта"
-      description="Основные условия бронирования, оплаты, переноса и подтверждения визита в Piggy Land."
+      description="На странице собраны условия использования сайта Piggy Land, политика конфиденциальности, правила посещения и публичная оферта."
+      returnHref={returnHref}
+      returnLabel={returnHref.includes("gift-certificates") ? "Вернуться к сертификату" : "Вернуться к записи"}
       sections={offerSections}
     />
   );

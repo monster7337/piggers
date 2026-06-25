@@ -1,5 +1,4 @@
-import { Award, Camera, PlayCircle, Star } from "lucide-react";
-import { withBasePath } from "@/lib/base-path";
+import { Award, Star } from "lucide-react";
 
 function getInitials(name) {
   return name
@@ -99,32 +98,6 @@ export function ReviewsStrip({ reviews, platforms }) {
               </p>
             </div>
 
-            {review.media?.length ? (
-              <div className="review-media-block">
-                <div className="review-media-meta">
-                  {review.media.some((item) => item.type === "video") ? <PlayCircle size={14} /> : <Camera size={14} />}
-                  <span>{review.mediaLabel}</span>
-                </div>
-                <div className="review-media-grid" data-count={review.media.length}>
-                  {review.media.map((item, index) => (
-                    <div
-                      key={`${review.name}-media-${index}`}
-                      className="review-media-item"
-                      style={{
-                        backgroundImage: `linear-gradient(180deg, rgba(27, 22, 20, 0.06), rgba(27, 22, 20, 0.24)), url(${withBasePath(item.image)})`,
-                        backgroundPosition: item.position || "center"
-                      }}
-                    >
-                      {item.type === "video" ? (
-                        <span className="review-media-play">
-                          <PlayCircle size={18} />
-                        </span>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </article>
         ))}
       </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function CtaBanner() {
   return (
-    <section className="section">
+    <section className="section cta-banner-section">
       <div className="container">
         <div className="cta-banner">
           <div>

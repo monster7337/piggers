@@ -22,6 +22,12 @@ export const contactInfo = {
   note: "Уважаемые гости, мы работаем по предварительной записи. Санкт-Петербург, 6-я Советская улица, дом 28А, помещение 3-Н."
 };
 
+export const businessInfo = {
+  inn: "470706645895",
+  ogrn: "325470400025791",
+  fullName: "Индивидуальный предприниматель ТЮЧКИН ВЛАДИМИР АЛЕКСАНДРОВИЧ"
+};
+
 export const alternativeProject = {
   name: "Наш второй проект",
   href: "https://vk.link/minipiggyspb",
@@ -53,9 +59,9 @@ export const rates = [
       "Один час нахождения в антикафе с минипигами в будние дни с 15:00 до 20:00 и весь день с 11:00 до 20:00 в выходные и праздничные дни - плюс чай, кофе и сладости.",
     mobileDescription: "Будни с 15:00 до 20:00, выходные с 11:00 до 20:00, чай и сладости включены.",
     includes: ["будни с 15:00 до 20:00", "выходные с 11:00 до 20:00", "чай, кофе и сладости"],
-    image: "/images/bilet.jpeg",
+    image: "/images/bilet.webp",
     imagePosition: "58% 34%",
-    details: "Классический билет на час в гостях у минипигов. Хороший выбор для первого знакомства."
+    details: ""
   },
   {
     id: "happy-hour",
@@ -70,7 +76,7 @@ export const rates = [
       "Входной билет со скидкой 30% в будние дни в интервал на 11:00 и 13:00. Не действует в выходные, праздничные дни и каникулы.",
     mobileDescription: "Скидка 30% в будни на слоты 11:00 и 13:00.",
     includes: ["время 11:00 и 13:00", "только будни", "не действует в праздники и каникулы"],
-    image: "/images/schastchas.jpeg",
+    image: "/images/schastchas.webp",
     imagePosition: "52% 58%",
     details: "Самый выгодный билет для тех, кто может прийти утром или днем в будни."
   },
@@ -87,7 +93,7 @@ export const rates = [
       "Акция: входной билет на семью от 3 человек и выше со скидкой 20%. Цена указана за одного человека.",
     mobileDescription: "Скидка для семьи или компании от 3 гостей.",
     includes: ["от 3 человек", "цена за одного гостя", "семейная цена со скидкой"],
-    image: "/images/family2.jpeg",
+    image: "/images/family2.webp",
     imagePosition: "50% 40%",
     details: "Подходит для семьи или компании от трех человек и помогает сделать общий визит выгоднее."
   },
@@ -104,7 +110,7 @@ export const rates = [
       "Скидка на входной билет для пенсионеров, участников СВО, инвалидов и именинников. Льгота подтверждается при посещении.",
     mobileDescription: "Льготная цена при подтверждающем документе.",
     includes: ["льготные категории гостей", "нужен подтверждающий документ", "цена за 1 билет"],
-    image: "/images/babko.png",
+    image: "/images/babko.webp",
     imagePosition: "50% 42%",
     details: "Билет для льготных категорий гостей. Документ можно показать при визите."
   }
@@ -180,7 +186,7 @@ export const piggies = [
       "Самый крупный минипиг в Piggy Land.",
       "При этом один из самых добрых и ласковых жителей пространства."
     ],
-    image: "/images/1.jpeg",
+    image: "/images/1.webp",
     imagePosition: "50% 50%"
   },
   {
@@ -196,7 +202,7 @@ export const piggies = [
       "Ее легко узнать по черному окрасу и белым носочкам.",
       "Очень любит личный контакт и быстро идет знакомиться."
     ],
-    image: "/images/2.jpeg",
+    image: "/images/2.webp",
     imagePosition: "50% 42%"
   },
   {
@@ -212,7 +218,7 @@ export const piggies = [
       "Единственная девочка среди минипигов в этой компании.",
       "Умеет быстро навести порядок среди своих братьев."
     ],
-    image: "/images/3.jpg",
+    image: "/images/3.webp",
     imagePosition: "28% 46%"
   },
   {
@@ -228,7 +234,7 @@ export const piggies = [
       "Самая маленькая среди микропигов Piggy Land.",
       "Храбрости у нее заметно больше, чем ее размер."
     ],
-    image: "/images/4.jpg",
+    image: "/images/4.webp",
     imagePosition: "50% 52%"
   },
   {
@@ -244,7 +250,7 @@ export const piggies = [
       "Один из самых энергичных жителей пространства.",
       "Часто заводит остальных минипигов на активные игры."
     ],
-    image: "/images/5.jpg",
+    image: "/images/5.webp",
     imagePosition: "50% 42%"
   },
   {
@@ -260,7 +266,7 @@ export const piggies = [
       "Очень быстро идет на контакт с гостями.",
       "Одна из самых ласковых малышек в пространстве."
     ],
-    image: "/images/6.jpeg",
+    image: "/images/6.webp",
     imagePosition: "50% 46%"
   },
   {
@@ -276,7 +282,7 @@ export const piggies = [
       "Регулярно участвует в съемках и сценических проектах.",
       "Очень уверенно чувствует себя перед камерой."
     ],
-    image: "/images/7.jpg",
+    image: "/images/7.webp",
     imagePosition: "50% 48%"
   },
   {
@@ -292,7 +298,7 @@ export const piggies = [
       "Луна сама решает, кому сегодня достанется ее внимание.",
       "Избирательность делает ее еще более запоминающейся."
     ],
-    image: "/images/8.jpeg",
+    image: "/images/8.webp",
     imagePosition: "50% 46%"
   },
   {
@@ -308,7 +314,7 @@ export const piggies = [
       "Один из самых фотогеничных жителей Piggy Land.",
       "На фото почти всегда выглядит так, будто специально позирует."
     ],
-    image: "/images/9.jpg",
+    image: "/images/9.webp",
     imagePosition: "50% 44%"
   },
   {
@@ -324,7 +330,7 @@ export const piggies = [
       "Любит демонстрировать трюки за вкусное угощение.",
       "Очень дружелюбно включается в контакт с гостями."
     ],
-    image: "/images/10.jpg",
+    image: "/images/10.webp",
     imagePosition: "50% 46%"
   },
   {
@@ -340,7 +346,7 @@ export const piggies = [
       "Самая деловая мадам среди наших микропигов.",
       "Несмотря на характер, очень ласковая и любит уютно устроиться на руках."
     ],
-    image: "/images/11.jpg",
+    image: "/images/11.webp",
     imagePosition: "50% 46%"
   }
 ];
@@ -360,7 +366,7 @@ export const galleryItems = [
     category: "piggies",
     title: "Пятачок крупным планом",
     description: "Тот самый взгляд, после которого хочется знакомиться со всеми сразу.",
-    image: "/images/minipig4.jpeg",
+    image: "/images/minipig4.webp",
     position: "50% 52%"
   },
   {
@@ -368,7 +374,7 @@ export const galleryItems = [
     category: "family",
     title: "Семейный визит",
     description: "Когда в кадре помещаются и улыбки, и минипиги, и общее настроение дня.",
-    image: "/images/family2.jpeg",
+    image: "/images/family2.webp",
     position: "50% 40%"
   },
   {
@@ -376,7 +382,7 @@ export const galleryItems = [
     category: "guests",
     title: "Первое знакомство",
     description: "Мягкий диван, шарики и сразу несколько любопытных пятачков рядом.",
-    image: "/images/bilet.jpeg",
+    image: "/images/bilet.webp",
     position: "58% 34%"
   },
   {
@@ -384,7 +390,7 @@ export const galleryItems = [
     category: "piggies",
     title: "Любопытный малыш",
     description: "Новые друзья обычно начинают именно с такого знакомства нос к носу.",
-    image: "/images/2.jpeg",
+    image: "/images/2.webp",
     position: "50% 50%"
   },
   {
@@ -392,7 +398,7 @@ export const galleryItems = [
     category: "piggies",
     title: "Усы для настроения",
     description: "Минипиги любят внимание не меньше, чем забавный реквизит для фото.",
-    image: "/images/1.jpeg",
+    image: "/images/1.webp",
     position: "50% 42%"
   },
   {
@@ -400,7 +406,7 @@ export const galleryItems = [
     category: "piggies",
     title: "Черный бархат",
     description: "Темные малыши вблизи выглядят особенно выразительно.",
-    image: "/images/10.jpg",
+    image: "/images/10.webp",
     position: "50% 46%"
   },
   {
@@ -408,7 +414,7 @@ export const galleryItems = [
     category: "piggies",
     title: "Парный портрет",
     description: "Светлый и темный пятачок в одном кадре без постановки.",
-    image: "/images/minipig5.jpeg",
+    image: "/images/minipig5.webp",
     position: "50% 42%"
   },
   {
@@ -416,7 +422,7 @@ export const galleryItems = [
     category: "piggies",
     title: "Шоколадный пятачок",
     description: "Крупный план одного из самых харизматичных малышей.",
-    image: "/images/11.jpg",
+    image: "/images/11.webp",
     position: "50% 50%"
   },
   {
@@ -424,7 +430,7 @@ export const galleryItems = [
     category: "details",
     title: "Пятачок в деталях",
     description: "Очень близкий кадр, где характер читается буквально в одном взгляде.",
-    image: "/images/bd45e420-4578-464f-9793-38ace2734166.jpeg",
+    image: "/images/bd45e420-4578-464f-9793-38ace2734166.webp",
     position: "50% 42%"
   },
   {
@@ -432,7 +438,7 @@ export const galleryItems = [
     category: "piggies",
     title: "Двое на прогулке",
     description: "Спокойный момент на зеленой площадке перед общением с гостями.",
-    image: "/images/IMG_0523.jpeg",
+    image: "/images/IMG_0523.webp",
     position: "50% 54%"
   },
   {
@@ -440,7 +446,7 @@ export const galleryItems = [
     category: "details",
     title: "Чайная зона и пятачок",
     description: "Даже в интерьерных кадрах минипиги все равно остаются в центре внимания.",
-    image: "/images/IMG_1104.jpeg",
+    image: "/images/IMG_1104.webp",
     position: "50% 42%"
   },
   {
@@ -448,7 +454,7 @@ export const galleryItems = [
     category: "family",
     title: "Нежность без спешки",
     description: "Кадр, в котором детям и взрослым одинаково спокойно рядом со свинками.",
-    image: "/images/family3.jpeg",
+    image: "/images/family3.webp",
     position: "50% 38%"
   },
   {
@@ -464,7 +470,7 @@ export const galleryItems = [
     category: "interior",
     title: "Праздничный стол",
     description: "Комната легко превращается в камерную площадку для дня рождения.",
-    image: "/images/IMG_1898.jpeg",
+    image: "/images/IMG_1898.webp",
     position: "50% 42%"
   },
   {
@@ -472,7 +478,7 @@ export const galleryItems = [
     category: "interior",
     title: "Комната для праздника",
     description: "Шарики, сервировка и теплая атмосфера без лишней суеты.",
-    image: "/images/IMG_1899.jpeg",
+    image: "/images/IMG_1899.webp",
     position: "50% 42%"
   },
   {
@@ -480,7 +486,7 @@ export const galleryItems = [
     category: "details",
     title: "Минипиг у ограды",
     description: "Любопытство работает в обе стороны: дети смотрят на свинок, а свинки на детей.",
-    image: "/images/IMG_1902.jpeg",
+    image: "/images/IMG_1902.webp",
     position: "50% 40%"
   },
   {
@@ -488,7 +494,7 @@ export const galleryItems = [
     category: "family",
     title: "Семья и минипиги",
     description: "Неспешный визит, где каждому хватает внимания и времени на фото.",
-    image: "/images/IMG_1904.jpeg",
+    image: "/images/IMG_1904.webp",
     position: "50% 40%"
   },
   {
@@ -496,7 +502,7 @@ export const galleryItems = [
     category: "details",
     title: "Два пятачка рядом",
     description: "Такие кадры обычно сохраняют первыми.",
-    image: "/images/IMG_5077.jpeg",
+    image: "/images/IMG_5077.webp",
     position: "50% 40%"
   },
   {
@@ -504,7 +510,7 @@ export const galleryItems = [
     category: "piggies",
     title: "После игр",
     description: "Иногда лучший кадр получается в короткой тихой паузе.",
-    image: "/images/IMG_5084.jpeg",
+    image: "/images/IMG_5084.webp",
     position: "50% 44%"
   },
   {
@@ -512,7 +518,7 @@ export const galleryItems = [
     category: "guests",
     title: "Теплый визит",
     description: "Льготный формат тоже остается таким же уютным и фотогеничным.",
-    image: "/images/babko.png",
+    image: "/images/babko.webp",
     position: "50% 42%"
   },
   {
@@ -520,7 +526,7 @@ export const galleryItems = [
     category: "guests",
     title: "Спокойный контакт",
     description: "Когда гости быстро находят общий ритм с нашими минипигами.",
-    image: "/images/IMG_6447.jpeg",
+    image: "/images/IMG_6447.webp",
     position: "50% 48%"
   },
   {
@@ -528,7 +534,7 @@ export const galleryItems = [
     category: "guests",
     title: "Час на диване",
     description: "Можно просто сесть поудобнее, а минипиги сами решат, кто к вам подойдет.",
-    image: "/images/IMG_8012.jpeg",
+    image: "/images/IMG_8012.webp",
     position: "50% 38%"
   },
   {
@@ -536,7 +542,7 @@ export const galleryItems = [
     category: "family",
     title: "Для пары и семьи",
     description: "Большим компаниям и близким людям здесь одинаково комфортно.",
-    image: "/images/IMG_8013.jpeg",
+    image: "/images/IMG_8013.webp",
     position: "50% 40%"
   },
   {
@@ -544,7 +550,7 @@ export const galleryItems = [
     category: "guests",
     title: "Фото на память",
     description: "После визита почти всегда хочется унести с собой хотя бы один такой кадр.",
-    image: "/images/IMG_8014.jpeg",
+    image: "/images/IMG_8014.webp",
     position: "50% 32%"
   },
   {
@@ -552,7 +558,7 @@ export const galleryItems = [
     category: "details",
     title: "Игра с настроением",
     description: "У нас любят и живые эмоции, и смешные фото с реквизитом.",
-    image: "/images/IMG_8019.jpeg",
+    image: "/images/IMG_8019.webp",
     position: "50% 40%"
   },
   {
@@ -560,7 +566,7 @@ export const galleryItems = [
     category: "guests",
     title: "Поцелуй в кадре",
     description: "Нежный момент, который получается без постановки.",
-    image: "/images/IMG_8020.jpeg",
+    image: "/images/IMG_8020.webp",
     position: "50% 38%"
   },
   {
@@ -568,7 +574,7 @@ export const galleryItems = [
     category: "guests",
     title: "Знакомство с малышом",
     description: "Самые маленькие минипиги быстро становятся любимцами гостей.",
-    image: "/images/IMG_8023.jpeg",
+    image: "/images/IMG_8023.webp",
     position: "50% 38%"
   },
   {
@@ -576,7 +582,7 @@ export const galleryItems = [
     category: "family",
     title: "Объятия с двумя пятачками",
     description: "Тот случай, когда отпускать кадр совсем не хочется.",
-    image: "/images/IMG_8026.jpeg",
+    image: "/images/IMG_8026.webp",
     position: "50% 40%"
   },
   {
@@ -584,7 +590,7 @@ export const galleryItems = [
     category: "family",
     title: "Счастливый час",
     description: "Будний визит, где можно спокойно поиграть, сфотографироваться и выдохнуть.",
-    image: "/images/schastchas.jpeg",
+    image: "/images/schastchas.webp",
     position: "52% 58%"
   }
 ];
@@ -644,11 +650,11 @@ export const reviews = [
     mediaLabel: "Фотоотзыв: 2 снимка",
     media: [
       {
-        image: "/images/family2.jpeg",
+        image: "/images/family2.webp",
         position: "50% 40%"
       },
       {
-        image: "/images/IMG_0523.jpeg",
+        image: "/images/IMG_0523.webp",
         position: "50% 54%"
       }
     ]
@@ -667,7 +673,7 @@ export const reviews = [
     mediaLabel: "Видеоотзыв гостя",
     media: [
       {
-        image: "/images/family3.jpeg",
+        image: "/images/family3.webp",
         position: "50% 38%",
         type: "video"
       }

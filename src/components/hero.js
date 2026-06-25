@@ -41,7 +41,7 @@ export function Hero() {
     <section id="home" className="hero-section">
       <div className="hero-background">
         <Image
-          src={withBasePath("/images/piggyland-hero.png")}
+          src={withBasePath("/images/piggyland-hero.webp")}
           alt="Минипиги на солнечной ферме рядом с красным амбаром"
           fill
           priority
@@ -55,13 +55,13 @@ export function Hero() {
           className="hero-copy hero-copy-overlay"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
+          transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
         >
           <motion.span
             className="eyebrow hero-badge"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.36 }}
           >
             РАБОТАЕМ ПО ПРЕДВАРИТЕЛЬНОЙ ЗАПИСИ
           </motion.span>
@@ -69,7 +69,7 @@ export function Hero() {
             className="hero-title"
             initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.05 }}
+            transition={{ duration: 0.4, delay: 0.03 }}
           >
             Пигги Лэнд
           </motion.h1>
@@ -77,7 +77,7 @@ export function Hero() {
             className="hero-subtitle"
             initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.12 }}
+            transition={{ duration: 0.4, delay: 0.06 }}
           >
             <span className="copy-desktop">
               Антикафе в Санкт-Петербурге, где можно провести время с милыми и дружелюбными минипигами.
@@ -90,7 +90,7 @@ export function Hero() {
             className="hero-description"
             initial={{ opacity: 0, y: 26 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.18 }}
+            transition={{ duration: 0.4, delay: 0.09 }}
           >
             <p className="hero-copy-text">
               Здесь вы можете гладить, кормить и играть с минипигами, а также делать с ними фотографии.
@@ -112,8 +112,8 @@ export function Hero() {
               hidden: {},
               visible: {
                 transition: {
-                  staggerChildren: 0.08,
-                  delayChildren: 0.18
+                  staggerChildren: 0.035,
+                  delayChildren: 0.08
                 }
               }
             }}
@@ -137,7 +137,7 @@ export function Hero() {
             className="button-row"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.28 }}
+            transition={{ duration: 0.4, delay: 0.12 }}
           >
             <Link className="button button-primary hero-primary-cta" href="/booking">
               Записаться

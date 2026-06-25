@@ -6,7 +6,6 @@ import { addDays, format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowUpRight,
   CalendarDays,
   Check,
   CircleAlert,
@@ -34,8 +33,8 @@ import {
   readStoredSettings,
   savePublicBooking
 } from "@/components/admin/admin-data";
-import { offerSections } from "@/lib/offer-data";
 import { alternativeProject, rates } from "@/lib/site-data";
+const BOOKING_DRAFT_STORAGE_KEY = "piggyland-booking-draft";
 
 const bookingSteps = ["Билеты", "Дата", "Время", "Контакты", "Подтверждение"];
 const bookingStepNotes = [
@@ -98,6 +97,36 @@ function getIntervalWord(count) {
   return "интервалов";
 }
 
+function areRateQuantitiesEqual(left, right) {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+
+  if (leftKeys.length !== rightKeys.length) {
+    return false;
+  }
+
+  return leftKeys.every((key) => left[key] === right[key]);
+}
+
+function normalizeHappyHourRateSelection(rateQuantities, shouldUseHappyHourRate) {
+  const standardCount = rateQuantities.standard || 0;
+  const happyHourCount = rateQuantities["happy-hour"] || 0;
+
+  if (standardCount === 0 && happyHourCount === 0) {
+    return rateQuantities;
+  }
+
+  const targetRateId = shouldUseHappyHourRate ? "happy-hour" : "standard";
+  const totalCount = standardCount + happyHourCount;
+  const next = { ...rateQuantities };
+
+  delete next.standard;
+  delete next["happy-hour"];
+  next[targetRateId] = totalCount;
+
+  return next;
+}
+
 export function BookingPlanner({ initialRate }) {
   const router = useRouter();
 
@@ -110,6 +139,7 @@ export function BookingPlanner({ initialRate }) {
   const [activeInfoRateId, setActiveInfoRateId] = useState(initialRate || null);
   const [stepError, setStepError] = useState("");
   const [offerAccepted, setOfferAccepted] = useState(false);
+  const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
   const [storageSnapshot, setStorageSnapshot] = useState(() => ({
     appointments: [],
     settings: defaultSettings
@@ -118,8 +148,10 @@ export function BookingPlanner({ initialRate }) {
   const {
     register,
     handleSubmit,
+    reset,
     trigger,
     getValues,
+    watch,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(contactSchema),
@@ -143,32 +175,76 @@ export function BookingPlanner({ initialRate }) {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
+  const watchedValues = watch();
+
+  useEffect(() => {
+    const raw = window.sessionStorage.getItem(BOOKING_DRAFT_STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+      const draft = JSON.parse(raw);
+      if (typeof draft.step === "number") setStep(Math.max(0, Math.min(bookingSteps.length - 1, draft.step)));
+      if (draft.selectedDate) setSelectedDate(new Date(draft.selectedDate));
+      if (draft.selectedTime) setSelectedTime(draft.selectedTime);
+      if (draft.selectedRateQuantities) setSelectedRateQuantities(draft.selectedRateQuantities);
+      if (typeof draft.offerAccepted === "boolean") setOfferAccepted(draft.offerAccepted);
+      if (typeof draft.personalDataAccepted === "boolean") setPersonalDataAccepted(draft.personalDataAccepted);
+      if (draft.formValues) reset(draft.formValues);
+    } catch {
+      window.sessionStorage.removeItem(BOOKING_DRAFT_STORAGE_KEY);
+    }
+  }, [reset]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      BOOKING_DRAFT_STORAGE_KEY,
+      JSON.stringify({
+        step,
+        selectedDate: selectedDate ? selectedDate.toISOString() : "",
+        selectedTime,
+        selectedRateQuantities,
+        offerAccepted,
+        personalDataAccepted,
+        formValues: watchedValues
+      })
+    );
+  }, [offerAccepted, personalDataAccepted, selectedDate, selectedRateQuantities, selectedTime, step, watchedValues]);
+
   const happyHourRate = rates.find((rate) => rate.id === "happy-hour");
   const standardRate = rates.find((rate) => rate.id === "standard");
   const selectedDateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
-  const happyHourDiscountActive = isHappyHourEnabled(storageSnapshot.settings, selectedDateKey, selectedTime);
+  const happyHourDiscountActive = Boolean(
+    selectedDateKey && selectedTime && isHappyHourEnabled(storageSnapshot.settings, selectedDateKey, selectedTime)
+  );
+
+  useEffect(() => {
+    if (!selectedTime) {
+      return;
+    }
+
+    setSelectedRateQuantities((current) => {
+      const next = normalizeHappyHourRateSelection(current, happyHourDiscountActive);
+      return areRateQuantitiesEqual(current, next) ? current : next;
+    });
+  }, [happyHourDiscountActive, selectedTime]);
 
   const selectedTickets = useMemo(
     () =>
       rates
         .map((rate) => {
           const quantity = selectedRateQuantities[rate.id] || 0;
-          const hasHappyHourDiscount = Boolean(
-            happyHourDiscountActive && happyHourRate && rate.id === "standard"
-          );
-          const effectivePrice = hasHappyHourDiscount ? happyHourRate.price : rate.price;
 
           return {
             ...rate,
             quantity,
-            price: effectivePrice,
+            price: rate.price,
             originalPrice: rate.price,
-            effectiveTariffId: hasHappyHourDiscount ? "happy-hour" : rate.id,
-            hasHappyHourDiscount
+            effectiveTariffId: rate.id,
+            hasHappyHourDiscount: rate.id === "happy-hour"
           };
         })
         .filter((rate) => rate.quantity > 0),
-    [happyHourDiscountActive, happyHourRate, selectedRateQuantities]
+    [selectedRateQuantities]
   );
 
   const guestTickets = useMemo(() => createGuestTickets(selectedTickets), [selectedTickets]);
@@ -176,11 +252,13 @@ export function BookingPlanner({ initialRate }) {
   const ticketsTotal = selectedTickets.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalTicketsCount = selectedTickets.reduce((sum, item) => sum + item.quantity, 0);
   const happyHourDiscountedTicketsCount = selectedTickets.reduce(
-    (sum, item) => sum + (item.hasHappyHourDiscount ? item.quantity : 0),
+    (sum, item) => sum + (item.id === "happy-hour" ? item.quantity : 0),
     0
   );
   const happyHourDiscountAmount = selectedTickets.reduce(
-    (sum, item) => sum + (item.hasHappyHourDiscount ? (item.originalPrice - item.price) * item.quantity : 0),
+    (sum, item) =>
+      sum +
+      (item.id === "happy-hour" && standardRate ? (standardRate.price - item.price) * item.quantity : 0),
     0
   );
   const total = ticketsTotal;
@@ -303,8 +381,8 @@ export function BookingPlanner({ initialRate }) {
     const dateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
 
     try {
-      if (!offerAccepted) {
-        setStepError("Перед оплатой нужно ознакомиться с офертой и принять ее условия.");
+      if (!offerAccepted || !personalDataAccepted) {
+        setStepError("Перед оплатой нужно принять условия оферты и согласие на обработку персональных данных.");
         return;
       }
 
@@ -335,6 +413,7 @@ export function BookingPlanner({ initialRate }) {
         phone: formValues.phone
       });
 
+      window.sessionStorage.removeItem(BOOKING_DRAFT_STORAGE_KEY);
       router.push(`/booking/success?${params.toString()}`);
     } catch (error) {
       setStorageSnapshot(getStorageSnapshot());
@@ -691,46 +770,46 @@ export function BookingPlanner({ initialRate }) {
                         <Check size={14} strokeWidth={2.8} />
                       </span>
                       <span className="offer-acceptance-toggle-copy">
-                        <strong>Принимаю условия договора оферты</strong>
-                        <small>Галочку можно поставить сразу. Сам текст оферты открывается в блоке ниже.</small>
+                        <strong>
+                          Принимаю{" "}
+                          <Link href="/offer?returnTo=/booking" className="offer-acceptance-link">
+                            условия использования, политику конфиденциальности и публичную оферту
+                          </Link>
+                        </strong>
+                        <small>Документ открывается на отдельной странице.</small>
                       </span>
                     </label>
 
-                    <details className="offer-acceptance-card">
-                      <summary className="offer-acceptance-summary">
-                        <span className="offer-acceptance-summary-copy">
-                          <Info size={18} />
-                          <span>
-                            <strong>Договор оферты перед оплатой</strong>
-                            <small>Откройте блок, если хотите ознакомиться с условиями прямо здесь.</small>
-                          </span>
-                        </span>
-                        <span className="offer-acceptance-summary-action">Читать оферту</span>
-                      </summary>
-
-                      <div className="offer-acceptance-body">
-                        <div className="offer-acceptance-sections">
-                          {offerSections.map((section) => (
-                            <section key={section.title} className="offer-acceptance-section">
-                              <h3>{section.title}</h3>
-                              {section.paragraphs.map((paragraph) => (
-                                <p key={paragraph}>{paragraph}</p>
-                              ))}
-                            </section>
-                          ))}
-                        </div>
-
-                        <Link href="/offer" className="offer-acceptance-link" target="_blank" rel="noreferrer">
-                          Открыть полную страницу оферты
-                          <ArrowUpRight size={16} />
-                        </Link>
-                      </div>
-                    </details>
+                    <label className={clsx("offer-acceptance-toggle", personalDataAccepted && "is-checked")}>
+                      <input
+                        type="checkbox"
+                        className="offer-acceptance-toggle-input"
+                        checked={personalDataAccepted}
+                        onChange={(event) => {
+                          setPersonalDataAccepted(event.target.checked);
+                          if (event.target.checked) {
+                            setStepError("");
+                          }
+                        }}
+                      />
+                      <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                        <Check size={14} strokeWidth={2.8} />
+                      </span>
+                      <span className="offer-acceptance-toggle-copy">
+                        <strong>
+                          Даю согласие на{" "}
+                          <Link href="/policy?returnTo=/booking" className="offer-acceptance-link">
+                            обработку моих персональных данных
+                          </Link>
+                        </strong>
+                        <small>Согласие открывается на отдельной странице.</small>
+                      </span>
+                    </label>
                   </div>
 
-                  {!offerAccepted ? (
+                  {!offerAccepted || !personalDataAccepted ? (
                     <p className="offer-acceptance-note">
-                      Кнопка оплаты станет активной после принятия условий оферты.
+                      Кнопка оплаты станет активной после принятия условий оферты и согласия на обработку персональных данных.
                     </p>
                   ) : null}
                 </div>
@@ -768,7 +847,7 @@ export function BookingPlanner({ initialRate }) {
                   type="button"
                   className="button button-primary"
                   onClick={submitBooking}
-                  disabled={!offerAccepted}
+                  disabled={!offerAccepted || !personalDataAccepted}
                 >
                   Оплатить
                 </button>

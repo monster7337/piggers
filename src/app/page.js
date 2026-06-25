@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { AnimatedSection } from "@/components/animated-section";
+import { AnimalRules } from "@/components/animal-rules";
 import { CtaBanner } from "@/components/cta-banner";
 import { FaqAccordion } from "@/components/faq-accordion";
 import { GalleryFilter } from "@/components/gallery-filter";
@@ -179,6 +180,8 @@ export default function HomePage() {
           <GalleryFilter items={galleryItems} limit={6} allCategoryLimit={3} showLink />
         </div>
       </AnimatedSection>
+
+      <AnimalRules />
 
       <AnimatedSection id="about" className="section-muted">
         <div className="container">

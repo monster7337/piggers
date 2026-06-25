@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { PageHero } from "@/components/page-hero";
 
-export function LegalPage({ eyebrow, title, description, sections }) {
+export function LegalPage({ eyebrow, title, description, sections, returnHref = "/booking", returnLabel = "Вернуться к записи" }) {
   return (
     <>
       <PageHero
@@ -20,6 +21,12 @@ export function LegalPage({ eyebrow, title, description, sections }) {
               ))}
             </section>
           ))}
+
+          <div className="mt-6">
+            <Link href={returnHref} className="button button-secondary">
+              {returnLabel}
+            </Link>
+          </div>
         </div>
       </section>
     </>

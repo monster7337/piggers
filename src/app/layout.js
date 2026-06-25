@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
   variable: "--font-display"
 });
 
-const heroImageUrl = absoluteUrl("/images/piggyland-hero.png");
+const heroImageUrl = absoluteUrl("/images/piggyland-hero.webp");
 
 export const metadata = {
   metadataBase: new URL(absoluteUrl("/")),
@@ -62,12 +62,13 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   const assetStyles = {
-    "--journey-progress-image": `url("${withBasePath("/images/progress.png")}")`,
-    "--experience-family-image": `url("${withBasePath("/images/familyandpigs2.png")}")`,
-    "--piggies-section-image": `url("${withBasePath("/images/piggersfon.png")}")`,
-    "--gallery-section-image": `url("${withBasePath("/images/piggers.png")}")`,
-    "--reviews-section-image": `url("${withBasePath("/images/otziv.png")}")`,
-    "--faq-section-image": `url("${withBasePath("/images/faq.png")}")`
+    "--standard-section-image": `url("${withBasePath("/images/standart.webp")}")`,
+    "--journey-progress-image": `url("${withBasePath("/images/progress.webp")}")`,
+    "--experience-family-image": `url("${withBasePath("/images/familyandpigs2.webp")}")`,
+    "--piggies-section-image": `url("${withBasePath("/images/piggersfon.webp")}")`,
+    "--gallery-section-image": `url("${withBasePath("/images/piggers.webp")}")`,
+    "--reviews-section-image": `url("${withBasePath("/images/otziv.webp")}")`,
+    "--faq-section-image": `url("${withBasePath("/images/faq.webp")}")`
   };
 
   const localBusinessSchema = {

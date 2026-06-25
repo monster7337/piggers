@@ -4,8 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { Camera, Check, CircleAlert, Gift, Mail, MessageCircle, Minus, Plus, Send } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -18,6 +19,7 @@ const GIFT_GUEST_MIN = 1;
 const GIFT_GUEST_MAX = 12;
 const GIFT_SINGLE_PRICE = 1500;
 const GIFT_GROUP_PRICE = 1200;
+const GIFT_DRAFT_STORAGE_KEY = "piggyland-gift-draft";
 
 const giftSteps = ["Количество", "Контакты"];
 const giftStepNotes = [
@@ -130,10 +132,13 @@ export function GiftCertificateOrderForm() {
   const [step, setStep] = useState(0);
   const [guestCount, setGuestCount] = useState(1);
   const [stepError, setStepError] = useState("");
+  const [offerAccepted, setOfferAccepted] = useState(false);
+  const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
 
   const {
     register,
     handleSubmit,
+    reset,
     watch,
     formState: { errors, isSubmitting }
   } = useForm({
@@ -154,6 +159,7 @@ export function GiftCertificateOrderForm() {
   });
 
   const deliveryMethod = watch("deliveryMethod");
+  const watchedValues = watch();
   const purchaserName = watch("purchaserName");
   const recipientName = watch("recipientName");
   const deliveryContact = watch("deliveryContact");
@@ -180,6 +186,35 @@ export function GiftCertificateOrderForm() {
         ? "vk.com/..."
         : "@instagram или instagram.com/...";
 
+  useEffect(() => {
+    const raw = window.sessionStorage.getItem(GIFT_DRAFT_STORAGE_KEY);
+    if (!raw) return;
+
+    try {
+      const draft = JSON.parse(raw);
+      if (typeof draft.step === "number") setStep(Math.max(0, Math.min(giftSteps.length - 1, draft.step)));
+      if (typeof draft.guestCount === "number") setGuestCount(Math.max(GIFT_GUEST_MIN, Math.min(GIFT_GUEST_MAX, draft.guestCount)));
+      if (typeof draft.offerAccepted === "boolean") setOfferAccepted(draft.offerAccepted);
+      if (typeof draft.personalDataAccepted === "boolean") setPersonalDataAccepted(draft.personalDataAccepted);
+      if (draft.formValues) reset(draft.formValues);
+    } catch {
+      window.sessionStorage.removeItem(GIFT_DRAFT_STORAGE_KEY);
+    }
+  }, [reset]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      GIFT_DRAFT_STORAGE_KEY,
+      JSON.stringify({
+        step,
+        guestCount,
+        offerAccepted,
+        personalDataAccepted,
+        formValues: watchedValues
+      })
+    );
+  }, [guestCount, offerAccepted, personalDataAccepted, step, watchedValues]);
+
   function updateGuestCount(nextValue) {
     setGuestCount(Math.max(GIFT_GUEST_MIN, Math.min(GIFT_GUEST_MAX, nextValue)));
   }
@@ -192,6 +227,11 @@ export function GiftCertificateOrderForm() {
   const submitGiftOrder = handleSubmit(
     async (values) => {
       setStepError("");
+
+      if (!offerAccepted || !personalDataAccepted) {
+        setStepError("Перед оплатой нужно принять условия оферты и согласие на обработку персональных данных.");
+        return;
+      }
 
       const order = saveGiftCertificatePurchase({
         ...values,
@@ -216,6 +256,7 @@ export function GiftCertificateOrderForm() {
         recipient: order.recipientName
       });
 
+      window.sessionStorage.removeItem(GIFT_DRAFT_STORAGE_KEY);
       router.push(`/booking/success?${params.toString()}`);
     },
     () => {
@@ -513,6 +554,60 @@ export function GiftCertificateOrderForm() {
                           </label>
                         </div>
                       </section>
+
+                      <div className="offer-acceptance-shell">
+                        <label className={clsx("offer-acceptance-toggle", offerAccepted && "is-checked")}>
+                          <input
+                            type="checkbox"
+                            className="offer-acceptance-toggle-input"
+                            checked={offerAccepted}
+                            onChange={(event) => {
+                              setOfferAccepted(event.target.checked);
+                              if (event.target.checked) {
+                                setStepError("");
+                              }
+                            }}
+                          />
+                          <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                            <Check size={14} strokeWidth={2.8} />
+                          </span>
+                          <span className="offer-acceptance-toggle-copy">
+                            <strong>
+                              Принимаю{" "}
+                              <Link href="/offer?returnTo=/gift-certificates" className="offer-acceptance-link">
+                                условия использования, политику конфиденциальности и публичную оферту
+                              </Link>
+                            </strong>
+                            <small>Документ открывается на отдельной странице.</small>
+                          </span>
+                        </label>
+
+                        <label className={clsx("offer-acceptance-toggle", personalDataAccepted && "is-checked")}>
+                          <input
+                            type="checkbox"
+                            className="offer-acceptance-toggle-input"
+                            checked={personalDataAccepted}
+                            onChange={(event) => {
+                              setPersonalDataAccepted(event.target.checked);
+                              if (event.target.checked) {
+                                setStepError("");
+                              }
+                            }}
+                          />
+                          <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                            <Check size={14} strokeWidth={2.8} />
+                          </span>
+                          <span className="offer-acceptance-toggle-copy">
+                            <strong>
+                              Даю согласие на{" "}
+                              <Link href="/policy?returnTo=/gift-certificates" className="offer-acceptance-link">
+                                обработку моих персональных данных
+                              </Link>
+                            </strong>
+                            <small>Согласие открывается на отдельной странице.</small>
+                          </span>
+                        </label>
+                      </div>
                     </div>
                   </>
                 )}
@@ -544,7 +639,12 @@ export function GiftCertificateOrderForm() {
                       Продолжить
                     </button>
                   ) : (
-                    <button type="button" className="button button-primary" onClick={submitGiftOrder} disabled={isSubmitting}>
+                    <button
+                      type="button"
+                      className="button button-primary"
+                      onClick={submitGiftOrder}
+                      disabled={isSubmitting || !offerAccepted || !personalDataAccepted}
+                    >
                       Оплатить сертификат
                     </button>
                   )}

@@ -13,6 +13,7 @@ export function PiggyBrowser({ piggies, previewCount }) {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [portalTarget, setPortalTarget] = useState(null);
+  const [transitionDirection, setTransitionDirection] = useState(1);
   const lockedScrollRef = useRef(0);
   const activeSelectorRef = useRef(null);
 
@@ -29,6 +30,12 @@ export function PiggyBrowser({ piggies, previewCount }) {
   const openPiggy = (slug, preserveGallery = false) => {
     if (!slug) {
       return;
+    }
+
+    const nextIndex = piggies.findIndex((piggy) => piggy.slug === slug);
+
+    if (activeIndex >= 0 && nextIndex >= 0 && nextIndex !== activeIndex) {
+      setTransitionDirection(nextIndex > activeIndex ? 1 : -1);
     }
 
     setIsGalleryOpen(preserveGallery);
@@ -52,9 +59,14 @@ export function PiggyBrowser({ piggies, previewCount }) {
     setActiveSlug(null);
   };
   const closeDetail = () => setActiveSlug(null);
-  const showPrevious = () =>
+  const showPrevious = () => {
+    setTransitionDirection(-1);
     setActiveSlug(piggies[(activeIndex - 1 + piggies.length) % piggies.length]?.slug || null);
-  const showNext = () => setActiveSlug(piggies[(activeIndex + 1) % piggies.length]?.slug || null);
+  };
+  const showNext = () => {
+    setTransitionDirection(1);
+    setActiveSlug(piggies[(activeIndex + 1) % piggies.length]?.slug || null);
+  };
 
   useEffect(() => {
     setPortalTarget(document.body);
@@ -207,7 +219,7 @@ export function PiggyBrowser({ piggies, previewCount }) {
 
       {activePiggy ? (
         <motion.div
-          key={`piggy-detail-${activePiggy.slug}`}
+          key="piggy-detail"
           className="lightbox"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -225,99 +237,108 @@ export function PiggyBrowser({ piggies, previewCount }) {
               <X size={20} />
             </button>
 
-            <div className="piggy-modal-grid">
-              <div
-                className="piggy-modal-media"
-                style={{
-                  backgroundImage: `linear-gradient(180deg, rgba(12, 10, 8, 0.06), rgba(12, 10, 8, 0.22)), url(${withBasePath(activePiggy.image)})`,
-                  backgroundPosition: activePiggy.imagePosition
-                }}
-              />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={activePiggy.slug}
+                className="piggy-modal-grid"
+                initial={{ opacity: 0, x: transitionDirection > 0 ? 32 : -32 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: transitionDirection > 0 ? -24 : 24 }}
+                transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+              >
+                <div
+                  className="piggy-modal-media"
+                  style={{
+                    backgroundImage: `linear-gradient(180deg, rgba(12, 10, 8, 0.06), rgba(12, 10, 8, 0.22)), url(${withBasePath(activePiggy.image)})`,
+                    backgroundPosition: activePiggy.imagePosition
+                  }}
+                />
 
-              <div className="piggy-modal-copy">
-                <span className="eyebrow">Наш минипиг</span>
-                <div className="card-topline">
-                  <h3>{activePiggy.name}</h3>
-                  <span className="soft-badge">{activePiggy.badge || activePiggy.age}</span>
-                </div>
-                <p className="piggy-modal-lead">{activePiggy.character}</p>
-                {activePiggy.trait ? <p className="muted-text">{activePiggy.trait}</p> : null}
+                <div className="piggy-modal-copy">
+                  <span className="eyebrow">Наш минипиг</span>
+                  <div className="card-topline">
+                    <h3>{activePiggy.name}</h3>
+                    <span className="soft-badge">{activePiggy.badge || activePiggy.age}</span>
+                  </div>
+                  <p className="piggy-modal-lead">{activePiggy.character}</p>
+                  {activePiggy.trait ? <p className="muted-text">{activePiggy.trait}</p> : null}
 
-                {!isMobile ? (
-                  <div className="piggy-modal-selector">
-                    {piggies.map((piggy) => (
+                  {!isMobile ? (
+                    <div className="piggy-modal-selector">
+                      {piggies.map((piggy) => (
+                        <button
+                          key={piggy.slug}
+                          ref={piggy.slug === activePiggy.slug ? activeSelectorRef : null}
+                          type="button"
+                          className={`piggy-selector-card ${piggy.slug === activePiggy.slug ? "active" : ""}`}
+                          onClick={() => openPiggy(piggy.slug)}
+                          style={{
+                            backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.08), rgba(17, 17, 17, 0.28)), url(${withBasePath(piggy.image)})`,
+                            backgroundPosition: piggy.imagePosition
+                          }}
+                        >
+                          <span>{piggy.name}</span>
+                          <small>{piggy.badge || piggy.age}</small>
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  <div className="piggy-modal-columns">
+                    <div className="card piggy-detail-card">
+                      <h4>
+                        <Heart size={18} />
+                        Любит
+                      </h4>
+                      <ul>
+                        {activePiggy.likes.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="card piggy-detail-card">
+                      <h4>
+                        <PawPrint size={18} />
+                        Интересные факты
+                      </h4>
+                      <ul>
+                        {activePiggy.facts.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="piggy-modal-action-bar">
+                    <div className="piggy-modal-switchers">
                       <button
-                        key={piggy.slug}
-                        ref={piggy.slug === activePiggy.slug ? activeSelectorRef : null}
                         type="button"
-                        className={`piggy-selector-card ${piggy.slug === activePiggy.slug ? "active" : ""}`}
-                        onClick={() => openPiggy(piggy.slug)}
-                        style={{
-                          backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.08), rgba(17, 17, 17, 0.28)), url(${withBasePath(piggy.image)})`,
-                          backgroundPosition: piggy.imagePosition
-                        }}
+                        className="button button-secondary piggy-modal-switch-button"
+                        onClick={showPrevious}
+                        aria-label="Предыдущий минипиг"
                       >
-                        <span>{piggy.name}</span>
-                        <small>{piggy.badge || piggy.age}</small>
+                        <ArrowLeft size={18} />
+                        <span className="piggy-modal-switch-label">Назад</span>
                       </button>
-                    ))}
-                  </div>
-                ) : null}
-
-                <div className="piggy-modal-columns">
-                  <div className="card piggy-detail-card">
-                    <h4>
-                      <Heart size={18} />
-                      Любит
-                    </h4>
-                    <ul>
-                      {activePiggy.likes.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="card piggy-detail-card">
-                    <h4>
-                      <PawPrint size={18} />
-                      Интересные факты
-                    </h4>
-                    <ul>
-                      {activePiggy.facts.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
+                      <button
+                        type="button"
+                        className="button button-secondary piggy-modal-switch-button"
+                        onClick={showNext}
+                        aria-label="Следующий минипиг"
+                      >
+                        <ArrowRight size={18} />
+                        <span className="piggy-modal-switch-label">Вперед</span>
+                      </button>
+                    </div>
+                    <Link className="button button-primary piggy-modal-booking" href="/booking">
+                      <CalendarDays size={18} />
+                      Забронировать визит
+                    </Link>
                   </div>
                 </div>
-
-                <div className="piggy-modal-action-bar">
-                  <div className="piggy-modal-switchers">
-                    <button
-                      type="button"
-                      className="button button-secondary piggy-modal-switch-button"
-                      onClick={showPrevious}
-                      aria-label="Предыдущий минипиг"
-                    >
-                      <ArrowLeft size={18} />
-                      <span className="piggy-modal-switch-label">Назад</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="button button-secondary piggy-modal-switch-button"
-                      onClick={showNext}
-                      aria-label="Следующий минипиг"
-                    >
-                      <ArrowRight size={18} />
-                      <span className="piggy-modal-switch-label">Вперед</span>
-                    </button>
-                  </div>
-                  <Link className="button button-primary piggy-modal-booking" href="/booking">
-                    <CalendarDays size={18} />
-                    Забронировать визит
-                  </Link>
-                </div>
-              </div>
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       ) : null}

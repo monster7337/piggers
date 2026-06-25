@@ -38,7 +38,7 @@ export function PageHero({
         {!hideImage ? (
           <div className="page-hero-media">
             <Image
-              src={withBasePath("/images/piggyland-hero.png")}
+              src={withBasePath("/images/piggyland-hero.webp")}
               alt="Теплый фермерский дворик Piggy Land"
               fill
               sizes="(max-width: 960px) 100vw, 46vw"

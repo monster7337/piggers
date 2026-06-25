@@ -62,7 +62,7 @@ export function Header() {
         <a className="brand-lockup brand-lockup-compact" href={withBasePath("/#home")} aria-label="Piggy Land">
           <span className="brand-badge brand-badge-logo">
             <img
-              src={withBasePath("/images/piggilandlogo-icon.png")}
+              src={withBasePath("/images/piggilandlogo-icon.webp")}
               alt=""
               className="brand-logo-image"
               width="48"
