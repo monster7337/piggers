@@ -47,6 +47,9 @@ export function AdminProvider({ children }) {
   const [detailId, setDetailId] = useState(null);
   const [toasts, setToasts] = useState([]);
   const [hydrated, setHydrated] = useState(false);
+  const syncedPaykeeperPaymentsRef = useRef(new Set());
+  const appointmentsRef = useRef([]);
+  const giftOrdersRef = useRef([]);
 
   useEffect(() => {
     setAppointments(readStoredAppointments());
@@ -102,6 +105,14 @@ export function AdminProvider({ children }) {
   }, [settings]);
 
   useEffect(() => {
+    appointmentsRef.current = appointments;
+  }, [appointments]);
+
+  useEffect(() => {
+    giftOrdersRef.current = giftOrders;
+  }, [giftOrders]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return undefined;
     }
@@ -135,6 +146,131 @@ export function AdminProvider({ children }) {
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
+
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") {
+      return undefined;
+    }
+
+    let disposed = false;
+
+    async function syncPaykeeperPayments() {
+      try {
+        const response = await fetch("/api/paykeeper/callback", { cache: "no-store" });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        const payments = Array.isArray(payload.payments) ? payload.payments : [];
+        const activityEntries = [];
+        const syncedPaymentIds = [];
+        const now = new Date().toISOString();
+
+        const nextAppointments = appointmentsRef.current.map((appointment) => {
+          const payment = payments.find(
+            (item) =>
+              item?.id &&
+              item?.orderid === appointment.id &&
+              item.id !== appointment.paykeeperPaymentId &&
+              !syncedPaykeeperPaymentsRef.current.has(item.id)
+          );
+
+          if (!payment) {
+            return appointment;
+          }
+
+          const paidAmount = Number(payment.sum) || appointment.prepaymentAmount || 0;
+          const prepaymentAmount = Math.max(appointment.prepaymentAmount || 0, Math.min(paidAmount, appointment.totalAmount || paidAmount));
+
+          syncedPaymentIds.push(payment.id);
+          activityEntries.push(
+            createActivityEntry({
+              entityId: appointment.id,
+              entityType: "appointment",
+              kind: "payment",
+              relatedDate: appointment.date,
+              relatedTime: appointment.time,
+              tone: "success",
+              message: `PayKeeper: оплата ${formatCurrency(paidAmount)} привязана к брони ${appointment.clientName}.`
+            })
+          );
+
+          return {
+            ...appointment,
+            prepaymentAmount,
+            paymentMethod: "online",
+            remainingAmount: Math.max(0, (appointment.totalAmount || 0) - prepaymentAmount - (appointment.onSitePaymentAmount || 0)),
+            status: appointment.status === "new" || appointment.status === "pending" ? "confirmed" : appointment.status,
+            paykeeperPaymentId: payment.id,
+            paykeeperPaidAt: payment.lastCallbackAt || now,
+            updatedAt: now
+          };
+        });
+
+        const nextOrders = giftOrdersRef.current.map((order) => {
+          const payment = payments.find(
+            (item) =>
+              item?.id &&
+              item?.orderid === order.id &&
+              item.id !== order.paykeeperPaymentId &&
+              !syncedPaykeeperPaymentsRef.current.has(item.id)
+          );
+
+          if (!payment) {
+            return order;
+          }
+
+          syncedPaymentIds.push(payment.id);
+          activityEntries.push(
+            createActivityEntry({
+              entityId: order.id,
+              entityType: "gift-certificate",
+              kind: "paid",
+              relatedDate: order.purchaseDate,
+              relatedTime: order.purchaseTime,
+              tone: "success",
+              message: `PayKeeper: оплата ${formatCurrency(Number(payment.sum) || order.amount)} привязана к сертификату ${order.certificateTitle}.`
+            })
+          );
+
+          return {
+            ...order,
+            status: "paid",
+            paymentMethod: "online",
+            paykeeperPaymentId: payment.id,
+            paykeeperPaidAt: payment.lastCallbackAt || now,
+            updatedAt: now
+          };
+        });
+
+        if (nextAppointments.some((appointment, index) => appointment !== appointmentsRef.current[index])) {
+          setAppointments(sortAppointments(nextAppointments));
+        }
+
+        if (nextOrders.some((order, index) => order !== giftOrdersRef.current[index])) {
+          setGiftOrders(nextOrders);
+        }
+
+        if (!disposed && syncedPaymentIds.length) {
+          syncedPaymentIds.forEach((id) => syncedPaykeeperPaymentsRef.current.add(id));
+          activityEntries.forEach((entry) => appendActivity(entry));
+          pushToast(`PayKeeper: синхронизировано оплат — ${syncedPaymentIds.length}`);
+        }
+      } catch {
+        // GitHub Pages has no API runtime; local/ngrok dev server does. Silent fallback keeps the static CRM usable.
+      }
+    }
+
+    syncPaykeeperPayments();
+    const intervalId = window.setInterval(syncPaykeeperPayments, 20000);
+
+    return () => {
+      disposed = true;
+      window.clearInterval(intervalId);
+    };
+  }, [hydrated]);
 
   function pushToast(message, tone = "success") {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

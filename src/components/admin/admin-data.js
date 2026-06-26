@@ -152,7 +152,7 @@ function padTimePart(value) {
 
 function createId(prefix) {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
+    return `${prefix}-${crypto.randomUUID()}`;
   }
 
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -1507,7 +1507,7 @@ export function savePublicBooking(values) {
   const appointments = readStoredAppointments();
   const settings = readStoredSettings();
   const appointment = normalizeAppointment({
-    id: createId("appointment"),
+    id: createId("piggy-appointment"),
     clientName: values.clientName,
     phone: values.phone,
     email: values.email,
@@ -1551,7 +1551,7 @@ export function savePublicBooking(values) {
 export function saveGiftCertificatePurchase(values) {
   const order = normalizeGiftCertificateOrder({
     ...values,
-    id: createId("gift"),
+    id: createId("piggy-gift"),
     source: "Сайт",
     paymentMethod: "online",
     status: "paid",
