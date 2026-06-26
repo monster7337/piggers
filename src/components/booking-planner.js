@@ -17,7 +17,6 @@ import {
   ShoppingBag
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -33,6 +32,7 @@ import {
   readStoredSettings,
   savePublicBooking
 } from "@/components/admin/admin-data";
+import { createPaykeeperInvoice } from "@/lib/paykeeper-client";
 import { alternativeProject, rates } from "@/lib/site-data";
 const BOOKING_DRAFT_STORAGE_KEY = "piggyland-booking-draft";
 
@@ -128,7 +128,6 @@ function normalizeHappyHourRateSelection(rateQuantities, shouldUseHappyHourRate)
 }
 
 export function BookingPlanner({ initialRate }) {
-  const router = useRouter();
 
   const [step, setStep] = useState(0);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -152,7 +151,7 @@ export function BookingPlanner({ initialRate }) {
     trigger,
     getValues,
     watch,
-    formState: { errors }
+    formState: { errors, isSubmitting }
   } = useForm({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -407,14 +406,23 @@ export function BookingPlanner({ initialRate }) {
         time: selectedTime,
         tickets: String(totalTicketsCount),
         total: formatCurrency(total),
-        prepayment: formatCurrency(appointment.prepaymentAmount),
-        remaining: formatCurrency(appointment.remainingAmount),
+        prepayment: formatCurrency(prepaymentNow),
+        remaining: formatCurrency(remainingOnSite),
         name: formValues.name,
         phone: formValues.phone
       });
+      const invoice = await createPaykeeperInvoice({
+        amount: prepaymentNow,
+        orderId: appointment.id,
+        clientName: formValues.name,
+        clientEmail: formValues.email,
+        clientPhone: formValues.phone,
+        serviceName: `Piggy Land: бронь ${selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", ")}`,
+        successPath: `/booking/success?${params.toString()}`
+      });
 
       window.sessionStorage.removeItem(BOOKING_DRAFT_STORAGE_KEY);
-      router.push(`/booking/success?${params.toString()}`);
+      window.location.assign(invoice.paymentUrl);
     } catch (error) {
       setStorageSnapshot(getStorageSnapshot());
       setStep(2);
@@ -839,7 +847,7 @@ export function BookingPlanner({ initialRate }) {
                 type="button"
                 className="button button-secondary"
                 onClick={() => goToStep(Math.max(0, step - 1))}
-                disabled={step === 0}
+                disabled={step === 0 || isSubmitting}
               >
                 Назад
               </button>
@@ -853,7 +861,7 @@ export function BookingPlanner({ initialRate }) {
                   type="button"
                   className="button button-primary"
                   onClick={submitBooking}
-                  disabled={!offerAccepted || !personalDataAccepted}
+                  disabled={isSubmitting || !offerAccepted || !personalDataAccepted}
                 >
                   Оплатить
                 </button>

@@ -5,7 +5,6 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { Camera, Check, CircleAlert, Gift, Mail, MessageCircle, Minus, Plus, Send } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,6 +13,7 @@ import {
   giftDeliveryOptions,
   saveGiftCertificatePurchase
 } from "@/components/admin/admin-data";
+import { createPaykeeperInvoice } from "@/lib/paykeeper-client";
 
 const GIFT_GUEST_MIN = 1;
 const GIFT_GUEST_MAX = 12;
@@ -128,7 +128,6 @@ function DeliveryIcon({ method }) {
 }
 
 export function GiftCertificateOrderForm() {
-  const router = useRouter();
   const [step, setStep] = useState(0);
   const [guestCount, setGuestCount] = useState(1);
   const [stepError, setStepError] = useState("");
@@ -255,9 +254,18 @@ export function GiftCertificateOrderForm() {
         phone: order.purchaserPhone,
         recipient: order.recipientName
       });
+      const invoice = await createPaykeeperInvoice({
+        amount: order.amount,
+        orderId: order.id,
+        clientName: order.purchaserName,
+        clientEmail: order.purchaserEmail,
+        clientPhone: order.purchaserPhone,
+        serviceName: `Piggy Land: ${order.certificateTitle}`,
+        successPath: `/booking/success?${params.toString()}`
+      });
 
       window.sessionStorage.removeItem(GIFT_DRAFT_STORAGE_KEY);
-      router.push(`/booking/success?${params.toString()}`);
+      window.location.assign(invoice.paymentUrl);
     },
     () => {
       setStepError("Проверьте контакты получателя, покупателя и способ отправки перед оплатой.");
