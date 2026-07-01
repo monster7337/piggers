@@ -134,6 +134,16 @@ export function Footer() {
           <span>{businessInfo.fullName}</span>
         </div>
       </div>
+
+      <div className="container footer-legal-bar">
+        <p className="footer-legal-disclaimer">
+          Все материалы и цены, размещенные на сайте, носят справочный характер и не являются публичной офертой,
+          определяемой положением Статьи 437(2) Гражданского кодекса Российской Федерации.
+        </p>
+        <Link href="/policy" className="footer-legal-policy">
+          Политика конфиденциальности
+        </Link>
+      </div>
     </footer>
   );
 }

@@ -20,8 +20,8 @@ export function LegalPage({ eyebrow, title, description, sections, returnHref = 
       />
       <section className="section">
         <div className="container legal-content">
-          {sections.map((section) => (
-            <section key={section.title} className="legal-section">
+          {sections.map((section, index) => (
+            <section id={`section-${index + 1}`} key={section.title} className="legal-section">
               <h2>{section.title}</h2>
               {section.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>

@@ -783,11 +783,19 @@ export function BookingPlanner({ initialRate }) {
                       <span className="offer-acceptance-toggle-copy">
                         <strong>
                           Принимаю{" "}
-                          <Link href="/offer?returnTo=/booking" prefetch className="offer-acceptance-link">
-                            условия использования, политику конфиденциальности и публичную оферту
+                          <Link href="/offer?returnTo=/booking#section-1" prefetch className="offer-acceptance-link">
+                            условия использования
+                          </Link>
+                          ,{" "}
+                          <Link href="/offer?returnTo=/booking#section-2" prefetch className="offer-acceptance-link">
+                            политику конфиденциальности
+                          </Link>{" "}
+                          и{" "}
+                          <Link href="/offer?returnTo=/booking#section-3" prefetch className="offer-acceptance-link">
+                            публичную оферту
                           </Link>
                         </strong>
-                        <small>Документ открывается на отдельной странице.</small>
+                        <small>Каждый документ открывается по отдельной ссылке.</small>
                       </span>
                     </div>
 
@@ -812,7 +820,7 @@ export function BookingPlanner({ initialRate }) {
                       <span className="offer-acceptance-toggle-copy">
                         <strong>
                           Даю согласие на{" "}
-                          <Link href="/policy?returnTo=/booking" prefetch className="offer-acceptance-link">
+                          <Link href="/policy?returnTo=/booking#section-1" prefetch className="offer-acceptance-link">
                             обработку моих персональных данных
                           </Link>
                         </strong>

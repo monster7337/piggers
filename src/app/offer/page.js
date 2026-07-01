@@ -3,7 +3,7 @@ import { offerSections } from "@/lib/offer-data";
 
 export const metadata = {
   title: "Публичная оферта",
-  description: "Публичная оферта на бронирование посещения Piggy Land."
+  description: "Условия использования сайта, политика конфиденциальности и публичная оферта Piggy Land."
 };
 
 export default function OfferPage({ searchParams }) {
@@ -11,9 +11,9 @@ export default function OfferPage({ searchParams }) {
 
   return (
     <LegalPage
-      eyebrow="Оферта"
+      eyebrow="Документы"
       title="Публичная оферта"
-      description="На странице собраны условия использования сайта Piggy Land, политика конфиденциальности, правила посещения и публичная оферта."
+      description="На этой странице собраны условия использования сайта Piggy Land, политика конфиденциальности и публичная оферта на бронирование посещения и оформление подарочных сертификатов."
       returnHref={returnHref}
       returnLabel={returnHref.includes("gift-certificates") ? "Вернуться к сертификату" : "Вернуться к записи"}
       sections={offerSections}

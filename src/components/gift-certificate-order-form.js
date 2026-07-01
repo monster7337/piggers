@@ -275,6 +275,16 @@ export function GiftCertificateOrderForm() {
   return (
     <section className="section" id="gift-order">
       <div className="container">
+        <div className="gift-validity-notice" role="note" aria-label="Срок действия сертификата">
+          <span className="gift-validity-notice-icon" aria-hidden="true">
+            <CircleAlert size={20} />
+          </span>
+          <div className="gift-validity-notice-copy">
+            <strong>Подарочный сертификат действует 3 месяца с момента оформления.</strong>
+            <p>Пожалуйста, учитывайте срок действия сертификата до оплаты.</p>
+          </div>
+        </div>
+
         <div className="booking-layout gift-config-layout">
           <div className="booking-main">
             <div className="card booking-mobile-overview">
@@ -582,11 +592,19 @@ export function GiftCertificateOrderForm() {
                           <span className="offer-acceptance-toggle-copy">
                             <strong>
                               Принимаю{" "}
-                              <Link href="/offer?returnTo=/gift-certificates" className="offer-acceptance-link">
-                                условия использования, политику конфиденциальности и публичную оферту
+                              <Link href="/offer?returnTo=/gift-certificates#section-1" className="offer-acceptance-link">
+                                условия использования
+                              </Link>
+                              ,{" "}
+                              <Link href="/offer?returnTo=/gift-certificates#section-2" className="offer-acceptance-link">
+                                политику конфиденциальности
+                              </Link>{" "}
+                              и{" "}
+                              <Link href="/offer?returnTo=/gift-certificates#section-3" className="offer-acceptance-link">
+                                публичную оферту
                               </Link>
                             </strong>
-                            <small>Документ открывается на отдельной странице.</small>
+                            <small>Каждый документ открывается по отдельной ссылке.</small>
                           </span>
                         </label>
 
@@ -608,7 +626,7 @@ export function GiftCertificateOrderForm() {
                           <span className="offer-acceptance-toggle-copy">
                             <strong>
                               Даю согласие на{" "}
-                              <Link href="/policy?returnTo=/gift-certificates" className="offer-acceptance-link">
+                              <Link href="/policy?returnTo=/gift-certificates#section-1" className="offer-acceptance-link">
                                 обработку моих персональных данных
                               </Link>
                             </strong>

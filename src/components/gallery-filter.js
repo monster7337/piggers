@@ -139,10 +139,6 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
                 backgroundPosition: item.position
               }}
             />
-            <span className="gallery-card-copy">
-              <strong>{item.title}</strong>
-              <span>{item.description}</span>
-            </span>
           </button>
         ))}
       </div>
