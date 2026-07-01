@@ -99,7 +99,13 @@ export function BookingRulesGate() {
 
       const url = new URL(anchor.href, window.location.href);
 
-      if (url.origin !== window.location.origin || !isGatedPath(stripBasePath(url.pathname))) {
+      const targetPathname = stripBasePath(url.pathname);
+
+      if (url.origin !== window.location.origin || !isGatedPath(targetPathname)) {
+        return;
+      }
+
+      if (pathname === targetPathname) {
         return;
       }
 
@@ -118,28 +124,7 @@ export function BookingRulesGate() {
     };
   }, [pathname]);
 
-  useEffect(() => {
-    if (!pathname || !isGatedPath(pathname) || isOpen) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setPendingHref(pathname);
-      setAcceptedRules(rules.map(() => false));
-      setIsOpen(true);
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [isOpen, pathname]);
-
   const close = () => {
-    if (isGatedPath(pathname)) {
-      router.push("/");
-      return;
-    }
-
     setAcceptedRules(rules.map(() => false));
     setIsOpen(false);
   };
