@@ -3805,6 +3805,12 @@ img {
   align-self: flex-start;
   font-weight: 700;
   color: var(--accent);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.offer-acceptance-link:hover {
+  text-decoration: underline;
 }
 
 .legal-top-return {

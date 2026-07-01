@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { stripBasePath } from "@/lib/base-path";
 
 const OPEN_EVENT = "piggy-land:booking-gate-open";
+const ACCEPTED_STORAGE_KEY = "piggy-land:rules-accepted";
 
 const rules = [
   "Помните: вы в гостях у животных, а не на аттракционе. Капибар нельзя принуждать к общению — слушайте иструкторов, чтобы всем было комфортно.",
@@ -23,8 +24,29 @@ export function requestBookingGate(href = "/booking") {
   window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: { href } }));
 }
 
-function isBookingUrl(url) {
-  return stripBasePath(url.pathname) === "/booking";
+function isGatedPath(pathname) {
+  return pathname === "/booking" || pathname === "/gift-certificates";
+}
+
+function getStoredAcceptance() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.sessionStorage.getItem(ACCEPTED_STORAGE_KEY) === "true";
+}
+
+function storeAcceptance(value) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (value) {
+    window.sessionStorage.setItem(ACCEPTED_STORAGE_KEY, "true");
+    return;
+  }
+
+  window.sessionStorage.removeItem(ACCEPTED_STORAGE_KEY);
 }
 
 export function BookingRulesGate() {
@@ -33,6 +55,7 @@ export function BookingRulesGate() {
   const [pendingHref, setPendingHref] = useState("/booking");
   const [isOpen, setIsOpen] = useState(false);
   const [acceptedRules, setAcceptedRules] = useState(() => rules.map(() => false));
+  const [hasAcceptedRules, setHasAcceptedRules] = useState(() => getStoredAcceptance());
 
   useEffect(() => {
     const html = document.documentElement;
@@ -99,11 +122,11 @@ export function BookingRulesGate() {
 
       const url = new URL(anchor.href, window.location.href);
 
-      if (url.origin !== window.location.origin || !isBookingUrl(url)) {
+      if (url.origin !== window.location.origin || !isGatedPath(stripBasePath(url.pathname))) {
         return;
       }
 
-      if (pathname === "/booking" && stripBasePath(url.pathname) === "/booking") {
+      if (getStoredAcceptance()) {
         return;
       }
 
@@ -122,7 +145,28 @@ export function BookingRulesGate() {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    if (!pathname || hasAcceptedRules || !isGatedPath(pathname) || isOpen) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setPendingHref(pathname);
+      setAcceptedRules(rules.map(() => false));
+      setIsOpen(true);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [hasAcceptedRules, isOpen, pathname]);
+
   const close = () => {
+    if (isGatedPath(pathname) && !hasAcceptedRules) {
+      router.push("/");
+      return;
+    }
+
     setAcceptedRules(rules.map(() => false));
     setIsOpen(false);
   };
@@ -135,6 +179,8 @@ export function BookingRulesGate() {
     if (!allAccepted) {
       return;
     }
+    storeAcceptance(true);
+    setHasAcceptedRules(true);
     setAcceptedRules(rules.map(() => false));
     setIsOpen(false);
     router.push(pendingHref);
