@@ -17,6 +17,14 @@ const rules = [
   "Не опаздывайте — время сеанса сокращается, а продлить его нельзя."
 ];
 
+function normalizePathname(pathname) {
+  if (!pathname || pathname === "/") {
+    return "/";
+  }
+
+  return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+}
+
 export function requestBookingGate(href = "/booking") {
   if (typeof window === "undefined") {
     return;
@@ -26,7 +34,8 @@ export function requestBookingGate(href = "/booking") {
 }
 
 function isGatedPath(pathname) {
-  return pathname === "/booking" || pathname === "/gift-certificates";
+  const normalizedPathname = normalizePathname(pathname);
+  return normalizedPathname === "/booking" || normalizedPathname === "/gift-certificates";
 }
 
 function hasDraftForPath(href) {
@@ -35,7 +44,7 @@ function hasDraftForPath(href) {
   }
 
   const url = new URL(href, window.location.href);
-  const targetPathname = stripBasePath(url.pathname);
+  const targetPathname = normalizePathname(stripBasePath(url.pathname));
 
   if (targetPathname === "/booking") {
     return Boolean(window.sessionStorage.getItem(BOOKING_DRAFT_STORAGE_KEY));
@@ -50,7 +59,7 @@ function hasDraftForPath(href) {
 
 export function BookingRulesGate() {
   const router = useRouter();
-  const pathname = stripBasePath(usePathname());
+  const pathname = normalizePathname(stripBasePath(usePathname()));
   const [pendingHref, setPendingHref] = useState("/booking");
   const [isOpen, setIsOpen] = useState(false);
   const [acceptedRules, setAcceptedRules] = useState(() => rules.map(() => false));
@@ -125,7 +134,7 @@ export function BookingRulesGate() {
       }
 
       const url = new URL(anchor.href, window.location.href);
-      const targetPathname = stripBasePath(url.pathname);
+      const targetPathname = normalizePathname(stripBasePath(url.pathname));
       const nextHref = `${url.pathname}${url.search}${url.hash}`;
 
       if (pathname !== "/" || url.origin !== window.location.origin || !isGatedPath(targetPathname)) {
