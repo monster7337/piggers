@@ -57,6 +57,16 @@ function hasDraftForPath(href) {
   return false;
 }
 
+function getInternalHref(href) {
+  if (typeof window === "undefined") {
+    return href || "/booking";
+  }
+
+  const url = new URL(href || "/booking", window.location.href);
+  const targetPathname = normalizePathname(stripBasePath(url.pathname));
+  return `${targetPathname}${url.search}${url.hash}` || "/booking";
+}
+
 export function BookingRulesGate() {
   const router = useRouter();
   const pathname = normalizePathname(stripBasePath(usePathname()));
@@ -97,7 +107,7 @@ export function BookingRulesGate() {
 
   useEffect(() => {
     const handleOpenRequest = (event) => {
-      const href = event.detail?.href || "/booking";
+      const href = getInternalHref(event.detail?.href || "/booking");
 
       if (hasDraftForPath(href)) {
         router.push(href);
@@ -135,7 +145,7 @@ export function BookingRulesGate() {
 
       const url = new URL(anchor.href, window.location.href);
       const targetPathname = normalizePathname(stripBasePath(url.pathname));
-      const nextHref = `${url.pathname}${url.search}${url.hash}`;
+      const nextHref = `${targetPathname}${url.search}${url.hash}`;
 
       if (pathname !== "/" || url.origin !== window.location.origin || !isGatedPath(targetPathname)) {
         return;
