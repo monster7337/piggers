@@ -223,7 +223,8 @@ export function GiftCertificateOrderForm() {
     );
   }, [getValues, guestCount, offerAccepted, personalDataAccepted, step]);
 
-  const handleLegalLinkIntent = useCallback(() => {
+  const handleLegalLinkIntent = useCallback((event) => {
+    event?.stopPropagation?.();
     saveDraft();
   }, [saveDraft]);
 
@@ -620,8 +621,9 @@ export function GiftCertificateOrderForm() {
                       </section>
 
                       <div className="offer-acceptance-shell">
-                        <label className={clsx("offer-acceptance-toggle", offerAccepted && "is-checked")}>
+                        <div className={clsx("offer-acceptance-toggle", offerAccepted && "is-checked")}>
                           <input
+                            id="piggy-gift-offer-accepted"
                             type="checkbox"
                             className="offer-acceptance-toggle-input"
                             checked={offerAccepted}
@@ -632,9 +634,11 @@ export function GiftCertificateOrderForm() {
                               }
                             }}
                           />
-                          <span className="offer-acceptance-toggle-box" aria-hidden="true">
-                            <Check size={14} strokeWidth={2.8} />
-                          </span>
+                          <label htmlFor="piggy-gift-offer-accepted" className="offer-acceptance-toggle-control">
+                            <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                              <Check size={14} strokeWidth={2.8} />
+                            </span>
+                          </label>
                           <span className="offer-acceptance-toggle-copy">
                             <strong>
                               Принимаю{" "}
@@ -670,10 +674,11 @@ export function GiftCertificateOrderForm() {
                             </strong>
                             <small>Каждый документ открывается по отдельной ссылке.</small>
                           </span>
-                        </label>
+                        </div>
 
-                        <label className={clsx("offer-acceptance-toggle", personalDataAccepted && "is-checked")}>
+                        <div className={clsx("offer-acceptance-toggle", personalDataAccepted && "is-checked")}>
                           <input
+                            id="piggy-gift-personal-data-accepted"
                             type="checkbox"
                             className="offer-acceptance-toggle-input"
                             checked={personalDataAccepted}
@@ -684,9 +689,11 @@ export function GiftCertificateOrderForm() {
                               }
                             }}
                           />
-                          <span className="offer-acceptance-toggle-box" aria-hidden="true">
-                            <Check size={14} strokeWidth={2.8} />
-                          </span>
+                          <label htmlFor="piggy-gift-personal-data-accepted" className="offer-acceptance-toggle-control">
+                            <span className="offer-acceptance-toggle-box" aria-hidden="true">
+                              <Check size={14} strokeWidth={2.8} />
+                            </span>
+                          </label>
                           <span className="offer-acceptance-toggle-copy">
                             <strong>
                               Даю согласие на{" "}
@@ -702,7 +709,7 @@ export function GiftCertificateOrderForm() {
                             </strong>
                             <small>Согласие открывается на отдельной странице.</small>
                           </span>
-                        </label>
+                        </div>
                       </div>
                     </div>
                   </>

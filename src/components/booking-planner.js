@@ -217,7 +217,8 @@ export function BookingPlanner({ initialRate }) {
     );
   }, [getValues, offerAccepted, personalDataAccepted, selectedDate, selectedRateQuantities, selectedTime, step]);
 
-  const handleLegalLinkIntent = useCallback(() => {
+  const handleLegalLinkIntent = useCallback((event) => {
+    event?.stopPropagation?.();
     saveDraft();
   }, [saveDraft]);
 
