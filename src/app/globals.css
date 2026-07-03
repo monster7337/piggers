@@ -6070,6 +6070,7 @@ img {
 
   .booking-main {
     gap: 12px;
+    padding-bottom: calc(156px + env(safe-area-inset-bottom));
   }
 
   .booking-summary {
@@ -6639,13 +6640,16 @@ img {
   }
 
   .step-actions {
-    position: sticky;
+    position: fixed;
+    left: 12px;
+    right: 12px;
     bottom: calc(10px + env(safe-area-inset-bottom));
-    z-index: 6;
+    z-index: 40;
+    width: min(720px, calc(100vw - 24px));
+    margin-inline: auto;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    margin-top: 16px;
     padding: 10px;
     border: 1px solid rgba(92, 63, 46, 0.08);
     border-radius: 20px;

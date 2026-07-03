@@ -8,11 +8,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { stripBasePath } from "@/lib/base-path";
 
 const OPEN_EVENT = "piggy-land:booking-gate-open";
+const BOOKING_DRAFT_STORAGE_KEY = "piggyland-booking-draft";
+const GIFT_DRAFT_STORAGE_KEY = "piggyland-gift-draft";
 
 const rules = [
-  "Помните: вы в гостях у животных, а не на аттракционе. Капибар нельзя принуждать к общению — слушайте иструкторов, чтобы всем было комфортно.",
+  "Помните: вы в гостях у животных, а не на аттракционе. Животных нельзя принуждать к общению — слушайте инструкторов, чтобы всем было комфортно.",
   "Дети до 12 лет могут находиться с животными только со взрослым сопровождающим. Билет нужен каждому.",
-  "Не опаздывайте — время сеанса сокращается, а продлить его нельзя.",
+  "Не опаздывайте — время сеанса сокращается, а продлить его нельзя."
 ];
 
 export function requestBookingGate(href = "/booking") {
@@ -25,6 +27,25 @@ export function requestBookingGate(href = "/booking") {
 
 function isGatedPath(pathname) {
   return pathname === "/booking" || pathname === "/gift-certificates";
+}
+
+function hasDraftForPath(href) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const url = new URL(href, window.location.href);
+  const targetPathname = stripBasePath(url.pathname);
+
+  if (targetPathname === "/booking") {
+    return Boolean(window.sessionStorage.getItem(BOOKING_DRAFT_STORAGE_KEY));
+  }
+
+  if (targetPathname === "/gift-certificates") {
+    return Boolean(window.sessionStorage.getItem(GIFT_DRAFT_STORAGE_KEY));
+  }
+
+  return false;
 }
 
 export function BookingRulesGate() {
@@ -68,6 +89,12 @@ export function BookingRulesGate() {
   useEffect(() => {
     const handleOpenRequest = (event) => {
       const href = event.detail?.href || "/booking";
+
+      if (hasDraftForPath(href)) {
+        router.push(href);
+        return;
+      }
+
       setPendingHref(href);
       setAcceptedRules(rules.map(() => false));
       setIsOpen(true);
@@ -98,19 +125,19 @@ export function BookingRulesGate() {
       }
 
       const url = new URL(anchor.href, window.location.href);
-
       const targetPathname = stripBasePath(url.pathname);
+      const nextHref = `${url.pathname}${url.search}${url.hash}`;
 
-      if (url.origin !== window.location.origin || !isGatedPath(targetPathname)) {
+      if (pathname !== "/" || url.origin !== window.location.origin || !isGatedPath(targetPathname)) {
         return;
       }
 
-      if (pathname === targetPathname) {
+      if (hasDraftForPath(nextHref)) {
         return;
       }
 
       event.preventDefault();
-      setPendingHref(`${url.pathname}${url.search}${url.hash}`);
+      setPendingHref(nextHref);
       setAcceptedRules(rules.map(() => false));
       setIsOpen(true);
     };
@@ -122,13 +149,15 @@ export function BookingRulesGate() {
       window.removeEventListener(OPEN_EVENT, handleOpenRequest);
       document.removeEventListener("click", handleDocumentClick, true);
     };
-  }, [pathname]);
+  }, [pathname, router]);
 
   const close = () => {
     setAcceptedRules(rules.map(() => false));
     setIsOpen(false);
   };
+
   const allAccepted = acceptedRules.every(Boolean);
+
   const toggleRule = (index) => {
     setAcceptedRules((current) => current.map((value, currentIndex) => (currentIndex === index ? !value : value)));
   };
@@ -137,6 +166,7 @@ export function BookingRulesGate() {
     if (!allAccepted) {
       return;
     }
+
     setAcceptedRules(rules.map(() => false));
     setIsOpen(false);
     router.push(pendingHref);
@@ -186,11 +216,8 @@ export function BookingRulesGate() {
                 <Sparkles size={14} />
                 Перед бронированием
               </span>
-              <h2 id="piggy-booking-gate-title">Небольшие правила для теплого и спокойного визита</h2>
-              <p>
-                Мы хотим, чтобы гостям было уютно, а минипигам спокойно. Поэтому перед записью важно помнить несколько
-                простых пунктов.
-              </p>
+              <h2 id="piggy-booking-gate-title">Небольшие правила для спокойного и тёплого визита</h2>
+              <p>Мы хотим, чтобы гостям было уютно, а животным спокойно. Перед записью важно подтвердить три простых пункта.</p>
             </div>
 
             <div className="booking-gate-rule-list">
@@ -215,7 +242,7 @@ export function BookingRulesGate() {
 
             <div className="booking-gate-note">
               <ShieldCheck size={18} />
-              <span>Бронируя визит, вы подтверждаете, что готовы соблюдать правила поведения в пространстве.</span>
+              <span>Продолжая, вы подтверждаете, что готовы соблюдать правила поведения в пространстве.</span>
             </div>
 
             <div className="booking-gate-actions">
@@ -229,7 +256,7 @@ export function BookingRulesGate() {
                 disabled={!allAccepted}
               >
                 <Heart size={16} />
-                Понятно, перейти к бронированию
+                Перейти к оформлению
               </button>
             </div>
           </motion.div>

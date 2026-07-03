@@ -4,8 +4,8 @@ import { withBasePath } from "@/lib/base-path";
 import { businessInfo, contactInfo, navigation } from "@/lib/site-data";
 
 const legalLinks = [
-  { label: "Политика", href: "/policy", icon: ShieldCheck },
-  { label: "Оферта", href: "/offer", icon: FileText },
+  { label: "Политика", href: "/privacy-policy", icon: ShieldCheck },
+  { label: "Оферта", href: "/public-offer", icon: FileText },
   { label: "Правила посещения", href: "/visit-rules", icon: BookOpen }
 ];
 
@@ -140,7 +140,7 @@ export function Footer() {
           Все материалы и цены, размещенные на сайте, носят справочный характер и не являются публичной офертой,
           определяемой положением Статьи 437(2) Гражданского кодекса Российской Федерации.
         </p>
-        <Link href="/policy" className="footer-legal-policy">
+        <Link href="/privacy-policy" className="footer-legal-policy">
           Политика конфиденциальности
         </Link>
       </div>

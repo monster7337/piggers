@@ -17,7 +17,7 @@ import {
   ShoppingBag
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -139,6 +139,7 @@ export function BookingPlanner({ initialRate }) {
   const [stepError, setStepError] = useState("");
   const [offerAccepted, setOfferAccepted] = useState(false);
   const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
+  const [isDraftRestored, setIsDraftRestored] = useState(false);
   const [storageSnapshot, setStorageSnapshot] = useState(() => ({
     appointments: [],
     settings: defaultSettings
@@ -178,7 +179,10 @@ export function BookingPlanner({ initialRate }) {
 
   useEffect(() => {
     const raw = window.sessionStorage.getItem(BOOKING_DRAFT_STORAGE_KEY);
-    if (!raw) return;
+    if (!raw) {
+      setIsDraftRestored(true);
+      return;
+    }
 
     try {
       const draft = JSON.parse(raw);
@@ -191,10 +195,14 @@ export function BookingPlanner({ initialRate }) {
       if (draft.formValues) reset(draft.formValues);
     } catch {
       window.sessionStorage.removeItem(BOOKING_DRAFT_STORAGE_KEY);
+    } finally {
+      setIsDraftRestored(true);
     }
   }, [reset]);
 
-  useEffect(() => {
+  const saveDraft = useCallback(() => {
+    const currentFormValues = getValues();
+
     window.sessionStorage.setItem(
       BOOKING_DRAFT_STORAGE_KEY,
       JSON.stringify({
@@ -204,10 +212,47 @@ export function BookingPlanner({ initialRate }) {
         selectedRateQuantities,
         offerAccepted,
         personalDataAccepted,
-        formValues: watchedValues
+        formValues: currentFormValues
       })
     );
-  }, [offerAccepted, personalDataAccepted, selectedDate, selectedRateQuantities, selectedTime, step, watchedValues]);
+  }, [getValues, offerAccepted, personalDataAccepted, selectedDate, selectedRateQuantities, selectedTime, step]);
+
+  const handleLegalLinkIntent = useCallback(() => {
+    saveDraft();
+  }, [saveDraft]);
+
+  useEffect(() => {
+    if (!isDraftRestored) {
+      return;
+    }
+
+    saveDraft();
+  }, [isDraftRestored, saveDraft]);
+
+  useEffect(() => {
+    if (!isDraftRestored) {
+      return undefined;
+    }
+
+    const persistDraft = () => saveDraft();
+    const persistWhenHidden = () => {
+      if (document.visibilityState === "hidden") {
+        saveDraft();
+      }
+    };
+
+    window.addEventListener("pagehide", persistDraft);
+    window.addEventListener("beforeunload", persistDraft);
+    window.addEventListener("popstate", persistDraft);
+    document.addEventListener("visibilitychange", persistWhenHidden);
+
+    return () => {
+      window.removeEventListener("pagehide", persistDraft);
+      window.removeEventListener("beforeunload", persistDraft);
+      window.removeEventListener("popstate", persistDraft);
+      document.removeEventListener("visibilitychange", persistWhenHidden);
+    };
+  }, [isDraftRestored, saveDraft]);
 
   const happyHourRate = rates.find((rate) => rate.id === "happy-hour");
   const standardRate = rates.find((rate) => rate.id === "standard");
@@ -757,7 +802,7 @@ export function BookingPlanner({ initialRate }) {
                     <CreditCard size={18} />
                     <span>
                       На сайте оплачивается только предоплата: {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждое место.
-                      Остаток {formatCurrency(remainingOnSite)} администратор отметит в CRM при оплате на месте.
+                      Остаток {formatCurrency(remainingOnSite)} вы оплатите на месте перед началом визита.
                     </span>
                   </div>
 
@@ -783,15 +828,36 @@ export function BookingPlanner({ initialRate }) {
                       <span className="offer-acceptance-toggle-copy">
                         <strong>
                           Принимаю{" "}
-                          <Link href="/offer?returnTo=/booking#section-1" prefetch className="offer-acceptance-link">
+                          <Link
+                            href="/terms-of-use"
+                            prefetch
+                            className="offer-acceptance-link"
+                            onMouseDown={handleLegalLinkIntent}
+                            onTouchStart={handleLegalLinkIntent}
+                            onClick={handleLegalLinkIntent}
+                          >
                             условия использования
                           </Link>
                           ,{" "}
-                          <Link href="/offer?returnTo=/booking#section-2" prefetch className="offer-acceptance-link">
+                          <Link
+                            href="/privacy-policy"
+                            prefetch
+                            className="offer-acceptance-link"
+                            onMouseDown={handleLegalLinkIntent}
+                            onTouchStart={handleLegalLinkIntent}
+                            onClick={handleLegalLinkIntent}
+                          >
                             политику конфиденциальности
                           </Link>{" "}
                           и{" "}
-                          <Link href="/offer?returnTo=/booking#section-3" prefetch className="offer-acceptance-link">
+                          <Link
+                            href="/public-offer"
+                            prefetch
+                            className="offer-acceptance-link"
+                            onMouseDown={handleLegalLinkIntent}
+                            onTouchStart={handleLegalLinkIntent}
+                            onClick={handleLegalLinkIntent}
+                          >
                             публичную оферту
                           </Link>
                         </strong>
@@ -820,7 +886,14 @@ export function BookingPlanner({ initialRate }) {
                       <span className="offer-acceptance-toggle-copy">
                         <strong>
                           Даю согласие на{" "}
-                          <Link href="/policy?returnTo=/booking#section-1" prefetch className="offer-acceptance-link">
+                          <Link
+                            href="/personal-data-consent"
+                            prefetch
+                            className="offer-acceptance-link"
+                            onMouseDown={handleLegalLinkIntent}
+                            onTouchStart={handleLegalLinkIntent}
+                            onClick={handleLegalLinkIntent}
+                          >
                             обработку моих персональных данных
                           </Link>
                         </strong>

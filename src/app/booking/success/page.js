@@ -46,7 +46,7 @@ export default function BookingSuccessPage() {
     <>
       <PageHero
         eyebrow="Оформление завершено"
-        title="Заказ принят и сразу попал в CRM"
+        title="Заказ принят и уже сохранен"
         description="После оформления гость видит номер брони или заказа, оплату, дату, время и контактные данные."
         primaryAction={{ href: "/", label: "Вернуться на главную" }}
         secondaryAction={{ href: "/booking", label: "Оформить еще одну бронь" }}

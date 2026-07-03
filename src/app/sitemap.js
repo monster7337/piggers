@@ -6,8 +6,10 @@ const routes = [
   "/",
   "/booking",
   "/gift-certificates",
-  "/policy",
-  "/offer",
+  "/terms-of-use",
+  "/privacy-policy",
+  "/public-offer",
+  "/personal-data-consent",
   "/visit-rules"
 ];
 

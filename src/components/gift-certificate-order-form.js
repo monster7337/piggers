@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { Camera, Check, CircleAlert, Gift, Mail, MessageCircle, Minus, Plus, Send } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -45,7 +45,7 @@ const giftSchema = z
     deliveryMethod: z.string().min(1, "Выберите способ отправки"),
     deliveryContact: z.string().max(120, "Контакт для отправки не должен превышать 120 символов").optional(),
     message: z.string().max(320, "Текст для получателя не должен превышать 320 символов").optional(),
-    comment: z.string().max(320, "Комментарий администратору не должен превышать 320 символов").optional()
+    comment: z.string().max(320, "Комментарий не должен превышать 320 символов").optional()
   })
   .superRefine((values, context) => {
     if (socialDeliveryMethods.has(values.deliveryMethod) && !values.deliveryContact?.trim()) {
@@ -133,10 +133,12 @@ export function GiftCertificateOrderForm() {
   const [stepError, setStepError] = useState("");
   const [offerAccepted, setOfferAccepted] = useState(false);
   const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
+  const [isDraftRestored, setIsDraftRestored] = useState(false);
 
   const {
     register,
     handleSubmit,
+    getValues,
     reset,
     watch,
     formState: { errors, isSubmitting }
@@ -158,7 +160,7 @@ export function GiftCertificateOrderForm() {
   });
 
   const deliveryMethod = watch("deliveryMethod");
-  const watchedValues = watch();
+  watch();
   const purchaserName = watch("purchaserName");
   const recipientName = watch("recipientName");
   const deliveryContact = watch("deliveryContact");
@@ -187,7 +189,10 @@ export function GiftCertificateOrderForm() {
 
   useEffect(() => {
     const raw = window.sessionStorage.getItem(GIFT_DRAFT_STORAGE_KEY);
-    if (!raw) return;
+    if (!raw) {
+      setIsDraftRestored(true);
+      return;
+    }
 
     try {
       const draft = JSON.parse(raw);
@@ -198,10 +203,14 @@ export function GiftCertificateOrderForm() {
       if (draft.formValues) reset(draft.formValues);
     } catch {
       window.sessionStorage.removeItem(GIFT_DRAFT_STORAGE_KEY);
+    } finally {
+      setIsDraftRestored(true);
     }
   }, [reset]);
 
-  useEffect(() => {
+  const saveDraft = useCallback(() => {
+    const currentFormValues = getValues();
+
     window.sessionStorage.setItem(
       GIFT_DRAFT_STORAGE_KEY,
       JSON.stringify({
@@ -209,10 +218,47 @@ export function GiftCertificateOrderForm() {
         guestCount,
         offerAccepted,
         personalDataAccepted,
-        formValues: watchedValues
+        formValues: currentFormValues
       })
     );
-  }, [guestCount, offerAccepted, personalDataAccepted, step, watchedValues]);
+  }, [getValues, guestCount, offerAccepted, personalDataAccepted, step]);
+
+  const handleLegalLinkIntent = useCallback(() => {
+    saveDraft();
+  }, [saveDraft]);
+
+  useEffect(() => {
+    if (!isDraftRestored) {
+      return;
+    }
+
+    saveDraft();
+  }, [isDraftRestored, saveDraft]);
+
+  useEffect(() => {
+    if (!isDraftRestored) {
+      return undefined;
+    }
+
+    const persistDraft = () => saveDraft();
+    const persistWhenHidden = () => {
+      if (document.visibilityState === "hidden") {
+        saveDraft();
+      }
+    };
+
+    window.addEventListener("pagehide", persistDraft);
+    window.addEventListener("beforeunload", persistDraft);
+    window.addEventListener("popstate", persistDraft);
+    document.addEventListener("visibilitychange", persistWhenHidden);
+
+    return () => {
+      window.removeEventListener("pagehide", persistDraft);
+      window.removeEventListener("beforeunload", persistDraft);
+      window.removeEventListener("popstate", persistDraft);
+      document.removeEventListener("visibilitychange", persistWhenHidden);
+    };
+  }, [isDraftRestored, saveDraft]);
 
   function updateGuestCount(nextValue) {
     setGuestCount(Math.max(GIFT_GUEST_MIN, Math.min(GIFT_GUEST_MAX, nextValue)));
@@ -547,7 +593,7 @@ export function GiftCertificateOrderForm() {
                       <section className="gift-form-group">
                         <div className="gift-form-group-head">
                           <span className="eyebrow">Тексты</span>
-                          <h3>Добавьте сообщение получателю и заметку администратору</h3>
+                          <h3>Добавьте сообщение получателю и заметку к заказу</h3>
                         </div>
 
                         <div className="form-grid">
@@ -562,7 +608,7 @@ export function GiftCertificateOrderForm() {
                           </label>
 
                           <label className="field field-full">
-                            <span>Текст администратору</span>
+                            <span>Комментарий к заказу</span>
                             <textarea
                               rows={3}
                               placeholder="Здесь можно указать детали оформления или пожелания по отправке"
@@ -592,15 +638,33 @@ export function GiftCertificateOrderForm() {
                           <span className="offer-acceptance-toggle-copy">
                             <strong>
                               Принимаю{" "}
-                              <Link href="/offer?returnTo=/gift-certificates#section-1" className="offer-acceptance-link">
+                              <Link
+                                href="/terms-of-use"
+                                className="offer-acceptance-link"
+                                onMouseDown={handleLegalLinkIntent}
+                                onTouchStart={handleLegalLinkIntent}
+                                onClick={handleLegalLinkIntent}
+                              >
                                 условия использования
                               </Link>
                               ,{" "}
-                              <Link href="/offer?returnTo=/gift-certificates#section-2" className="offer-acceptance-link">
+                              <Link
+                                href="/privacy-policy"
+                                className="offer-acceptance-link"
+                                onMouseDown={handleLegalLinkIntent}
+                                onTouchStart={handleLegalLinkIntent}
+                                onClick={handleLegalLinkIntent}
+                              >
                                 политику конфиденциальности
                               </Link>{" "}
                               и{" "}
-                              <Link href="/offer?returnTo=/gift-certificates#section-3" className="offer-acceptance-link">
+                              <Link
+                                href="/public-offer"
+                                className="offer-acceptance-link"
+                                onMouseDown={handleLegalLinkIntent}
+                                onTouchStart={handleLegalLinkIntent}
+                                onClick={handleLegalLinkIntent}
+                              >
                                 публичную оферту
                               </Link>
                             </strong>
@@ -626,7 +690,13 @@ export function GiftCertificateOrderForm() {
                           <span className="offer-acceptance-toggle-copy">
                             <strong>
                               Даю согласие на{" "}
-                              <Link href="/policy?returnTo=/gift-certificates#section-1" className="offer-acceptance-link">
+                              <Link
+                                href="/personal-data-consent"
+                                className="offer-acceptance-link"
+                                onMouseDown={handleLegalLinkIntent}
+                                onTouchStart={handleLegalLinkIntent}
+                                onClick={handleLegalLinkIntent}
+                              >
                                 обработку моих персональных данных
                               </Link>
                             </strong>
@@ -741,7 +811,7 @@ export function GiftCertificateOrderForm() {
 
               <div className="status-inline success">
                 <span>
-                  Сертификат оплачивается полностью сразу. После оплаты заказ сразу попадет в CRM и администратор увидит,
+                  Сертификат оплачивается полностью сразу. После оплаты заказ сразу сохранится, и мы увидим,
                   кому и куда его нужно отправить.
                 </span>
               </div>
