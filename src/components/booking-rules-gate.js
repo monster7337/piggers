@@ -239,29 +239,31 @@ export function BookingRulesGate() {
               <p>Мы хотим, чтобы гостям было уютно, а животным спокойно. Перед записью важно подтвердить три простых пункта.</p>
             </div>
 
-            <div className="booking-gate-rule-list">
-              {rules.map((rule, index) => (
-                <button
-                  key={rule}
-                  type="button"
-                  className="booking-gate-rule"
-                  onClick={() => toggleRule(index)}
-                  aria-pressed={acceptedRules[index]}
-                >
-                  <span className="booking-gate-rule-icon">
-                    <PawPrint size={16} />
-                  </span>
-                  <span>{rule}</span>
-                  <span className={`booking-gate-rule-check ${acceptedRules[index] ? "checked" : ""}`}>
-                    {acceptedRules[index] ? <Check size={16} /> : null}
-                  </span>
-                </button>
-              ))}
-            </div>
+            <div className="booking-gate-scroll">
+              <div className="booking-gate-rule-list">
+                {rules.map((rule, index) => (
+                  <button
+                    key={rule}
+                    type="button"
+                    className="booking-gate-rule"
+                    onClick={() => toggleRule(index)}
+                    aria-pressed={acceptedRules[index]}
+                  >
+                    <span className="booking-gate-rule-icon">
+                      <PawPrint size={16} />
+                    </span>
+                    <span>{rule}</span>
+                    <span className={`booking-gate-rule-check ${acceptedRules[index] ? "checked" : ""}`}>
+                      {acceptedRules[index] ? <Check size={16} /> : null}
+                    </span>
+                  </button>
+                ))}
+              </div>
 
-            <div className="booking-gate-note">
-              <ShieldCheck size={18} />
-              <span>Продолжая, вы подтверждаете, что готовы соблюдать правила поведения в пространстве.</span>
+              <div className="booking-gate-note">
+                <ShieldCheck size={18} />
+                <span>Продолжая, вы подтверждаете, что готовы соблюдать правила поведения в пространстве.</span>
+              </div>
             </div>
 
             <div className="booking-gate-actions">

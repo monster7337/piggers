@@ -2294,6 +2294,9 @@ img {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .booking-gate-backdrop {
@@ -2309,6 +2312,9 @@ img {
 .booking-gate-card {
   position: relative;
   width: min(100%, 680px);
+  max-height: calc(100dvh - 40px);
+  display: flex;
+  flex-direction: column;
   border-radius: 32px;
   border: 1px solid rgba(255, 214, 168, 0.34);
   background: linear-gradient(180deg, rgba(108, 34, 24, 0.98) 0%, rgba(57, 21, 15, 0.98) 100%);
@@ -2356,6 +2362,7 @@ img {
 .booking-gate-hero {
   position: relative;
   z-index: 1;
+  flex: 0 0 auto;
 }
 
 .booking-gate-pill {
@@ -2389,10 +2396,21 @@ img {
   line-height: 1.6;
 }
 
+.booking-gate-scroll {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  margin: 22px -8px 0;
+  padding: 2px 8px 2px;
+}
+
 .booking-gate-rule-list {
   display: grid;
   gap: 12px;
-  margin-top: 24px;
 }
 
 .booking-gate-rule {
@@ -2407,6 +2425,7 @@ img {
   background: rgba(255, 247, 239, 0.06);
   color: inherit;
   text-align: left;
+  touch-action: manipulation;
   transition:
     transform 0.18s ease,
     border-color 0.18s ease,
@@ -2470,6 +2489,7 @@ img {
 
 .booking-gate-actions {
   display: flex;
+  flex: 0 0 auto;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 22px;
@@ -2477,6 +2497,7 @@ img {
 
 .booking-gate-actions > * {
   flex: 1 1 220px;
+  touch-action: manipulation;
 }
 
 .booking-gate-confirm {
@@ -7432,8 +7453,13 @@ main > .section:not(:first-child) {
   }
 
   .booking-gate-card {
+    max-height: calc(100dvh - 28px);
     border-radius: 26px;
     padding: 22px 16px 16px;
+  }
+
+  .booking-gate-scroll {
+    margin-top: 18px;
   }
 
   .booking-gate-close {
