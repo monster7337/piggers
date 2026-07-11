@@ -574,7 +574,10 @@ export function BookingPlanner({ initialRate }) {
 
                         <h3>{rate.name}</h3>
                         <span className="ticket-description-label">Описание</span>
-                        <p>{rate.description}</p>
+                        <p>
+                          <span className="mobile-ticket-description">{rate.mobileDescription || rate.description}</span>
+                          <span className="desktop-ticket-description">{rate.description}</span>
+                        </p>
 
                         {infoOpen ? (
                           <div className="ticket-info-box">
