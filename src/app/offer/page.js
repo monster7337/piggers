@@ -3,8 +3,10 @@ import { offerSections } from "@/lib/offer-data";
 
 export const metadata = {
   title: "Публичная оферта",
-  description: "Условия использования сайта, политика конфиденциальности и публичная оферта Piggy Land."
+  description: "Условия использования сайта, политика конфиденциальности и публичная оферта Piggy Land.",
+  robots: { index: false, follow: false }
 };
+
 
 export default function OfferPage({ searchParams }) {
   const returnHref = searchParams?.returnTo || "/booking";

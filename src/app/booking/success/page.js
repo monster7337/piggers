@@ -5,7 +5,8 @@ import { PageHero } from "@/components/page-hero";
 
 export const metadata = {
   title: "Оформление завершено",
-  description: "Страница подтверждения брони или успешно оплаченного подарочного сертификата Piggy Land."
+  description: "Страница подтверждения брони или успешно оплаченного подарочного сертификата Piggy Land.",
+  robots: { index: false, follow: false }
 };
 
 function BookingSuccessFallback() {

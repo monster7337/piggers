@@ -21,6 +21,7 @@ export function Header() {
   const isScrolledRef = useRef(false);
   const activeSectionRef = useRef("home");
   const isHomeHero = pathname === "/";
+  const isBookingPage = pathname === "/booking";
 
   useEffect(() => {
     let frameId = 0;
@@ -126,8 +127,8 @@ export function Header() {
           <a className="mobile-header-call" href={contactInfo.phoneLink} aria-label="Позвонить">
             <Phone size={18} />
           </a>
-          <Link className="mobile-header-booking" href="/booking">
-            Забронировать
+          <Link className="mobile-header-booking" href={isBookingPage ? "/" : "/booking"}>
+            {isBookingPage ? "На главную" : "Забронировать"}
           </Link>
           <button
             type="button"

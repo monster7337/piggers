@@ -530,6 +530,7 @@ export function BookingPlanner({ initialRate }) {
           <motion.div
             key={step}
             className="card booking-panel"
+            data-step={step}
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -18 }}
@@ -919,10 +920,16 @@ export function BookingPlanner({ initialRate }) {
               </p>
             ) : null}
 
-            <div className="step-actions">
+            <div className="step-actions booking-desktop-actions">
               <div className="booking-mobile-action-meta">
-                <span>{mobileSelectionNote}</span>
-                <strong>{formatCurrency(prepaymentNow)}</strong>
+                <div>
+                  <span>{selectedDateLabel} · {selectedTimeLabel} · {totalTicketsCount || 0} бил.</span>
+                  <small>Всего {formatCurrency(total)} · на месте {formatCurrency(remainingOnSite)}</small>
+                </div>
+                <div>
+                  <span>Предоплата</span>
+                  <strong>{formatCurrency(prepaymentNow)}</strong>
+                </div>
               </div>
 
               <button
@@ -951,6 +958,40 @@ export function BookingPlanner({ initialRate }) {
             </div>
           </motion.div>
         </AnimatePresence>
+        <div className="step-actions booking-mobile-fixed-actions">
+          <div className="booking-mobile-action-meta">
+            <div>
+              <span>{selectedDateLabel} · {selectedTimeLabel} · {totalTicketsCount || 0} бил.</span>
+              <small>Всего {formatCurrency(total)} · на месте {formatCurrency(remainingOnSite)}</small>
+            </div>
+            <div>
+              <span>Предоплата</span>
+              <strong>{formatCurrency(prepaymentNow)}</strong>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="button button-secondary"
+            onClick={() => goToStep(Math.max(0, step - 1))}
+            disabled={step === 0 || isSubmitting}
+          >
+            Назад
+          </button>
+          {step < bookingSteps.length - 1 ? (
+            <button type="button" className="button button-primary" onClick={() => goToStep(step + 1)} disabled={isSubmitting}>
+              Продолжить
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="button button-primary"
+              onClick={submitBooking}
+              disabled={isSubmitting || !offerAccepted || !personalDataAccepted}
+            >
+              Оплатить
+            </button>
+          )}
+        </div>
       </div>
 
       <aside className="booking-summary">

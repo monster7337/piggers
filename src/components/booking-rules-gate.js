@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Heart, PawPrint, ShieldCheck, Sparkles, X } from "lucide-react";
+import { Check, Heart, PawPrint, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
@@ -231,12 +231,7 @@ export function BookingRulesGate() {
             </button>
 
             <div className="booking-gate-hero">
-              <span className="booking-gate-pill">
-                <Sparkles size={14} />
-                Перед бронированием
-              </span>
-              <h2 id="piggy-booking-gate-title">Небольшие правила для спокойного и тёплого визита</h2>
-              <p>Мы хотим, чтобы гостям было уютно, а животным спокойно. Перед записью важно подтвердить три простых пункта.</p>
+              <h2 id="piggy-booking-gate-title">Правила поведения</h2>
             </div>
 
             <div className="booking-gate-scroll">
@@ -258,11 +253,6 @@ export function BookingRulesGate() {
                     </span>
                   </button>
                 ))}
-              </div>
-
-              <div className="booking-gate-note">
-                <ShieldCheck size={18} />
-                <span>Продолжая, вы подтверждаете, что готовы соблюдать правила поведения в пространстве.</span>
               </div>
             </div>
 

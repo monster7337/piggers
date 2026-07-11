@@ -2,8 +2,10 @@ import { LegalPage } from "@/components/legal-page";
 
 export const metadata = {
   title: "Согласие на обработку персональных данных",
-  description: "Согласие на обработку персональных данных для сайта Piggy Land."
+  description: "Согласие на обработку персональных данных для сайта Piggy Land.",
+  robots: { index: false, follow: false }
 };
+
 
 const sections = [
   {

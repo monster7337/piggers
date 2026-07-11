@@ -19,29 +19,29 @@ const heroImageUrl = absoluteUrl("/images/piggyland-hero.webp");
 export const metadata = {
   metadataBase: new URL(absoluteUrl("/")),
   title: {
-    default: "Piggy Land",
+    default: "Piggy Land — антикафе с животными и минипигами в Санкт-Петербурге",
     template: "%s | Piggy Land"
   },
   description:
-    "Piggy Land — антикафе с минипигами в Санкт-Петербурге: 11 мини и микро пигов, чайная комната, фотолокации и визиты по предварительной записи.",
+    "Piggy Land — антикафе с животными и минипигами в Санкт-Петербурге: 11 мини и микро пигов, чайная комната, фотолокации и визиты по предварительной записи.",
   keywords: [
-    "минипиги",
-    "антикафе с минипигами",
-    "антикафе",
-    "организация мероприятий",
-    "дни рождения",
-    "контактный зоопарк",
-    "минизоопарк",
-    "куда сходить с детьми в спб",
-    "отдых всей семьей",
-    "игровое пространство",
-    "аренда залов для праздников",
-    "куда сходить в выходные",
-    "кафе с животными",
-    "хрюшки",
-    "аниматоры"
+    "антикафе с минипигами спб",
+    "минипиги санкт-петербург",
+    "где погладить минипига в спб",
+    "день рождения с минипигами",
+    "подарочный сертификат с минипигами",
+    "куда сходить с детьми в спб"
   ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 }
+  },
   openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    url: absoluteUrl("/"),
+    siteName: "Piggy Land",
     title: "Piggy Land",
     description:
       "Антикафе с минипигами в Санкт-Петербурге: предварительная запись, 11 свинок, фотолокации, чайная комната и теплые мероприятия.",
@@ -53,7 +53,14 @@ export const metadata = {
         alt: "Piggy Land"
       }
     ]
-  }
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Piggy Land — антикафе с минипигами в СПб",
+    description: "Визиты с минипигами, чайная комната и онлайн-запись.",
+    images: [heroImageUrl]
+  },
+  icons: { icon: "/images/piggilandlogo-icon.webp" }
 };
 
 export const viewport = {
@@ -73,21 +80,29 @@ export default function RootLayout({ children }) {
 
   const localBusinessSchema = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    name: "Piggy Land",
-    description:
-      "Антикафе с минипигами в Санкт-Петербурге. 11 мини и микро пигов, чайная комната, фотолокации и визиты по предварительной записи.",
-    telephone: contactInfo.phone,
-    url: contactInfo.socials[0]?.href,
-    sameAs: contactInfo.socials.map((social) => social.href),
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "6-я Советская улица, дом 28А, помещение 3-Н",
-      addressLocality: "Санкт-Петербург",
-      addressCountry: "RU"
-    },
-    openingHours: contactInfo.hours,
-    ...(contactInfo.email ? { email: contactInfo.email } : {})
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": `${absoluteUrl("/")}#business`,
+        name: "Piggy Land",
+        description:
+          "Антикафе с минипигами в Санкт-Петербурге. 11 мини и микро пигов, чайная комната, фотолокации и визиты по предварительной записи.",
+        telephone: contactInfo.phone,
+        url: absoluteUrl("/"),
+        image: heroImageUrl,
+        logo: absoluteUrl("/images/piggilandlogo-icon.webp"),
+        priceRange: "1500-4200 RUB",
+        sameAs: contactInfo.socials.map((social) => social.href),
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "6-я Советская улица, дом 28А, помещение 3-Н",
+          addressLocality: "Санкт-Петербург",
+          addressCountry: "RU"
+        },
+        ...(contactInfo.email ? { email: contactInfo.email } : {})
+      },
+      { "@type": "WebSite", "@id": `${absoluteUrl("/")}#website`, url: absoluteUrl("/"), name: "Piggy Land", inLanguage: "ru-RU" }
+    ]
   };
 
   return (

@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function BookingPage() {
   return (
-    <section className="section">
+    <section className="section booking-page-shell">
       <div className="container">
         <div className="card info-band">
           Мы работаем по предварительной записи. На сайте оплачивается только предоплата 500 ₽ за каждое место,

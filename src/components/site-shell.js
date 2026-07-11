@@ -9,13 +9,14 @@ import { stripBasePath } from "@/lib/base-path";
 export function SiteShell({ children }) {
   const pathname = stripBasePath(usePathname());
   const isAdminRoute = pathname?.startsWith("/admin");
+  const isBookingRoute = pathname === "/booking";
 
   if (isAdminRoute) {
     return children;
   }
 
   return (
-    <div className="site-root">
+    <div className={`site-root${isBookingRoute ? " booking-mobile-app" : ""}`}>
       <Header />
       <BookingRulesGate />
       <main className="site-main">{children}</main>

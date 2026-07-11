@@ -46,9 +46,11 @@ export function LegalPdfPage({
           </div>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-            <a href={pdfPath} target="_blank" rel="noreferrer" className="button button-primary">
-              Открыть исходный PDF
-            </a>
+            {pdfPath ? (
+              <a href={pdfPath} target="_blank" rel="noreferrer" className="button button-primary">
+                Открыть исходный PDF
+              </a>
+            ) : null}
             <Link href={returnHref} className="button button-secondary">
               {returnLabel}
             </Link>
