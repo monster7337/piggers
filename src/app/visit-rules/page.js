@@ -1,8 +1,10 @@
 import { LegalPage } from "@/components/legal-page";
+import { absoluteUrl } from "@/lib/base-path";
 
 export const metadata = {
   title: "Правила посещения",
-  description: "Правила посещения Piggy Land и базовые требования к комфорту гостей и минипигов."
+  description: "Правила посещения Piggy Land и базовые требования к комфорту гостей и минипигов.",
+  alternates: { canonical: absoluteUrl("/visit-rules") }
 };
 
 const sections = [

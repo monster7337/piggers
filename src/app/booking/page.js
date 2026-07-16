@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 import { BookingPlanner } from "@/components/booking-planner";
 import { BookingPageClient } from "@/components/booking-page-client";
+import { absoluteUrl } from "@/lib/base-path";
 
 export const metadata = {
   title: "Бронирование",
-  description: "Многошаговое бронирование Piggy Land: билеты, дата, время, контакты и переход к оплате."
+  description: "Многошаговое бронирование Piggy Land: билеты, дата, время, контакты и переход к оплате.",
+  alternates: { canonical: absoluteUrl("/booking") }
 };
 
 export default function BookingPage() {

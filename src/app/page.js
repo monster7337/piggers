@@ -36,6 +36,11 @@ import {
   reviews,
   visitSteps
 } from "@/lib/site-data";
+import { absoluteUrl } from "@/lib/base-path";
+
+export const metadata = {
+  alternates: { canonical: absoluteUrl("/") }
+};
 
 const highlightIcons = [HeartHandshake, Leaf, Coffee, Camera, Users, Sparkles];
 
