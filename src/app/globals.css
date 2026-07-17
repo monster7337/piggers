@@ -62,7 +62,8 @@ body {
   pointer-events: none;
   background: rgba(255, 241, 218, 0.5);
   box-shadow: 0 2px 12px rgba(141, 48, 35, 0.16);
-  animation: site-load-progress-hide 0.28s 1.28s ease forwards;
+  opacity: 1;
+  transition: opacity 0.3s ease 0.18s, visibility 0s linear 0.48s;
 }
 
 .site-load-progress span {
@@ -74,20 +75,25 @@ body {
   border-radius: 0 999px 999px 0;
   background: linear-gradient(90deg, #b64230 0%, #f0a85e 58%, #ffe5ac 100%);
   box-shadow: 0 0 14px rgba(240, 168, 94, 0.68);
-  animation: site-load-progress-fill 1.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: site-load-progress-wait 8s cubic-bezier(0.18, 0.72, 0.2, 1) forwards;
 }
 
-@keyframes site-load-progress-fill {
+html.site-ready .site-load-progress {
+  opacity: 0;
+  visibility: hidden;
+}
+
+html.site-ready .site-load-progress span {
+  transform: scaleX(1);
+  animation: none;
+}
+
+@keyframes site-load-progress-wait {
   0% { transform: scaleX(0.04); }
-  42% { transform: scaleX(0.62); }
-  100% { transform: scaleX(1); }
-}
-
-@keyframes site-load-progress-hide {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
+  18% { transform: scaleX(0.48); }
+  52% { transform: scaleX(0.74); }
+  100% { transform: scaleX(0.9); }
 }
 
 a {
@@ -7411,11 +7417,13 @@ main > .section:not(:first-child) {
 
 @media (prefers-reduced-motion: reduce) {
   .site-load-progress {
-    animation-delay: 0s !important;
+    opacity: 0;
+    visibility: hidden;
   }
 
   .site-load-progress span {
     transform: scaleX(1);
+    animation: none !important;
   }
 
   *,
