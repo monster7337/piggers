@@ -1,15 +1,19 @@
+import Image from "next/image";
 import { withBasePath } from "@/lib/base-path";
 
 export function PiggyCard({ piggy, onOpen }) {
   return (
     <article className="card piggy-card">
-      <div
-        className="photo-card-media piggy-media"
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.04), rgba(17, 17, 17, 0.22)), url(${withBasePath(piggy.image)})`,
-          backgroundPosition: piggy.imagePosition
-        }}
-      />
+      <div className="photo-card-media piggy-media">
+        <Image
+          className="deferred-card-image"
+          src={withBasePath(piggy.image)}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 25vw, (min-width: 680px) 33vw, 50vw"
+          style={{ objectPosition: piggy.imagePosition }}
+        />
+      </div>
 
       <div className="card-body">
         <div className="card-topline">

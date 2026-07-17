@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Images, X } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { withBasePath } from "@/lib/base-path";
@@ -132,13 +133,16 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
             onClick={() => openItem(item.id)}
             aria-label={item.title}
           >
-            <span
-              className="gallery-card-media"
-              style={{
-                backgroundImage: `linear-gradient(180deg, rgba(12, 10, 8, 0.04), rgba(12, 10, 8, 0.34)), url(${withBasePath(item.image)})`,
-                backgroundPosition: item.position
-              }}
-            />
+            <span className="gallery-card-media">
+              <Image
+                className="deferred-card-image"
+                src={withBasePath(item.image)}
+                alt=""
+                fill
+                sizes="(min-width: 900px) 33vw, 50vw"
+                style={{ objectPosition: item.position }}
+              />
+            </span>
           </button>
         ))}
       </div>

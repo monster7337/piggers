@@ -1,17 +1,20 @@
 import { Clock3 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
 
 export function RateCard({ rate }) {
   return (
     <article className={`card rate-card ${rate.popular ? "popular" : ""}`}>
-      <div
-        className="photo-card-media"
-        style={{
-          backgroundImage: `linear-gradient(180deg, rgba(17, 17, 17, 0.02), rgba(17, 17, 17, 0.16)), url(${withBasePath(rate.image)})`,
-          backgroundPosition: rate.imagePosition
-        }}
-      >
+      <div className="photo-card-media">
+        <Image
+          className="deferred-card-image"
+          src={withBasePath(rate.image)}
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 680px) 50vw, 100vw"
+          style={{ objectPosition: rate.imagePosition }}
+        />
         {rate.popular ? <span className="card-badge">Популярный тариф</span> : null}
       </div>
 

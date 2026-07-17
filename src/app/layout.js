@@ -60,7 +60,8 @@ export const metadata = {
     description: "Визиты с минипигами, чайная комната и онлайн-запись.",
     images: [heroImageUrl]
   },
-  icons: { icon: "/images/piggilandlogo-icon.webp" }
+  manifest: withBasePath("/manifest.webmanifest"),
+  icons: { icon: withBasePath("/images/piggilandlogo-icon.webp") }
 };
 
 export const viewport = {
@@ -108,6 +109,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ru" style={assetStyles}>
       <body className={`${manrope.variable} ${playfair.variable}`}>
+        <div className="site-load-progress" aria-hidden="true">
+          <span />
+        </div>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}

@@ -19,7 +19,9 @@ const nextConfig = {
   },
   images: {
     unoptimized: isStaticExport,
-    formats: ["image/avif", "image/webp"]
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 2678400,
+    qualities: [75]
   }
 };
 

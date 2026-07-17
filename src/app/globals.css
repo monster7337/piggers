@@ -53,6 +53,43 @@ body {
     linear-gradient(180deg, #fff8ef 0%, #fbf5ed 28%, #f8efe3 100%);
 }
 
+.site-load-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10050;
+  height: 4px;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(255, 241, 218, 0.5);
+  box-shadow: 0 2px 12px rgba(141, 48, 35, 0.16);
+  animation: site-load-progress-hide 0.28s 1.28s ease forwards;
+}
+
+.site-load-progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0.04);
+  transform-origin: left;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(90deg, #b64230 0%, #f0a85e 58%, #ffe5ac 100%);
+  box-shadow: 0 0 14px rgba(240, 168, 94, 0.68);
+  animation: site-load-progress-fill 1.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes site-load-progress-fill {
+  0% { transform: scaleX(0.04); }
+  42% { transform: scaleX(0.62); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes site-load-progress-hide {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -1658,8 +1695,28 @@ img {
 .photo-card-media {
   position: relative;
   min-height: 240px;
-  background-size: cover;
+  overflow: hidden;
   border-radius: calc(var(--radius-lg) - 2px) calc(var(--radius-lg) - 2px) 22px 22px;
+}
+
+.deferred-card-image {
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.photo-card-media::after,
+.gallery-card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(17, 17, 17, 0.02), rgba(17, 17, 17, 0.2));
+}
+
+.rate-card:hover .deferred-card-image,
+.piggy-card:hover .deferred-card-image,
+.gallery-card:hover .deferred-card-image {
+  transform: scale(1.025);
 }
 
 .card-body {
@@ -1711,6 +1768,7 @@ img {
 
 .card-badge {
   position: absolute;
+  z-index: 1;
   top: 16px;
   left: 16px;
 }
@@ -2171,8 +2229,10 @@ img {
 }
 
 .gallery-card-media {
+  position: relative;
+  display: block;
   min-height: 260px;
-  background-size: cover;
+  overflow: hidden;
 }
 
 .gallery-card-copy {
@@ -7350,6 +7410,14 @@ main > .section:not(:first-child) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .site-load-progress {
+    animation-delay: 0s !important;
+  }
+
+  .site-load-progress span {
+    transform: scaleX(1);
+  }
+
   *,
   *::before,
   *::after {
