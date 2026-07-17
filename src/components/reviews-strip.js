@@ -20,7 +20,7 @@ export function ReviewsStrip({ reviews, platforms }) {
             <div className="rating-score">5.0</div>
             <div className="rating-score-copy">
               <p className="rating-copy">Твердые 5 звезд на Яндексе, 2ГИС и VK.</p>
-              <div className="stars-row" aria-label="Рейтинг 5 из 5">
+              <div className="stars-row" role="img" aria-label="Рейтинг 5 из 5">
                 {Array.from({ length: 5 }).map((_, index) => (
                   <Star key={index} size={16} fill="currentColor" />
                 ))}
@@ -72,7 +72,7 @@ export function ReviewsStrip({ reviews, platforms }) {
               <span className="review-platform-badge" data-platform={review.platformId}>
                 {review.platform}
               </span>
-              <div className="stars-row" aria-label={`Рейтинг ${review.rating} из 5`}>
+              <div className="stars-row" role="img" aria-label={`Рейтинг ${review.rating} из 5`}>
                 {Array.from({ length: review.rating }).map((_, index) => (
                   <Star key={index} size={14} fill="currentColor" />
                 ))}

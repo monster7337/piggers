@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Phone, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -121,13 +120,13 @@ export function Header() {
             <Phone size={16} />
             <span>{contactInfo.phone}</span>
           </a>
-          <Link className="button button-primary header-booking-button" href="/booking">
+          <Link className="button button-primary header-booking-button" href="/booking" prefetch={false}>
             Забронировать сеанс
           </Link>
           <a className="mobile-header-call" href={contactInfo.phoneLink} aria-label="Позвонить">
             <Phone size={18} />
           </a>
-          <Link className="mobile-header-booking" href={isBookingPage ? "/" : "/booking"}>
+          <Link className="mobile-header-booking" href={isBookingPage ? "/" : "/booking"} prefetch={false}>
             {isBookingPage ? "На главную" : "Забронировать"}
           </Link>
           <button
@@ -142,15 +141,8 @@ export function Header() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {isOpen ? (
-          <motion.div
-            className="mobile-menu"
-            initial={{ opacity: 0, y: -16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.24 }}
-          >
+      {isOpen ? (
+          <div className="mobile-menu">
             <div className="container mobile-menu-inner">
               <nav className="mobile-nav" aria-label="Мобильная навигация">
                 {navigation.map((item) => (
@@ -174,14 +166,13 @@ export function Header() {
                   <Phone size={16} />
                   <span>{contactInfo.phone}</span>
                 </a>
-                <Link className="button button-primary button-block" href="/booking" onClick={() => setIsOpen(false)}>
+                <Link className="button button-primary button-block" href="/booking" prefetch={false} onClick={() => setIsOpen(false)}>
                   Перейти к бронированию
                 </Link>
               </div>
             </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+          </div>
+      ) : null}
     </header>
   );
 }

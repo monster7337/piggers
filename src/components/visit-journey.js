@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx";
-import { motion } from "framer-motion";
 import { ArrowUpRight, BadgeCheck, CalendarDays, HeartHandshake, Sparkles } from "lucide-react";
 import { useState } from "react";
 
@@ -56,10 +55,9 @@ export function VisitJourney({ steps }) {
           </div>
 
           <div className="journey-progress-track" aria-hidden="true">
-            <motion.div
+            <div
               className="journey-progress-fill"
-              animate={{ width: `${progressValue}%` }}
-              transition={{ type: "spring", stiffness: 170, damping: 22 }}
+              style={{ width: `${progressValue}%` }}
             />
           </div>
         </div>
@@ -81,7 +79,7 @@ export function VisitJourney({ steps }) {
               onFocus={() => setActiveIndex(index)}
               onClick={() => setActiveIndex(index)}
             >
-              {isActive ? <motion.span className="journey-step-glow" layoutId="journey-active-glow" /> : null}
+              {isActive ? <span className="journey-step-glow" /> : null}
 
               <div className="journey-step-topline">
                 <span className="journey-step-number">0{index + 1}</span>

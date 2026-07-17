@@ -12,7 +12,7 @@ export function RateCard({ rate }) {
           src={withBasePath(rate.image)}
           alt=""
           fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 680px) 50vw, 100vw"
+          sizes="(min-width: 1024px) 25vw, 50vw"
           style={{ objectPosition: rate.imagePosition }}
         />
         {rate.popular ? <span className="card-badge">Популярный тариф</span> : null}

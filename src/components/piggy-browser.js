@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, CalendarDays, Heart, PawPrint, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,7 +12,6 @@ export function PiggyBrowser({ piggies, previewCount }) {
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [portalTarget, setPortalTarget] = useState(null);
-  const [transitionDirection, setTransitionDirection] = useState(1);
   const lockedScrollRef = useRef(0);
   const activeSelectorRef = useRef(null);
 
@@ -33,10 +31,6 @@ export function PiggyBrowser({ piggies, previewCount }) {
     }
 
     const nextIndex = piggies.findIndex((piggy) => piggy.slug === slug);
-
-    if (activeIndex >= 0 && nextIndex >= 0 && nextIndex !== activeIndex) {
-      setTransitionDirection(nextIndex > activeIndex ? 1 : -1);
-    }
 
     setIsGalleryOpen(preserveGallery);
     setActiveSlug(slug);
@@ -60,11 +54,9 @@ export function PiggyBrowser({ piggies, previewCount }) {
   };
   const closeDetail = () => setActiveSlug(null);
   const showPrevious = () => {
-    setTransitionDirection(-1);
     setActiveSlug(piggies[(activeIndex - 1 + piggies.length) % piggies.length]?.slug || null);
   };
   const showNext = () => {
-    setTransitionDirection(1);
     setActiveSlug(piggies[(activeIndex + 1) % piggies.length]?.slug || null);
   };
 
@@ -177,22 +169,15 @@ export function PiggyBrowser({ piggies, previewCount }) {
   }, [activeSlug, isMobile]);
 
   const overlay = (
-    <AnimatePresence mode="wait">
+    <>
       {isGalleryOpen && !activePiggy ? (
-        <motion.div
+        <div
           key="piggy-gallery"
           className="lightbox"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
         >
           <button className="lightbox-backdrop" type="button" onClick={closeOverlay} />
-          <motion.div
+          <div
             className="lightbox-panel piggy-gallery-modal"
-            initial={{ opacity: 0, scale: 0.96, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 16 }}
-            transition={{ duration: 0.22 }}
           >
             <button type="button" className="lightbox-close" onClick={closeOverlay} aria-label="Закрыть">
               <X size={20} />
@@ -213,38 +198,26 @@ export function PiggyBrowser({ piggies, previewCount }) {
                 />
               ))}
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       ) : null}
 
       {activePiggy ? (
-        <motion.div
+        <div
           key="piggy-detail"
           className="lightbox"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
         >
           <button className="lightbox-backdrop" type="button" onClick={closeDetail} />
-          <motion.div
+          <div
             className="lightbox-panel piggy-modal"
-            initial={{ opacity: 0, scale: 0.96, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 16 }}
-            transition={{ duration: 0.24 }}
           >
             <button type="button" className="lightbox-close" onClick={closeDetail} aria-label="Закрыть">
               <X size={20} />
             </button>
 
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
+              <div
                 key={activePiggy.slug}
                 className="piggy-modal-grid"
-                initial={{ opacity: 0, x: transitionDirection > 0 ? 32 : -32 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: transitionDirection > 0 ? -24 : 24 }}
-                transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
               >
                 <div
                   className="piggy-modal-media"
@@ -331,18 +304,17 @@ export function PiggyBrowser({ piggies, previewCount }) {
                         <span className="piggy-modal-switch-label">Вперед</span>
                       </button>
                     </div>
-                    <Link className="button button-primary piggy-modal-booking" href="/booking">
+                    <Link className="button button-primary piggy-modal-booking" href="/booking" prefetch={false}>
                       <CalendarDays size={18} />
                       Забронировать визит
                     </Link>
                   </div>
                 </div>
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
+              </div>
+          </div>
+        </div>
       ) : null}
-    </AnimatePresence>
+    </>
   );
 
   return (

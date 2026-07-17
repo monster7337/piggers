@@ -1,18 +1,7 @@
-import { Manrope, Playfair_Display } from "next/font/google";
 import { SiteShell } from "@/components/site-shell";
 import { absoluteUrl, withBasePath } from "@/lib/base-path";
 import { contactInfo } from "@/lib/site-data";
 import "./globals.css";
-
-const manrope = Manrope({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-sans"
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin", "cyrillic"],
-  variable: "--font-display"
-});
 
 const heroImageUrl = absoluteUrl("/images/piggyland-hero.webp");
 
@@ -108,7 +97,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="ru" style={assetStyles}>
-      <body className={`${manrope.variable} ${playfair.variable}`}>
+      <body>
         <div className="site-load-progress" aria-hidden="true">
           <span />
         </div>

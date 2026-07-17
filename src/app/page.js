@@ -104,10 +104,10 @@ export default function HomePage() {
             mobileDescription="Быстро посмотрите цены, формат визита и выберите свой билет."
             actions={
               <div className="home-rates-actions">
-                <Link className="button button-secondary" href="/booking">
+                <Link className="button button-secondary" href="/booking" prefetch={false}>
                   Перейти к бронированию
                 </Link>
-                <Link className="button button-primary button-shimmer" href="/gift-certificates">
+                <Link className="button button-primary button-shimmer" href="/gift-certificates" prefetch={false}>
                   Купить сертификат
                 </Link>
               </div>

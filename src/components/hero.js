@@ -1,6 +1,3 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
@@ -45,53 +42,29 @@ export function Hero() {
           alt="Минипиги на солнечной ферме рядом с красным амбаром"
           fill
           priority
+          quality={60}
           sizes="100vw"
           style={{ objectFit: "cover", objectPosition: "72% 52%" }}
         />
       </div>
 
       <div className="container hero-fullscreen-content hero-fullscreen-grid">
-        <motion.div
-          className="hero-copy hero-copy-overlay"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <motion.span
-            className="eyebrow hero-badge"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.36 }}
-          >
+        <div className="hero-copy hero-copy-overlay">
+          <span className="eyebrow hero-badge">
             РАБОТАЕМ ПО ПРЕДВАРИТЕЛЬНОЙ ЗАПИСИ
-          </motion.span>
-          <motion.h1
-            className="hero-title"
-            initial={{ opacity: 0, y: 26 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.03 }}
-          >
+          </span>
+          <h1 className="hero-title">
             Пигги Лэнд
-          </motion.h1>
-          <motion.p
-            className="hero-subtitle"
-            initial={{ opacity: 0, y: 26 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.06 }}
-          >
+          </h1>
+          <p className="hero-subtitle">
             <span className="copy-desktop">
               Антикафе в Санкт-Петербурге, где можно провести время с милыми и дружелюбными минипигами.
             </span>
             <span className="copy-mobile">
               Антикафе в Санкт-Петербурге, где можно провести время с милыми и дружелюбными минипигами.
             </span>
-          </motion.p>
-          <motion.div
-            className="hero-description"
-            initial={{ opacity: 0, y: 26 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.09 }}
-          >
+          </p>
+          <div className="hero-description">
             <p className="hero-copy-text">
               Здесь вы можете гладить, кормить и играть с минипигами, а также делать с ними фотографии.
             </p>
@@ -102,51 +75,26 @@ export function Hero() {
               Здесь вы можете гладить, кормить и играть с минипигами, а также делать с ними фотографии. Кроме того,
               гостей ждут чай, кофе и сладости, которые входят в стоимость посещения.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="hero-highlights"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.035,
-                  delayChildren: 0.08
-                }
-              }
-            }}
-          >
+          <div className="hero-highlights">
             {heroBenefits.map((item) => (
-              <motion.span
-                key={item.desktop}
-                className="highlight-pill"
-                variants={{
-                  hidden: { opacity: 0, y: 18 },
-                  visible: { opacity: 1, y: 0 }
-                }}
-              >
+              <span key={item.desktop} className="highlight-pill">
                 <span className="copy-desktop">{item.desktop}</span>
                 <span className="copy-mobile">{item.mobile}</span>
-              </motion.span>
+              </span>
             ))}
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="button-row"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.12 }}
-          >
-            <Link className="button button-primary hero-primary-cta" href="/booking">
+          <div className="button-row">
+            <Link className="button button-primary hero-primary-cta" href="/booking" prefetch={false}>
               Записаться
             </Link>
             <a className="button button-secondary hero-secondary-cta" href={withBasePath("/#rates")}>
               Посмотреть тарифы
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
         <div className="hero-empty-column" aria-hidden="true" />
       </div>
     </section>

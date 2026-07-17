@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx";
-import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Images, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -158,22 +157,14 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
 
       {portalTarget
         ? createPortal(
-            <AnimatePresence>
-              {activeItem ? (
-                <motion.div
+              activeItem ? (
+                <div
                   className="lightbox"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
                   onClick={closeItem}
                 >
                   <div className="lightbox-backdrop" aria-hidden="true" />
-                  <motion.div
+                  <div
                     className="lightbox-panel gallery-browser-panel"
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ duration: 0.2 }}
                     onClick={(event) => event.stopPropagation()}
                   >
               <button type="button" className="lightbox-close" onClick={closeItem} aria-label="Закрыть">
@@ -211,10 +202,9 @@ export function GalleryFilter({ items, limit, allCategoryLimit, showLink = false
                   </div>
                 </div>
               </div>
-                  </motion.div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>,
+                  </div>
+                </div>
+              ) : null,
             portalTarget
           )
         : null}

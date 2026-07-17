@@ -5,6 +5,9 @@ const siteUrl = isStaticExport ? "https://monster7337.github.io" : "https://pigg
 
 const nextConfig = {
   poweredByHeader: false,
+  experimental: {
+    inlineCss: true
+  },
   allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.31.155", "172.18.0.1", "192.168.0.6", "192.168.0.14", "192.168.0.5"],
   ...(isStaticExport
     ? {
@@ -21,7 +24,7 @@ const nextConfig = {
     unoptimized: isStaticExport,
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 2678400,
-    qualities: [75]
+    qualities: [60, 75]
   }
 };
 

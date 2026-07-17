@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { Check, Heart, PawPrint, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -198,30 +197,17 @@ export function BookingRulesGate() {
   }
 
   return createPortal(
-    <AnimatePresence>
-      {isOpen ? (
-        <motion.div
-          className="booking-gate booking-gate-piggy"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.button
+      isOpen ? (
+        <div className="booking-gate booking-gate-piggy">
+          <button
             type="button"
             className="booking-gate-backdrop"
             aria-label="Закрыть окно с правилами"
             onClick={close}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
           />
 
-          <motion.div
+          <div
             className="booking-gate-card"
-            initial={{ opacity: 0, y: 28, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 18, scale: 0.97 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             role="dialog"
             aria-modal="true"
             aria-labelledby="piggy-booking-gate-title"
@@ -270,10 +256,9 @@ export function BookingRulesGate() {
                 Перейти к оформлению
               </button>
             </div>
-          </motion.div>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>,
+          </div>
+        </div>
+      ) : null,
     portalTarget
   );
 }

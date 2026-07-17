@@ -134,6 +134,56 @@ img {
   padding: 88px 0;
 }
 
+.mobile-menu,
+.booking-gate,
+.lightbox {
+  animation: quick-fade-in 0.2s ease-out both;
+}
+
+.booking-gate-card,
+.lightbox-panel {
+  animation: quick-pop-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes quick-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes quick-pop-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.journey-progress-fill {
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.faq-trigger {
+  list-style: none;
+}
+
+.faq-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item[open] .faq-trigger svg {
+  transform: rotate(180deg);
+}
+
+.faq-trigger svg {
+  transition: transform 0.2s ease;
+}
+
+/* Decorative section photos load only shortly before they enter the viewport. */
+.site-main > .section:not(.lazy-background-ready) {
+  background-image: none !important;
+}
+
+.site-main > #piggies:not(.lazy-background-ready)::before {
+  background-image: none !important;
+}
+
 .section:not(.journey-section):not(.experience-section):not(.gallery-section):not(.reviews-section):not(.faq-section):not(.animal-rules-section):not(#piggies) {
   position: relative;
   overflow: hidden;
