@@ -12,6 +12,7 @@ export function RateCard({ rate }) {
           src={withBasePath(rate.image)}
           alt=""
           fill
+          fetchPriority="low"
           sizes="(min-width: 1024px) 25vw, 50vw"
           style={{ objectPosition: rate.imagePosition }}
         />
@@ -36,7 +37,7 @@ export function RateCard({ rate }) {
           </span>
         </div>
 
-        <Link className="button button-secondary button-block" href={`/booking?rate=${rate.id}`}>
+        <Link className="button button-secondary button-block" href={`/booking?rate=${rate.id}`} prefetch={false}>
           Выбрать
         </Link>
       </div>

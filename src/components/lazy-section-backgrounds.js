@@ -19,7 +19,7 @@ export function LazySectionBackgrounds() {
           observer.unobserve(entry.target);
         });
       },
-      { rootMargin: "600px 0px" }
+      { rootMargin: "0px" }
     );
 
     sections.forEach((section) => observer.observe(section));
