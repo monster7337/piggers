@@ -7909,3 +7909,461 @@ main > .section:not(:first-child) {
     gap: 10px;
   }
 }
+
+/* Booking is a natural document on phones: no clipped cards or nested horizontal scrolling. */
+@media (max-width: 767px) {
+  html:has(.site-root.booking-mobile-app),
+  body:has(.site-root.booking-mobile-app) {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .site-root.booking-mobile-app {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .site-root.booking-mobile-app > .site-main {
+    height: auto;
+    min-height: calc(100dvh - 72px);
+    overflow: visible;
+  }
+
+  .booking-page-shell {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 10px 10px calc(160px + env(safe-area-inset-bottom));
+  }
+
+  .booking-page-shell > .container,
+  .booking-page-shell .booking-layout,
+  .booking-page-shell .booking-main {
+    height: auto;
+    min-height: 0;
+  }
+
+  .booking-page-shell .info-band {
+    display: block;
+    margin-bottom: 10px;
+    padding: 11px 13px;
+    font-size: 0.78rem;
+    line-height: 1.42;
+  }
+
+  .booking-page-shell .booking-main {
+    gap: 10px;
+    padding-bottom: 0;
+  }
+
+  .booking-page-shell .booking-mobile-overview {
+    min-height: 0;
+    align-items: stretch;
+    padding: 13px 14px;
+  }
+
+  .booking-page-shell .booking-mobile-overview-copy p {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .booking-page-shell .booking-panel {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 14px;
+  }
+
+  .booking-page-shell .ticket-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-auto-rows: auto;
+    gap: 12px;
+    overflow: visible;
+    padding: 0;
+  }
+
+  .booking-page-shell .ticket-card {
+    min-height: 0;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .booking-page-shell .ticket-card .ticket-price-group strong {
+    font-size: 1.08rem;
+  }
+
+  .booking-page-shell .ticket-card .info-dot-button {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .booking-page-shell .ticket-card .ticket-tag {
+    min-height: 28px;
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    line-height: 1.25;
+  }
+
+  .booking-page-shell .ticket-card h3 {
+    font-size: 1.08rem;
+    line-height: 1.25;
+  }
+
+  .booking-page-shell .ticket-card > p {
+    display: block;
+    overflow: visible;
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .booking-page-shell .ticket-footer {
+    margin-top: 2px;
+  }
+
+  .booking-page-shell .ticket-footer .button {
+    width: 100%;
+    min-height: 44px;
+    height: auto;
+    font-size: 0.86rem;
+  }
+
+  .booking-page-shell .selection-state {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .booking-page-shell .quantity-stepper {
+    flex: 1;
+    justify-content: space-between;
+  }
+
+  .booking-page-shell .selected-state-pill,
+  .booking-page-shell .quantity-stepper strong {
+    font-size: 0.76rem;
+  }
+
+  .booking-page-shell .booking-panel:has(.ticket-info-box) {
+    overflow: visible;
+  }
+
+  .booking-page-shell .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    grid-auto-rows: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .booking-page-shell .status-inline {
+    display: flex;
+  }
+
+  .booking-page-shell .booking-detour-card {
+    display: flex;
+  }
+
+  .booking-page-shell .field:has(textarea) {
+    display: flex;
+  }
+
+  .booking-page-shell .field textarea {
+    display: block;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .confirmation-grid {
+    display: grid;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .status-inline.success {
+    display: flex;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .offer-acceptance-note {
+    display: block;
+  }
+
+  .booking-page-shell .booking-mobile-fixed-actions {
+    bottom: calc(env(safe-area-inset-bottom) + 8px);
+  }
+}
+
+/* Keep the complete desktop configurator, order summary and actions within one viewport. */
+@media (min-width: 1024px) {
+  .booking-page-shell .booking-mobile-fixed-actions {
+    display: none;
+  }
+
+  .booking-page-shell {
+    min-height: calc(100svh - 92px);
+    padding: 14px 0 20px;
+  }
+
+  .booking-page-shell > .container {
+    width: min(1320px, calc(100% - 28px));
+  }
+
+  .booking-page-shell .info-band {
+    margin-bottom: 10px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  .booking-page-shell .booking-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 12px;
+  }
+
+  .booking-page-shell .booking-main {
+    gap: 10px;
+    padding-bottom: 0;
+  }
+
+  .booking-page-shell .booking-summary {
+    display: flex;
+    position: sticky;
+    top: 96px;
+  }
+
+  .booking-page-shell .booking-stepper {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .booking-page-shell .step-chip {
+    min-height: 52px;
+    flex-direction: row;
+    gap: 7px;
+    padding: 6px 8px;
+    border-radius: 15px;
+  }
+
+  .booking-page-shell .step-chip span {
+    width: 25px;
+    height: 25px;
+    flex: 0 0 25px;
+    font-size: 0.76rem;
+  }
+
+  .booking-page-shell .step-chip small {
+    font-size: 0.73rem;
+    line-height: 1.15;
+    text-align: left;
+  }
+
+  .booking-page-shell .booking-panel {
+    padding: 14px;
+  }
+
+  .booking-page-shell .panel-heading {
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .booking-page-shell .panel-heading .eyebrow {
+    display: none;
+  }
+
+  .booking-page-shell .panel-heading h2 {
+    font-size: 1.55rem;
+    line-height: 1.05;
+  }
+
+  .booking-page-shell .ticket-grid {
+    gap: 9px;
+  }
+
+  .booking-page-shell .ticket-card {
+    min-height: 190px;
+    gap: 7px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .booking-page-shell .ticket-card-header {
+    gap: 8px;
+  }
+
+  .booking-page-shell .ticket-price-group {
+    gap: 3px;
+  }
+
+  .booking-page-shell .ticket-price-group strong {
+    font-size: 1rem;
+  }
+
+  .booking-page-shell .old-price {
+    font-size: 0.72rem;
+  }
+
+  .booking-page-shell .discount-badge,
+  .booking-page-shell .ticket-tag {
+    min-height: 24px;
+    padding: 3px 8px;
+    font-size: 0.64rem;
+  }
+
+  .booking-page-shell .ticket-card h3 {
+    font-size: 0.94rem;
+    line-height: 1.18;
+  }
+
+  .booking-page-shell .ticket-description-label {
+    display: none;
+  }
+
+  .booking-page-shell .ticket-card > p {
+    font-size: 0.76rem;
+    line-height: 1.38;
+  }
+
+  .booking-page-shell .ticket-footer {
+    margin-top: auto;
+  }
+
+  .booking-page-shell .ticket-footer .button {
+    min-height: 38px;
+    padding: 0 15px;
+    font-size: 0.76rem;
+  }
+
+  .booking-page-shell .booking-desktop-actions {
+    margin-top: 10px;
+  }
+
+  .booking-page-shell .booking-desktop-actions .button {
+    min-height: 40px;
+    padding: 0 16px;
+    font-size: 0.78rem;
+  }
+
+  .booking-page-shell .summary-card {
+    padding: 14px;
+  }
+
+  .booking-page-shell .summary-header {
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .booking-page-shell .summary-header h3 {
+    font-size: 1.12rem;
+  }
+
+  .booking-page-shell .summary-list {
+    gap: 10px;
+  }
+
+  .booking-page-shell .summary-group {
+    gap: 6px;
+  }
+
+  .booking-page-shell .summary-group-title,
+  .booking-page-shell .summary-row {
+    font-size: 0.74rem;
+  }
+
+  .booking-page-shell .summary-row {
+    padding-bottom: 6px;
+  }
+
+  .booking-page-shell .summary-card .status-inline {
+    margin-top: 10px;
+    padding: 9px 10px;
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .confirmation-card {
+    gap: 8px;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .confirmation-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .confirmation-grid div {
+    padding: 8px 10px;
+    border-radius: 14px;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .confirmation-grid span {
+    margin-bottom: 3px;
+    font-size: 0.68rem;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .confirmation-grid strong {
+    font-size: 0.76rem;
+    line-height: 1.3;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .status-inline {
+    padding: 8px 10px;
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .offer-acceptance-shell {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .offer-acceptance-toggle {
+    gap: 8px;
+    padding: 9px 10px;
+    border-radius: 15px;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .offer-acceptance-toggle-copy strong {
+    font-size: 0.76rem;
+    line-height: 1.35;
+  }
+
+  .booking-page-shell .booking-panel[data-step="4"] .offer-acceptance-toggle-copy small,
+  .booking-page-shell .booking-panel[data-step="4"] .offer-acceptance-note {
+    font-size: 0.68rem;
+    line-height: 1.3;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 820px) {
+  .booking-page-shell {
+    padding-top: 6px;
+  }
+
+  .booking-page-shell .info-band {
+    margin-bottom: 6px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+
+  .booking-page-shell .step-chip {
+    min-height: 46px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .booking-page-shell .booking-panel {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
