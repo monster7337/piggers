@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
 
@@ -37,15 +36,28 @@ export function Hero() {
   return (
     <section id="home" className="hero-section">
       <div className="hero-background">
-        <Image
-          src={withBasePath("/images/piggyland-hero.webp")}
-          alt="Минипиги на солнечной ферме рядом с красным амбаром"
-          fill
-          priority
-          quality={60}
-          sizes="100vw"
-          style={{ objectFit: "cover", objectPosition: "72% 52%" }}
-        />
+        <picture>
+          <source
+            media="(max-width: 720px)"
+            srcSet={withBasePath("/images/piggyland-hero-mobile.avif")}
+            type="image/avif"
+          />
+          <source
+            srcSet={withBasePath("/images/piggyland-hero-desktop.avif")}
+            type="image/avif"
+          />
+          {/* The fallback keeps the hero visible in browsers without AVIF support. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={withBasePath("/images/piggyland-hero.webp")}
+            alt="Минипиги на солнечной ферме рядом с красным амбаром"
+            width="1672"
+            height="941"
+            fetchPriority="high"
+            decoding="async"
+            className="hero-background-image"
+          />
+        </picture>
       </div>
 
       <div className="container hero-fullscreen-content hero-fullscreen-grid">

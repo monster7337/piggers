@@ -5,9 +5,6 @@ const siteUrl = "https://piggyland.ru";
 
 const nextConfig = {
   poweredByHeader: false,
-  experimental: {
-    inlineCss: isStaticExport
-  },
   allowedDevOrigins: ["localhost", "127.0.0.1", "192.168.31.155", "172.18.0.1", "192.168.0.6", "192.168.0.14", "192.168.0.5"],
   ...(isStaticExport
     ? {
