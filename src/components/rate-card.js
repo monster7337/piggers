@@ -1,21 +1,27 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { Clock3 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { withBasePath } from "@/lib/base-path";
 
 export function RateCard({ rate }) {
+  const imageSource = withBasePath(rate.image.replace("/images/", "/images/cards/").replace(/\.webp$/, ".avif"));
+
   return (
     <article className={`card rate-card ${rate.popular ? "popular" : ""}`}>
       <div className="photo-card-media">
-        <Image
-          className="deferred-card-image"
-          src={withBasePath(rate.image)}
+        <img
+          className="deferred-card-image deferred-native-image"
+          src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+          data-deferred-src={imageSource}
           alt=""
-          fill
+          decoding="async"
           fetchPriority="low"
-          sizes="(min-width: 1024px) 25vw, 50vw"
           style={{ objectPosition: rate.imagePosition }}
         />
+        <noscript>
+          <img className="deferred-card-image deferred-native-image" src={imageSource} alt="" style={{ objectPosition: rate.imagePosition }} />
+        </noscript>
         {rate.popular ? <span className="card-badge">Популярный тариф</span> : null}
       </div>
 

@@ -1,5 +1,5 @@
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://monster7337.github.io";
+const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://piggyland.ru";
 
 function isExternalPath(path) {
   return /^(?:[a-z]+:)?\/\//i.test(path) || path.startsWith("tel:") || path.startsWith("mailto:");
@@ -34,7 +34,7 @@ export function getPublicBasePath() {
 }
 
 export function absoluteUrl(path = "/") {
-  const normalizedPath = withBasePath(path);
+  const normalizedPath = path || "/";
 
   if (!normalizedPath) {
     return siteOrigin;

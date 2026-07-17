@@ -1,18 +1,25 @@
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
+
 import { withBasePath } from "@/lib/base-path";
 
 export function PiggyCard({ piggy, onOpen }) {
+  const imageSource = withBasePath(piggy.image.replace("/images/", "/images/cards/").replace(/\.webp$/, ".avif"));
+
   return (
     <article className="card piggy-card">
       <div className="photo-card-media piggy-media">
-        <Image
-          className="deferred-card-image"
-          src={withBasePath(piggy.image)}
+        <img
+          className="deferred-card-image deferred-native-image"
+          src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
+          data-deferred-src={imageSource}
           alt=""
-          fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 680px) 33vw, 50vw"
+          decoding="async"
+          fetchPriority="low"
           style={{ objectPosition: piggy.imagePosition }}
         />
+        <noscript>
+          <img className="deferred-card-image deferred-native-image" src={imageSource} alt="" style={{ objectPosition: piggy.imagePosition }} />
+        </noscript>
       </div>
 
       <div className="card-body">

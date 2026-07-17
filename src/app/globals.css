@@ -1772,6 +1772,13 @@ img {
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.deferred-native-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .photo-card-media::after,
 .gallery-card-media::after {
   content: "";
