@@ -5,7 +5,7 @@ import { PageHero } from "@/components/page-hero";
 
 export const metadata = {
   title: "Оформление завершено",
-  description: "Страница подтверждения брони или успешно оплаченного подарочного сертификата Piggy Land.",
+  description: "Страница подтверждения бронирования или успешно оплаченного подарочного сертификата Piggy Land.",
   robots: { index: false, follow: false }
 };
 
@@ -22,7 +22,7 @@ function BookingSuccessFallback() {
 
       <div className="confirmation-grid">
         <div>
-          <span>Номер брони</span>
+          <span>Номер бронирования</span>
           <strong>PL-{new Date().getFullYear()}-0421</strong>
         </div>
         <div>
@@ -48,9 +48,9 @@ export default function BookingSuccessPage() {
       <PageHero
         eyebrow="Оформление завершено"
         title="Заказ принят и уже сохранен"
-        description="После оформления гость видит номер брони или заказа, оплату, дату, время и контактные данные."
+        description="После оформления гость видит номер бронирования или заказа, оплату, дату, время и контактные данные."
         primaryAction={{ href: "/", label: "Вернуться на главную" }}
-        secondaryAction={{ href: "/booking", label: "Оформить еще одну бронь" }}
+        secondaryAction={{ href: "/booking", label: "Оформить еще одно бронирование" }}
         hideImage
       />
 

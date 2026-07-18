@@ -103,7 +103,7 @@ export function Hero() {
               Записаться
             </Link>
             <a className="button button-secondary hero-secondary-cta" href={withBasePath("/#rates")}>
-              Посмотреть тарифы
+              Посмотреть билеты
             </a>
           </div>
         </div>

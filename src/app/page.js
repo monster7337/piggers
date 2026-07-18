@@ -98,7 +98,7 @@ export default function HomePage() {
       <AnimatedSection id="rates" className="home-rates-section">
         <div className="container">
           <SectionHeading
-            eyebrow="Тарифы и сеансы"
+            eyebrow="Билеты и время посещения"
             title="Выберите билет и приезжайте знакомиться с минипигами"
             description="Сразу видно, сколько стоит визит, что входит и какой вариант подойдет именно вам."
             mobileDescription="Быстро посмотрите цены, формат визита и выберите свой билет."

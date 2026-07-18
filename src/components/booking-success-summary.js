@@ -24,7 +24,7 @@ export function BookingSuccessSummary() {
       <div className="success-icon">
         <span aria-hidden="true">✓</span>
       </div>
-      <h2>{type === "gift" ? "Сертификат оформлен" : "Подтверждение брони"}</h2>
+      <h2>{type === "gift" ? "Сертификат оформлен" : "Подтверждение бронирования"}</h2>
       <p className="section-copy">
         {type === "gift"
           ? "Оплата прошла полностью. Заказ уже сохранен, и мы сможем подготовить сертификат по вашим данным."
@@ -33,7 +33,7 @@ export function BookingSuccessSummary() {
 
       <div className="confirmation-grid">
         <div>
-          <span>{type === "gift" ? "Номер заказа" : "Номер брони"}</span>
+          <span>{type === "gift" ? "Номер заказа" : "Номер бронирования"}</span>
           <strong>{bookingId ? `PL-${year}-${bookingId.slice(0, 8).toUpperCase()}` : `PL-${year}-0421`}</strong>
         </div>
         <div>

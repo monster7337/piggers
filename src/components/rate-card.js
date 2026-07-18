@@ -22,7 +22,7 @@ export function RateCard({ rate }) {
         <noscript>
           <img className="deferred-card-image deferred-native-image" src={imageSource} alt="" style={{ objectPosition: rate.imagePosition }} />
         </noscript>
-        {rate.popular ? <span className="card-badge">Популярный тариф</span> : null}
+        {rate.popular ? <span className="card-badge">Часто выбирают</span> : null}
       </div>
 
       <div className="card-body">

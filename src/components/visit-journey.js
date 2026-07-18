@@ -30,7 +30,7 @@ export function VisitJourney({ steps }) {
     <div className="journey-shell">
       <div className="card journey-progress-card">
         <div className="journey-progress-copy">
-          <span className="journey-progress-label">Плавный путь к брони</span>
+          <span className="journey-progress-label">Понятный путь к бронированию</span>
           <div className="journey-progress-stack">
             {steps.map((step, index) => (
               <div

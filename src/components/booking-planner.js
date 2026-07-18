@@ -463,7 +463,7 @@ export function BookingPlanner({ initialRate }) {
         clientName: formValues.name,
         clientEmail: formValues.email,
         clientPhone: formValues.phone,
-        serviceName: `Piggy Land: бронь ${selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", ")}`,
+        serviceName: `Piggy Land: бронирование ${selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", ")}`,
         successPath: `/booking/success?${params.toString()}`
       });
 
@@ -563,7 +563,7 @@ export function BookingPlanner({ initialRate }) {
                           <button
                             type="button"
                             className={clsx("info-dot-button", infoOpen && "active")}
-                            aria-label={`Информация о тарифе ${rate.name}`}
+                            aria-label={`Информация о билете ${rate.name}`}
                             onClick={() => setActiveInfoRateId(infoOpen ? null : rate.id)}
                           >
                             <Info size={14} />
@@ -691,7 +691,7 @@ export function BookingPlanner({ initialRate }) {
                       <div className="status-inline success">
                         <CreditCard size={18} />
                         <span>
-                          Вы выбрали будний слот {selectedTime}. Для входного билета действует "Счастливый час":
+                          Вы выбрали время {selectedTime} в будний день. Для входного билета действует "Счастливый час":
                           цена снижена с {formatCurrency(standardRate.price)} до {formatCurrency(happyHourRate.price)}
                           {happyHourDiscountedTicketsCount > 1 ? ` за каждый из ${happyHourDiscountedTicketsCount} билетов` : ""}.
                         </span>
@@ -1073,7 +1073,7 @@ export function BookingPlanner({ initialRate }) {
           <div className="status-inline success">
             <CreditCard size={18} />
             <span>
-              Бронь фиксируется после предоплаты {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждого гостя.
+              Бронирование подтверждается после предоплаты {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждого гостя.
             </span>
           </div>
         </div>
