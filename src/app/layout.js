@@ -95,7 +95,11 @@ export default function RootLayout({ children }) {
         paymentAccepted: "Банковская карта, наличные, СБП",
         taxID: businessInfo.inn,
         hasMap: "https://2gis.ru/spb/branches/70000001096234851",
-        sameAs: contactInfo.socials.map((social) => social.href),
+        sameAs: [
+          ...contactInfo.socials.map((social) => social.href),
+          "https://piggy-land-antikafe-s.clients.site/",
+          "https://2gis.ru/spb/branches/70000001096234851"
+        ],
         address: {
           "@type": "PostalAddress",
           streetAddress: "6-я Советская улица, дом 28А, помещение 3-Н",
