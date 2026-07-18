@@ -4483,6 +4483,14 @@ img {
   color: #cf6f31;
 }
 
+.footer-legal-links {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 18px;
+}
+
 .gift-validity-notice {
   display: flex;
   align-items: flex-start;
@@ -4746,6 +4754,10 @@ img {
   .footer-legal-bar {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .footer-legal-links {
+    justify-content: flex-start;
   }
 }
 

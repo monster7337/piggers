@@ -30,7 +30,7 @@ export const businessInfo = {
 
 export const alternativeProject = {
   name: "Наш второй проект",
-  href: "https://vk.link/minipiggyspb",
+  href: "https://xn----8sbenzf6e.xn--p1ai/",
   label: "Посмотреть второй проект",
   dateTitle: "Хотели прийти именно в занятую дату?",
   dateDescription: "Если на нужный день мест уже нет, можно заглянуть в наш второй проект и выбрать другой уютный визит.",

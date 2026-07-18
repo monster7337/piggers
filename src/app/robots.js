@@ -6,8 +6,9 @@ export default function robots() {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/api/"]
+      disallow: ["/api/"]
     },
-    sitemap: absoluteUrl("/sitemap.xml")
+    sitemap: absoluteUrl("/sitemap.xml"),
+    host: absoluteUrl("/").replace(/\/$/, "")
   };
 }

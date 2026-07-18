@@ -140,9 +140,17 @@ export function Footer() {
           Все материалы и цены, размещенные на сайте, носят справочный характер и не являются публичной офертой,
           определяемой положением Статьи 437(2) Гражданского кодекса Российской Федерации.
         </p>
-        <Link href="/privacy-policy" className="footer-legal-policy">
-          Политика конфиденциальности
-        </Link>
+        <div className="footer-legal-links">
+          <a href="https://animalplaces.ru/" className="footer-legal-policy">
+            Все пространства Animal Places
+          </a>
+          <a href="https://xn----8sbenzf6e.xn--p1ai/" className="footer-legal-policy">
+            Антикафе «В Ёлках»
+          </a>
+          <Link href="/privacy-policy" className="footer-legal-policy">
+            Политика конфиденциальности
+          </Link>
+        </div>
       </div>
     </footer>
   );
