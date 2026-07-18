@@ -76,6 +76,7 @@ body {
   box-shadow: 0 2px 12px rgba(141, 48, 35, 0.16);
   opacity: 1;
   transition: opacity 0.3s ease 0.18s, visibility 0s linear 0.48s;
+  animation: site-load-progress-safety 2s ease forwards;
 }
 
 .site-load-progress span {
@@ -88,12 +89,13 @@ body {
   background: linear-gradient(90deg, #b64230 0%, #f0a85e 58%, #ffe5ac 100%);
   box-shadow: 0 0 14px rgba(240, 168, 94, 0.68);
   transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
-  animation: site-load-progress-wait 8s cubic-bezier(0.18, 0.72, 0.2, 1) forwards;
+  animation: site-load-progress-wait 1.8s cubic-bezier(0.18, 0.72, 0.2, 1) forwards;
 }
 
 html.site-ready .site-load-progress {
   opacity: 0;
   visibility: hidden;
+  animation: none;
 }
 
 html.site-ready .site-load-progress span {
@@ -106,6 +108,11 @@ html.site-ready .site-load-progress span {
   18% { transform: scaleX(0.48); }
   52% { transform: scaleX(0.74); }
   100% { transform: scaleX(0.9); }
+}
+
+@keyframes site-load-progress-safety {
+  0%, 84% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
 }
 
 a {

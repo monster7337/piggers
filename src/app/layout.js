@@ -104,7 +104,7 @@ export default function RootLayout({ children }) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              '(()=>{const r=document.documentElement,d=()=>r.classList.add("site-ready");document.readyState==="complete"?requestAnimationFrame(d):addEventListener("load",d,{once:true});setTimeout(d,8000)})()'
+              '(()=>{const r=document.documentElement,d=()=>r.classList.add("site-ready"),q=()=>requestAnimationFrame(d);document.readyState==="loading"?addEventListener("DOMContentLoaded",q,{once:true}):q();addEventListener("pageshow",d,{once:true});setTimeout(d,1800)})()'
           }}
         />
         <script
