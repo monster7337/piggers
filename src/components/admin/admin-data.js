@@ -1,11 +1,19 @@
 import { extras as siteExtras, giftCertificates as siteGiftCertificates } from "@/lib/site-data";
 
-export const ADMIN_AUTH_KEY = "piggyland-admin-auth";
-export const ADMIN_APPOINTMENTS_KEY = "piggyland-admin-appointments";
+export const ADMIN_APPOINTMENTS_KEY = "piggyland-admin-appointments-v2";
 export const ADMIN_SETTINGS_KEY = "piggyland-admin-settings";
-export const ADMIN_ACTIVITY_KEY = "piggyland-admin-activity";
-export const ADMIN_GIFT_CERTIFICATES_KEY = "piggyland-admin-gift-certificates";
-export const ADMIN_FINANCE_RECORDS_KEY = "piggyland-admin-finance-records";
+export const ADMIN_ACTIVITY_KEY = "piggyland-admin-activity-v2";
+export const ADMIN_GIFT_CERTIFICATES_KEY = "piggyland-admin-gift-certificates-v2";
+export const ADMIN_FINANCE_RECORDS_KEY = "piggyland-admin-finance-records-v2";
+
+const ADMIN_DATA_RESET_MARKER = "piggyland-admin-data-reset-v2";
+const LEGACY_ADMIN_DATA_KEYS = [
+  "piggyland-admin-auth",
+  "piggyland-admin-appointments",
+  "piggyland-admin-activity",
+  "piggyland-admin-gift-certificates",
+  "piggyland-admin-finance-records"
+];
 
 export const PUBLIC_SLOT_CAPACITY = 12;
 export const SLOT_RESERVE_CAPACITY = 2;
@@ -13,11 +21,6 @@ export const MAX_SLOT_CAPACITY = PUBLIC_SLOT_CAPACITY + SLOT_RESERVE_CAPACITY;
 export const BOOKING_PREPAYMENT_PER_GUEST = 500;
 export const FIXED_SLOT_TIMES = ["11:00", "13:00", "15:00", "17:00", "19:00"];
 export const HAPPY_HOUR_SLOT_TIMES = ["11:00", "13:00"];
-
-export const mockCredentials = {
-  login: "user",
-  password: "123"
-};
 
 export const statusOptions = [
   { value: "new", label: "Новая", tone: "info" },
@@ -1408,6 +1411,10 @@ function getSafeLocalStorage() {
     const testKey = "__piggyland_admin_storage_test__";
     window.localStorage.setItem(testKey, "1");
     window.localStorage.removeItem(testKey);
+    if (window.localStorage.getItem(ADMIN_DATA_RESET_MARKER) !== "done") {
+      LEGACY_ADMIN_DATA_KEYS.forEach((key) => window.localStorage.removeItem(key));
+      window.localStorage.setItem(ADMIN_DATA_RESET_MARKER, "done");
+    }
     return window.localStorage;
   } catch {
     return null;
@@ -1474,7 +1481,7 @@ export function writeAdminJson(key, value) {
 
 export function readStoredAppointments() {
   const storedAppointments = readAdminJson(ADMIN_APPOINTMENTS_KEY, null);
-  return storedAppointments ? sortAppointments(storedAppointments.map((appointment) => normalizeAppointment(appointment))) : createMockAppointments();
+  return storedAppointments ? sortAppointments(storedAppointments.map((appointment) => normalizeAppointment(appointment))) : [];
 }
 
 export function readStoredSettings() {
@@ -1483,17 +1490,17 @@ export function readStoredSettings() {
 
 export function readStoredGiftOrders() {
   const storedOrders = readAdminJson(ADMIN_GIFT_CERTIFICATES_KEY, null);
-  return storedOrders ? storedOrders.map((order) => normalizeGiftCertificateOrder(order)) : createMockGiftCertificateOrders();
+  return storedOrders ? storedOrders.map((order) => normalizeGiftCertificateOrder(order)) : [];
 }
 
 export function readStoredFinanceRecords() {
   const storedRecords = readAdminJson(ADMIN_FINANCE_RECORDS_KEY, null);
-  return storedRecords ? sortFinanceRecords(storedRecords.map((record) => normalizeFinanceRecord(record))) : createMockFinanceRecords();
+  return storedRecords ? sortFinanceRecords(storedRecords.map((record) => normalizeFinanceRecord(record))) : [];
 }
 
 export function readStoredActivityLog() {
   const storedActivity = readAdminJson(ADMIN_ACTIVITY_KEY, null);
-  return storedActivity ? storedActivity.map((entry) => normalizeActivityEntry(entry)) : createMockActivityLog();
+  return storedActivity ? storedActivity.map((entry) => normalizeActivityEntry(entry)) : [];
 }
 
 export function appendActivityEntry(entry) {

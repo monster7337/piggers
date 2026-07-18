@@ -9,10 +9,6 @@ import {
   ADMIN_SETTINGS_KEY,
   createActivityEntry,
   createAppointmentTemplate,
-  createMockFinanceRecords,
-  createMockActivityLog,
-  createMockAppointments,
-  createMockGiftCertificateOrders,
   defaultSettings,
   formatDateKey,
   formatCurrency,
@@ -573,13 +569,12 @@ export function AdminProvider({ children }) {
   }
 
   function resetDemoData() {
-    setAppointments(createMockAppointments());
-    setGiftOrders(createMockGiftCertificateOrders());
-    setFinanceRecords(createMockFinanceRecords());
-    setActivityLog(createMockActivityLog());
-    setSettings(normalizeSettings(defaultSettings));
+    setAppointments([]);
+    setGiftOrders([]);
+    setFinanceRecords([]);
+    setActivityLog([]);
     setSelectedDate(formatDateKey(new Date()));
-    pushToast("Демо-данные восстановлены", "neutral");
+    pushToast("Записи и статистика очищены", "neutral");
   }
 
   const selectedAppointment = useMemo(

@@ -27,7 +27,6 @@ import { useEffect, useMemo, useState } from "react";
 import { stripBasePath } from "@/lib/base-path";
 import styles from "@/components/admin/admin.module.css";
 import {
-  ADMIN_AUTH_KEY,
   BOOKING_PREPAYMENT_PER_GUEST,
   FIXED_SLOT_TIMES,
   calculateExpectedPrepayment,
@@ -50,7 +49,6 @@ import {
   normalizeAppointment,
   onSitePaymentMethodOptions,
   paymentMethodOptions,
-  removeAdminStorage,
   resizeGuestTickets,
   serviceOptions,
   sourceOptions,
@@ -886,9 +884,10 @@ export function AdminShell({ children }) {
     setIsMobileSearchOpen(false);
   }, [pathname]);
 
-  function handleLogout() {
-    removeAdminStorage(ADMIN_AUTH_KEY);
+  async function handleLogout() {
+    await fetch("/api/admin/logout", { method: "POST" }).catch(() => null);
     router.replace("/admin");
+    router.refresh();
   }
 
   return (

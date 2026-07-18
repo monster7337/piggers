@@ -2,17 +2,8 @@
 
 import { ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styles from "@/components/admin/admin.module.css";
-import {
-  ADMIN_AUTH_KEY,
-  ADMIN_SETTINGS_KEY,
-  defaultSettings,
-  mockCredentials,
-  readAdminJson,
-  readAdminStorage,
-  writeAdminStorage
-} from "@/components/admin/admin-data";
 
 export function AdminLoginPage() {
   const router = useRouter();
@@ -21,34 +12,29 @@ export function AdminLoginPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    try {
-      const isAuthorized = readAdminStorage(ADMIN_AUTH_KEY) === "true";
-      const storedSettings = readAdminJson(ADMIN_SETTINGS_KEY, defaultSettings);
-
-      if (isAuthorized) {
-        router.replace(storedSettings.startRoute ?? defaultSettings.startRoute);
-        return;
-      }
-    } catch {}
-  }, [router]);
-
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
     setIsSubmitting(true);
 
-    await new Promise((resolve) => window.setTimeout(resolve, 650));
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login, password })
+      });
+      const payload = await response.json().catch(() => ({}));
 
-    if (login === mockCredentials.login && password === mockCredentials.password) {
-      writeAdminStorage(ADMIN_AUTH_KEY, "true");
-      const storedSettings = readAdminJson(ADMIN_SETTINGS_KEY, defaultSettings);
-      const nextRoute = storedSettings.startRoute ?? defaultSettings.startRoute;
-      router.push(nextRoute);
-      return;
+      if (response.ok) {
+        router.replace("/admin/dashboard");
+        router.refresh();
+        return;
+      }
+
+      setError(payload.message || "Неверный логин или пароль.");
+    } catch {
+      setError("Не удалось проверить данные. Попробуйте ещё раз.");
     }
-
-    setError("Неверный логин или пароль");
     setIsSubmitting(false);
   }
 
@@ -62,18 +48,18 @@ export function AdminLoginPage() {
         <div className={styles.authBrand}>
           <span className={styles.authBadge}>PL</span>
           <div>
-            <strong>Piggy Land CRM</strong>
-            <span>Тёмная админка для управления записями</span>
+            <strong>Piggy Land</strong>
+            <span>Управление записями</span>
           </div>
         </div>
 
         <div className={styles.authHeading}>
           <p className={styles.kicker}>
             <ShieldCheck size={16} />
-            Demo access
+            Защищённый доступ
           </p>
-          <h1>Вход в CRM</h1>
-          <p>Быстрый mock-вход для демо-версии админки без серверной авторизации.</p>
+          <h1>Вход в панель управления</h1>
+          <p>Введите личный логин и пароль владельца.</p>
         </div>
 
         <label className={styles.field}>
@@ -110,11 +96,6 @@ export function AdminLoginPage() {
           <span>{isSubmitting ? "Входим…" : "Войти"}</span>
           <ArrowRight size={18} />
         </button>
-
-        <div className={styles.demoCredentials}>
-          <span>login: user</span>
-          <span>password: 123</span>
-        </div>
       </form>
     </div>
   );

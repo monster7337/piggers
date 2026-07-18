@@ -1,9 +1,10 @@
 import crypto from "node:crypto";
 import path from "node:path";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { isAdminRequest } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 const DEV_FALLBACK_SECRET = "paykeeper-test-secret";
 
@@ -26,7 +27,7 @@ function normalizeSum(value) {
 }
 
 function getSecret() {
-  return process.env.PAYKEEPER_SECRET || process.env.PAYKEEPER_CALLBACK_SECRET || DEV_FALLBACK_SECRET;
+  return process.env.PAYKEEPER_SECRET || process.env.PAYKEEPER_CALLBACK_SECRET || (process.env.NODE_ENV === "development" ? DEV_FALLBACK_SECRET : "");
 }
 
 function getPaymentsFilePath() {
@@ -110,6 +111,10 @@ export async function POST(request) {
   const key = (params.key || "").toLowerCase();
   const secret = getSecret();
 
+  if (!secret) {
+    return textResponse("Error! Callback is not configured", 503);
+  }
+
   if (!id || !sum || !key) {
     return textResponse("Error! Missing or invalid parameters", 400);
   }
@@ -138,15 +143,18 @@ export async function POST(request) {
   return textResponse(`OK ${md5(`${id}${secret}`)}`);
 }
 
-export async function GET() {
+export async function GET(request) {
+  if (!isAdminRequest(request)) {
+    return Response.json({ ok: false }, { status: 401, headers: { "Cache-Control": "no-store" } });
+  }
+
   const storage = await readPaymentsFile(getPaymentsFilePath());
 
   return Response.json(
     {
       ok: true,
       paymentsCount: storage.payments.length,
-      payments: storage.payments.slice(-20).reverse(),
-      testSecretHint: process.env.PAYKEEPER_SECRET || process.env.PAYKEEPER_CALLBACK_SECRET ? "env" : DEV_FALLBACK_SECRET
+      payments: storage.payments.slice(-20).reverse()
     },
     {
       headers: {
