@@ -13,8 +13,8 @@ export const contactInfo = {
   email: null,
   emailLink: null,
   socials: [
-    { id: "vk", label: "VK", value: "minipiggyspb", href: "https://vk.link/minipiggyspb" },
-    { id: "telegram", label: "Telegram", value: "@minipiggyspb", href: "https://t.me/minipiggyspb" },
+    { id: "vk", label: "VK", value: "minipiggyspb", href: "https://vk.ru/minipiggyspb" },
+    { id: "telegram", label: "Telegram", value: "@piggy_land_v_elkax", href: "https://t.me/piggy_land_v_elkax" },
     { id: "instagram", label: "Instagram", value: "@minipiggyspb", href: "https://instagram.com/minipiggyspb" }
   ],
   address: "г. Санкт-Петербург, ул. 6-я Советская, д. 28А, помещение 3-Н",
