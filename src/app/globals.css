@@ -1137,7 +1137,7 @@ img {
   flex: 1;
   justify-content: center;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .nav-link {
@@ -8642,13 +8642,14 @@ main > .section:not(:first-child) {
   }
 
   .desktop-nav .nav-link:hover {
+    z-index: 1;
     color: var(--text);
     border-color: rgba(182, 66, 48, 0.3);
     background: rgba(255, 250, 244, 0.9);
     box-shadow:
       0 12px 24px rgba(83, 54, 38, 0.12),
       0 0 0 1px rgba(255, 255, 255, 0.58) inset;
-    transform: translateY(-3px) scale(1.025);
+    transform: scale(1.035);
   }
 
   .desktop-nav .nav-link:hover::before,
