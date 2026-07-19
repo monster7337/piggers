@@ -5,7 +5,7 @@ import { absoluteUrl } from "@/lib/base-path";
 
 export const metadata = {
   title: "Бронирование",
-  description: "Многошаговое бронирование Piggy Land: билеты, дата, время, контакты и переход к оплате.",
+  description: "Выберите удобные билеты, дату и время визита в Piggy Land. Онлайн-запись временно тестируется.",
   alternates: { canonical: absoluteUrl("/booking") }
 };
 
@@ -14,8 +14,7 @@ export default function BookingPage() {
     <section className="section booking-page-shell">
       <div className="container">
         <div className="card info-band">
-          Мы работаем по предварительной записи. На сайте оплачивается только предоплата 500 ₽ за каждое место,
-          остальное гость оплачивает на месте.
+          Онлайн-запись временно тестируется. Заявка и оплата на сайте не создаются: для записи уточните свободное время у администратора по телефону.
         </div>
         <Suspense fallback={<BookingPlanner />}>
           <BookingPageClient />

@@ -2624,6 +2624,41 @@ img {
   filter: saturate(0.72);
 }
 
+.booking-testing-notice .booking-gate-card {
+  max-width: 620px;
+}
+
+.booking-testing-notice-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #ffd191;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.booking-testing-notice-copy {
+  display: grid;
+  gap: 12px;
+  color: rgba(255, 239, 222, 0.9);
+  font-size: 0.98rem;
+  line-height: 1.58;
+}
+
+.booking-testing-notice-copy p {
+  margin: 0;
+}
+
+.booking-testing-notice-phone {
+  justify-content: center;
+  gap: 9px;
+  margin-top: 4px;
+  text-decoration: none;
+}
+
 .gallery-browser-topline > div {
   flex: 1 1 auto;
   min-width: 0;

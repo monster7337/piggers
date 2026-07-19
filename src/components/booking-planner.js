@@ -21,19 +21,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
-  BOOKING_PREPAYMENT_PER_GUEST,
   FIXED_SLOT_TIMES,
-  calculateExpectedPrepayment,
   defaultSettings,
   formatCurrency,
   isHappyHourEnabled,
   getSlotCapacityState,
   readStoredAppointments,
-  readStoredSettings,
-  savePublicBooking
+  readStoredSettings
 } from "@/components/admin/admin-data";
-import { createPaykeeperInvoice } from "@/lib/paykeeper-client";
-import { alternativeProject, rates } from "@/lib/site-data";
+import { BookingTestingNotice } from "@/components/booking-testing-notice";
+import { alternativeProject, contactInfo, rates } from "@/lib/site-data";
 const BOOKING_DRAFT_STORAGE_KEY = "piggyland-booking-draft";
 
 const bookingSteps = ["Билеты", "Дата", "Время", "Контакты", "Подтверждение"];
@@ -42,7 +39,7 @@ const bookingStepNotes = [
   "Найдите удобный день",
   "Выберите удобное время",
   "Оставьте контакты",
-  "Проверьте предоплату, оферту и остаток"
+  "Проверьте детали и уточните запись"
 ];
 
 const siteRateToTariffMap = {
@@ -139,6 +136,7 @@ export function BookingPlanner({ initialRate }) {
   const [stepError, setStepError] = useState("");
   const [offerAccepted, setOfferAccepted] = useState(false);
   const [personalDataAccepted, setPersonalDataAccepted] = useState(false);
+  const [isTestingNoticeOpen, setIsTestingNoticeOpen] = useState(true);
   const [isDraftRestored, setIsDraftRestored] = useState(false);
   const [storageSnapshot, setStorageSnapshot] = useState(() => ({
     appointments: [],
@@ -147,12 +145,11 @@ export function BookingPlanner({ initialRate }) {
 
   const {
     register,
-    handleSubmit,
     reset,
     trigger,
     getValues,
     watch,
-    formState: { errors, isSubmitting }
+    formState: { errors }
   } = useForm({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -307,8 +304,6 @@ export function BookingPlanner({ initialRate }) {
     0
   );
   const total = ticketsTotal;
-  const prepaymentNow = totalTicketsCount ? calculateExpectedPrepayment(totalTicketsCount, total) : 0;
-  const remainingOnSite = Math.max(0, total - prepaymentNow);
   const values = getValues();
 
   const calendarDays = useMemo(
@@ -369,7 +364,7 @@ export function BookingPlanner({ initialRate }) {
   const selectedTimeLabel = selectedTime || "Выберите";
   const mobileSelectionNote =
     totalTicketsCount > 0
-      ? `${totalTicketsCount} мест · предоплата ${formatCurrency(prepaymentNow)}`
+      ? `${totalTicketsCount} мест выбрано`
       : "Соберите визит по шагам";
 
   function updateRateQuantity(id, delta) {
@@ -422,62 +417,11 @@ export function BookingPlanner({ initialRate }) {
     setStep(nextStep);
   }
 
-  const submitBooking = handleSubmit(async (formValues) => {
-    const dateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
-
-    try {
-      if (!offerAccepted || !personalDataAccepted) {
-        setStepError("Перед оплатой нужно принять условия оферты и согласие на обработку персональных данных.");
-        return;
-      }
-
-      const appointment = savePublicBooking({
-        clientName: formValues.name,
-        phone: formValues.phone,
-        email: formValues.email,
-        date: dateKey,
-        time: selectedTime,
-        guestTickets,
-        selectedExtras: [],
-        comment: formValues.comment
-      });
-
-      setStorageSnapshot(getStorageSnapshot());
-
-      const params = new URLSearchParams({
-        type: "booking",
-        bookingId: appointment.id,
-        items: selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", "),
-        date: selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: ru }) : "",
-        time: selectedTime,
-        tickets: String(totalTicketsCount),
-        total: formatCurrency(total),
-        prepayment: formatCurrency(prepaymentNow),
-        remaining: formatCurrency(remainingOnSite),
-        name: formValues.name,
-        phone: formValues.phone
-      });
-      const invoice = await createPaykeeperInvoice({
-        amount: prepaymentNow,
-        orderId: appointment.id,
-        clientName: formValues.name,
-        clientEmail: formValues.email,
-        clientPhone: formValues.phone,
-        serviceName: `Piggy Land: бронирование ${selectedTickets.map((item) => `${item.name} x${item.quantity}`).join(", ")}`,
-        successPath: `/booking/success?${params.toString()}`
-      });
-
-      window.sessionStorage.removeItem(BOOKING_DRAFT_STORAGE_KEY);
-      window.location.assign(invoice.paymentUrl);
-    } catch (error) {
-      setStorageSnapshot(getStorageSnapshot());
-      setStep(2);
-      setStepError(error instanceof Error ? error.message : "Не удалось завершить бронирование.");
-    }
-  });
+  const openTestingNotice = () => setIsTestingNoticeOpen(true);
 
   return (
-    <div className="booking-layout">
+    <>
+      <div className="booking-layout">
       <div className="booking-main">
         <div className="card booking-mobile-overview">
           <div className="booking-mobile-overview-top">
@@ -506,8 +450,8 @@ export function BookingPlanner({ initialRate }) {
               <strong>{selectedTimeLabel}</strong>
             </div>
             <div className="booking-mobile-overview-item booking-mobile-overview-item-accent">
-              <span>Сейчас</span>
-              <strong>{formatCurrency(prepaymentNow)}</strong>
+              <span>Стоимость</span>
+              <strong>{formatCurrency(total)}</strong>
             </div>
           </div>
         </div>
@@ -763,7 +707,7 @@ export function BookingPlanner({ initialRate }) {
               <>
                 <div className="panel-heading">
                   <span className="eyebrow">Шаг 5</span>
-                  <h2>Проверьте вашу запись</h2>
+                  <h2>Проверьте детали визита</h2>
                 </div>
 
                 <div className="confirmation-card">
@@ -791,20 +735,20 @@ export function BookingPlanner({ initialRate }) {
                       <strong>{values.phone || "Не указан"}</strong>
                     </div>
                     <div>
-                      <span>Предоплата сейчас</span>
-                      <strong>{formatCurrency(prepaymentNow)}</strong>
+                      <span>Оплата на сайте</span>
+                      <strong>Недоступна</strong>
                     </div>
                     <div>
-                      <span>Остаток на месте</span>
-                      <strong>{formatCurrency(remainingOnSite)}</strong>
+                      <span>Стоимость визита</span>
+                      <strong>{formatCurrency(total)}</strong>
                     </div>
                   </div>
 
                   <div className="status-inline success">
                     <CreditCard size={18} />
                     <span>
-                      На сайте оплачивается только предоплата: {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждое место.
-                      Остаток {formatCurrency(remainingOnSite)} вы оплатите на месте перед началом визита.
+                      Сайт сейчас тестируется: заявка не будет создана, а оплата на сайте недоступна.
+                      Уточните свободное время у администратора по телефону.
                     </span>
                   </div>
 
@@ -906,7 +850,7 @@ export function BookingPlanner({ initialRate }) {
 
                   {!offerAccepted || !personalDataAccepted ? (
                     <p className="offer-acceptance-note">
-                      Кнопка оплаты станет активной после принятия условий оферты и согласия на обработку персональных данных.
+                      Уведомление не отправляет данные и не создаёт заявку.
                     </p>
                   ) : null}
                 </div>
@@ -924,11 +868,11 @@ export function BookingPlanner({ initialRate }) {
               <div className="booking-mobile-action-meta">
                 <div>
                   <span>{selectedDateLabel} · {selectedTimeLabel} · {totalTicketsCount || 0} бил.</span>
-                  <small>Всего {formatCurrency(total)} · на месте {formatCurrency(remainingOnSite)}</small>
+                  <small>Стоимость визита: {formatCurrency(total)}</small>
                 </div>
                 <div>
-                  <span>Предоплата</span>
-                  <strong>{formatCurrency(prepaymentNow)}</strong>
+                  <span>Онлайн-запись</span>
+                  <strong>Тестируется</strong>
                 </div>
               </div>
 
@@ -936,7 +880,7 @@ export function BookingPlanner({ initialRate }) {
                 type="button"
                 className="button button-secondary"
                 onClick={() => goToStep(Math.max(0, step - 1))}
-                disabled={step === 0 || isSubmitting}
+                disabled={step === 0}
               >
                 Назад
               </button>
@@ -949,10 +893,9 @@ export function BookingPlanner({ initialRate }) {
                 <button
                   type="button"
                   className="button button-primary"
-                  onClick={submitBooking}
-                  disabled={isSubmitting || !offerAccepted || !personalDataAccepted}
+                  onClick={openTestingNotice}
                 >
-                  Оплатить
+                  Уточнить запись
                 </button>
               )}
             </div>
@@ -962,33 +905,32 @@ export function BookingPlanner({ initialRate }) {
           <div className="booking-mobile-action-meta">
             <div>
               <span>{selectedDateLabel} · {selectedTimeLabel} · {totalTicketsCount || 0} бил.</span>
-              <small>Всего {formatCurrency(total)} · на месте {formatCurrency(remainingOnSite)}</small>
+              <small>Стоимость визита: {formatCurrency(total)}</small>
             </div>
             <div>
-              <span>Предоплата</span>
-              <strong>{formatCurrency(prepaymentNow)}</strong>
+              <span>Онлайн-запись</span>
+              <strong>Тестируется</strong>
             </div>
           </div>
           <button
             type="button"
             className="button button-secondary"
             onClick={() => goToStep(Math.max(0, step - 1))}
-            disabled={step === 0 || isSubmitting}
+            disabled={step === 0}
           >
             Назад
           </button>
           {step < bookingSteps.length - 1 ? (
-            <button type="button" className="button button-primary" onClick={() => goToStep(step + 1)} disabled={isSubmitting}>
+            <button type="button" className="button button-primary" onClick={() => goToStep(step + 1)}>
               Продолжить
             </button>
           ) : (
             <button
               type="button"
               className="button button-primary"
-              onClick={submitBooking}
-              disabled={isSubmitting || !offerAccepted || !personalDataAccepted}
+              onClick={openTestingNotice}
             >
-              Оплатить
+              Уточнить запись
             </button>
           )}
         </div>
@@ -1047,7 +989,7 @@ export function BookingPlanner({ initialRate }) {
             <div className="summary-group">
               <span className="summary-group-title">
                 <CreditCard size={16} />
-                Оплата
+                Стоимость визита
               </span>
               <div className="summary-row">
                 <span>Полная стоимость</span>
@@ -1060,12 +1002,12 @@ export function BookingPlanner({ initialRate }) {
                 </div>
               ) : null}
               <div className="summary-row">
-                <span>Предоплата сейчас</span>
-                <strong>{formatCurrency(prepaymentNow)}</strong>
+                <span>Оплата на сайте</span>
+                <strong>Недоступна</strong>
               </div>
               <div className="summary-row">
-                <span>Оплата на месте</span>
-                <strong>{formatCurrency(remainingOnSite)}</strong>
+                <span>Уточнение записи</span>
+                <strong>По телефону</strong>
               </div>
             </div>
           </div>
@@ -1073,11 +1015,18 @@ export function BookingPlanner({ initialRate }) {
           <div className="status-inline success">
             <CreditCard size={18} />
             <span>
-              Бронирование подтверждается после предоплаты {formatCurrency(BOOKING_PREPAYMENT_PER_GUEST)} за каждого гостя.
+              Сайт тестируется: заявка и оплата не создаются. Уточните запись у администратора по телефону.
             </span>
           </div>
         </div>
-      </aside>
-    </div>
+        </aside>
+      </div>
+      <BookingTestingNotice
+        isOpen={isTestingNoticeOpen}
+        onClose={() => setIsTestingNoticeOpen(false)}
+        phone={contactInfo.phone}
+        phoneHref={contactInfo.phoneLink}
+      />
+    </>
   );
 }
