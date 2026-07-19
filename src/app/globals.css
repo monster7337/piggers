@@ -8421,3 +8421,264 @@ main > .section:not(:first-child) {
     padding-bottom: 10px;
   }
 }
+
+/* Rich pointer feedback without adding JavaScript or affecting touch layouts. */
+@media (min-width: 961px) and (hover: hover) and (pointer: fine) {
+  .brand-lockup-compact .brand-badge-logo {
+    transform: translateZ(0);
+    transition:
+      transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.42s ease;
+  }
+
+  .brand-lockup-compact:hover .brand-badge-logo {
+    transform: translateY(-3px) rotate(-4deg) scale(1.08);
+    filter: drop-shadow(0 10px 12px rgba(182, 66, 48, 0.2));
+  }
+
+  .brand-lockup-compact:active .brand-badge-logo {
+    transform: translateY(1px) rotate(2deg) scale(0.94);
+    transition-duration: 90ms;
+  }
+
+  .desktop-nav .nav-link {
+    isolation: isolate;
+    overflow: hidden;
+    transform: translateZ(0);
+    box-shadow: 0 4px 12px rgba(61, 39, 26, 0);
+    transition:
+      transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.36s ease,
+      border-color 0.3s ease,
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  .desktop-nav .nav-link::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background:
+      radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.92), transparent 34%),
+      linear-gradient(120deg, rgba(255, 216, 201, 0.16), rgba(255, 247, 239, 0.96) 48%, rgba(200, 225, 196, 0.24));
+    opacity: 0;
+    transform: translateX(-28%) scale(0.84);
+    transition:
+      opacity 0.32s ease,
+      transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .desktop-nav .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 22%;
+    right: 22%;
+    bottom: 4px;
+    display: block;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(182, 66, 48, 0), #cf5d49 50%, rgba(182, 66, 48, 0));
+    box-shadow: 0 0 10px rgba(207, 93, 73, 0.48);
+    opacity: 0;
+    transform: scaleX(0.2);
+    transition:
+      opacity 0.3s ease,
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .desktop-nav .nav-link:hover {
+    color: var(--text);
+    border-color: rgba(182, 66, 48, 0.3);
+    background: rgba(255, 250, 244, 0.9);
+    box-shadow:
+      0 12px 24px rgba(83, 54, 38, 0.12),
+      0 0 0 1px rgba(255, 255, 255, 0.58) inset;
+    transform: translateY(-3px) scale(1.025);
+  }
+
+  .desktop-nav .nav-link:hover::before,
+  .desktop-nav .nav-link.active::before {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+
+  .desktop-nav .nav-link:hover::after,
+  .desktop-nav .nav-link.active::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .desktop-nav .nav-link:active {
+    box-shadow:
+      0 3px 8px rgba(61, 39, 26, 0.12),
+      0 2px 8px rgba(182, 66, 48, 0.12) inset;
+    transform: translateY(1px) scale(0.95);
+    transition-duration: 90ms;
+  }
+
+  .contact-pill {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    transform: translateZ(0);
+    transition:
+      transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.36s ease,
+      border-color 0.3s ease,
+      background-color 0.3s ease;
+  }
+
+  .contact-pill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(120deg, rgba(204, 229, 199, 0.18), rgba(255, 255, 255, 0.92), rgba(255, 220, 205, 0.2));
+    opacity: 0;
+    transform: scale(0.82);
+    transition:
+      opacity 0.32s ease,
+      transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .contact-pill:hover {
+    border-color: rgba(61, 94, 67, 0.28);
+    box-shadow: 0 13px 26px rgba(52, 82, 57, 0.14);
+    transform: translateY(-3px) scale(1.025);
+  }
+
+  .contact-pill:hover::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .contact-pill:active {
+    transform: translateY(1px) scale(0.95);
+    transition-duration: 90ms;
+  }
+
+  .button:not(:disabled) {
+    transform: translateZ(0);
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.4s ease,
+      border-color 0.3s ease,
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  .button:not(:disabled):not(.button-shimmer):not(.header-booking-button) {
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .button:not(:disabled):not(.button-shimmer):not(.header-booking-button)::after {
+    content: "";
+    position: absolute;
+    top: -55%;
+    bottom: -55%;
+    left: -46%;
+    width: 30%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62), transparent);
+    opacity: 0;
+    transform: translateX(-120%) rotate(16deg);
+    transition:
+      opacity 0.18s ease,
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .button:not(:disabled):not(.button-shimmer):not(.header-booking-button):hover::after {
+    opacity: 0.9;
+    transform: translateX(620%) rotate(16deg);
+  }
+
+  .button-primary:not(:disabled):hover {
+    box-shadow:
+      0 26px 46px rgba(182, 66, 48, 0.34),
+      0 0 0 5px rgba(213, 106, 83, 0.1);
+    transform: translateY(-4px) scale(1.025);
+  }
+
+  .button-secondary:not(:disabled):hover {
+    border-color: rgba(61, 94, 67, 0.32);
+    box-shadow:
+      0 20px 36px rgba(61, 65, 45, 0.14),
+      0 0 0 5px rgba(112, 153, 98, 0.07);
+    transform: translateY(-4px) scale(1.025);
+  }
+
+  .button:not(:disabled):active {
+    box-shadow:
+      0 5px 12px rgba(61, 39, 26, 0.16),
+      0 3px 10px rgba(69, 39, 30, 0.13) inset;
+    transform: translateY(2px) scale(0.94);
+    transition-duration: 90ms;
+  }
+
+  .header-booking-button {
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .header-booking-button::before {
+    inset: -18%;
+    z-index: 0;
+    background:
+      radial-gradient(circle at 24% 35%, rgba(255, 222, 211, 0.38), transparent 34%),
+      radial-gradient(circle at 76% 70%, rgba(255, 148, 117, 0.28), transparent 36%);
+    opacity: 0.52;
+    transform: scale(0.84);
+    transition:
+      opacity 0.4s ease,
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .header-booking-button::after {
+    content: "";
+    position: absolute;
+    top: -55%;
+    bottom: -55%;
+    left: -38%;
+    display: block;
+    width: 28%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.74), transparent);
+    opacity: 0;
+    transform: translateX(-130%) rotate(18deg);
+    transition:
+      opacity 0.2s ease,
+      transform 0.72s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .header-booking-button:hover {
+    box-shadow:
+      0 28px 52px rgba(182, 66, 48, 0.42),
+      0 0 0 6px rgba(226, 109, 86, 0.1),
+      0 0 0 1px rgba(255, 244, 238, 0.24) inset;
+    transform: translateY(-4px) scale(1.035);
+  }
+
+  .header-booking-button:hover::before {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+
+  .header-booking-button:hover::after {
+    opacity: 0.96;
+    transform: translateX(620%) rotate(18deg);
+  }
+
+  .header-booking-button:active {
+    box-shadow:
+      0 6px 14px rgba(117, 38, 27, 0.26),
+      0 4px 12px rgba(101, 31, 23, 0.2) inset;
+    transform: translateY(2px) scale(0.93);
+    transition-duration: 90ms;
+  }
+}
