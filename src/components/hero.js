@@ -49,6 +49,7 @@ export function Hero() {
           {/* The fallback keeps the hero visible in browsers without AVIF support. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            data-site-hero
             src={withBasePath("/images/piggyland-hero.webp")}
             alt="Минипиги на солнечной ферме рядом с красным амбаром"
             width="1672"
