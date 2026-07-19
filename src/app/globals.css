@@ -7533,11 +7533,9 @@ img {
   }
 
   .booking-page-shell .ticket-card > p {
-    display: -webkit-box;
+    display: block;
     margin: 0;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+    overflow: visible;
     font-size: 0.59rem;
     line-height: 1.25;
   }
@@ -7814,11 +7812,9 @@ main > .section:not(:first-child) {
   }
 
   #rates .rate-card p {
-    display: -webkit-box;
-    overflow: hidden;
-    min-height: 2.6em;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    display: block;
+    overflow: visible;
+    min-height: 0;
     font-size: 0.72rem;
     line-height: 1.32;
   }

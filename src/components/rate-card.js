@@ -31,10 +31,7 @@ export function RateCard({ rate }) {
           <span className="price-badge">{rate.price.toLocaleString("ru-RU")} ₽</span>
         </div>
 
-        <p>
-          <span className="copy-desktop">{rate.description}</span>
-          <span className="copy-mobile">{rate.mobileDescription || rate.description}</span>
-        </p>
+        <p>{rate.description}</p>
 
         <div className="card-meta">
           <span>
