@@ -187,16 +187,16 @@ export default function RootLayout({ children }) {
           </div>
         </div>
         <script
-          dangerouslySetInnerHTML={{
-            __html:
-              '(()=>{const r=document.documentElement;let done=false;const finish=()=>{if(done)return;done=true;requestAnimationFrame(()=>r.classList.add("site-ready"))};const watch=()=>{const hero=document.querySelector("[data-site-hero]");if(!hero){finish();return}const reveal=()=>typeof hero.decode==="function"?hero.decode().then(finish,finish):finish();if(hero.complete){reveal();return}hero.addEventListener("load",reveal,{once:true});hero.addEventListener("error",finish,{once:true})};document.readyState==="loading"?addEventListener("DOMContentLoaded",watch,{once:true}):watch();addEventListener("pageshow",e=>{if(e.persisted)finish()},{once:true});setTimeout(finish,7000)})()'
-          }}
-        />
-        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
         />
         <SiteShell>{children}</SiteShell>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(()=>{const r=document.documentElement;const hero=document.querySelector("[data-site-hero]");let done=false;const finish=()=>{if(done)return;done=true;requestAnimationFrame(()=>requestAnimationFrame(()=>r.classList.add("site-ready")))};const reveal=()=>typeof hero?.decode==="function"?hero.decode().then(finish,finish):finish();if(!hero){finish()}else if(hero.complete){reveal()}else{hero.addEventListener("load",reveal,{once:true});hero.addEventListener("error",finish,{once:true})}addEventListener("pageshow",e=>{if(e.persisted)finish()},{once:true});setTimeout(finish,4500)})()'
+          }}
+        />
       </body>
     </html>
   );

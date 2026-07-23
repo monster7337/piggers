@@ -54,6 +54,7 @@ export function Hero() {
             alt="Минипиги на солнечной ферме рядом с красным амбаром"
             width="1672"
             height="941"
+            loading="eager"
             fetchPriority="high"
             decoding="async"
             className="hero-background-image"
